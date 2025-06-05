@@ -1,0 +1,41 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace
+/go.sum
+/go.work.sum
+
+# Build output
+/bin/
+/build/
+/dist/
+
+# Dependency directories (optional if using vendoring)
+vendor/
+
+# IDEs and Editors
+.idea/
+*.iml
+.vscode/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.env
+
+# Coverage files
+*.coverprofile
+coverage.*
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
