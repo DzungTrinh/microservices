@@ -5,16 +5,25 @@ import (
 	"gorm.io/gorm"
 )
 
+// Role defines user roles
+type Role string
+
+const (
+	RoleUser  Role = "user"
+	RoleAdmin Role = "admin"
+)
+
+// User represents a user in the system
 type User struct {
 	gorm.Model
-	Name     string `json:"name" gorm:"type:varchar(50);not null" validate:"required,min=2,max=50"`
-	Email    string `json:"email" gorm:"type:varchar(100);unique;not null" validate:"required,email"`
-	Password string `json:"password" gorm:"type:varchar(255);not null" validate:"required,min=6"`
-	Role     string `json:"role" gorm:"type:varchar(20);default:'user'"`
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required,email" gorm:"unique"`
+	Password string `json:"password" validate:"required,min=6"`
+	Role     Role   `json:"role" validate:"required"`
 }
 
-// BeforeCreate - Mã hóa password trước khi lưu vào database
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+// BeforeCreate hook to hash password before saving to database
+func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

@@ -1,11 +1,10 @@
 package main
 
 import (
-	"user-management/config"
-	"user-management/controllers"
-	"user-management/middleware"
-
 	"github.com/gin-gonic/gin"
+	"microservices/user-management/config"
+	"microservices/user-management/controllers"
+	"microservices/user-management/middleware"
 )
 
 func main() {

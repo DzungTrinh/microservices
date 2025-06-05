@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"log"
+	"microservices/user-management/config"
+	"microservices/user-management/models"
+	"microservices/user-management/utils"
 	"net/http"
 	"os"
 	"time"
-	"user-management/config"
-	"user-management/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -25,169 +26,176 @@ type LoginInput struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
-// Login - Đăng nhập và tạo JWT
+// Login - Authenticate user and generate JWT
 func Login(c *gin.Context) {
 	var input LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Lỗi khi bind JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Error binding JSON: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrInvalidInput, "Invalid input format")
 		return
 	}
 
-	// Xác thực dữ liệu đầu vào
+	// Validate input
 	if err := validate.Struct(&input); err != nil {
-		log.Printf("Lỗi validation: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Validation error: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrValidationFailed, "Validation failed: "+err.Error())
 		return
 	}
 
 	var user models.User
 	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		log.Printf("Email không tồn tại: %s", input.Email)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email không tồn tại"})
+		log.Printf("Email not found: %s", input.Email)
+		utils.HandleError(c, http.StatusUnauthorized, utils.ErrEmailNotFound, "Email not found")
 		return
 	}
 
-	// In giá trị user.Password từ database để debug
-	log.Printf("Mật khẩu đã mã hóa trong database cho %s: %s", input.Email, user.Password)
-	// In mật khẩu đầu vào để xác nhận
-	log.Printf("Mật khẩu đầu vào cho %s: %s", input.Email, input.Password)
+	// Log for debugging
+	log.Printf("Password stored for user %s: %s", input.Email, user.Password)
+	log.Printf("Password input for user %s: %s", input.Email, input.Password)
 
-	// Kiểm tra password
+	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		log.Printf("Mật khẩu không đúng cho email %s, hash trong DB: %s, mật khẩu nhập: %s, lỗi: %v", input.Email, user.Password, input.Password, err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Mật khẩu không đúng"})
+		log.Printf("Password mismatch for email %s, hash: %s, input: %s, error: %v", input.Email, user.Password, input.Password, err)
+		utils.HandleError(c, http.StatusUnauthorized, utils.ErrIncorrectPassword, "Incorrect password")
 		return
 	}
 
-	// Tạo JWT
+	// Generate JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		log.Printf("Lỗi khi tạo token: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo token"})
+		log.Printf("Error generating token: %v", err)
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrTokenGeneration, "Failed to generate token")
 		return
 	}
 
-	log.Printf("Đăng nhập thành công cho email: %s", input.Email)
+	log.Printf("Login successful for user: %s", input.Email)
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
-// CreateUser - Tạo người dùng mới (chỉ admin đã đăng nhập được phép gọi, yêu cầu JWT)
+// CreateUser - Create a new user (admin only, requires JWT)
 func CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		log.Printf("Lỗi khi bind JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Error binding JSON: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrInvalidInput, "Invalid input format")
 		return
 	}
 
-	// Xác thực dữ liệu
+	// Validate input
 	if err := validate.Struct(&user); err != nil {
-		log.Printf("Lỗi validation: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Validation error: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrValidationFailed, "Validation failed: "+err.Error())
+		return
+	}
+
+	// Validate role
+	if user.Role != models.RoleUser && user.Role != models.RoleAdmin {
+		log.Printf("Invalid role: %s", user.Role)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrInvalidRole, "Role must be 'user' or 'admin'")
 		return
 	}
 
 	if err := config.DB.Create(&user).Error; err != nil {
-		log.Printf("Lỗi khi tạo người dùng: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo người dùng"})
+		log.Printf("Error creating user: %v", err)
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrCreateUserFailed, "Failed to create user")
 		return
 	}
 
-	// Không trả về password trong phản hồi
+	// Omit password in response
 	user.Password = ""
 	c.JSON(http.StatusCreated, user)
 }
 
-// GetUsers - Lấy danh sách tất cả người dùng
+// GetUsers - List all users
 func GetUsers(c *gin.Context) {
 	var users []models.User
 	if err := config.DB.Find(&users).Error; err != nil {
-		log.Printf("Lỗi khi lấy danh sách người dùng: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể lấy danh sách người dùng"})
+		log.Printf("Error fetching users: %v", err)
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrFetchUsersFailed, "Failed to fetch users")
 		return
 	}
 
-	// Không trả về password trong phản hồi
+	// Omit passwords in response
 	for i := range users {
 		users[i].Password = ""
 	}
 	c.JSON(http.StatusOK, users)
 }
 
-// GetUserByID - Lấy thông tin người dùng theo ID
+// GetUserByID - Get user by ID
 func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 
 	if err := config.DB.First(&user, id).Error; err != nil {
-		log.Printf("Lỗi khi tìm người dùng ID %s: %v", id, err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
+		log.Printf("Error finding user ID %s: %v", id, err)
+		utils.HandleError(c, http.StatusNotFound, utils.ErrUserNotFound, "User not found")
 		return
 	}
 
-	// Không trả về password
+	// Omit password in response
 	user.Password = ""
 	c.JSON(http.StatusOK, user)
 }
 
-// UpdateUser - Cập nhật thông tin người dùng
+// UpdateUser - Update user information
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 
 	if err := config.DB.First(&user, id).Error; err != nil {
-		log.Printf("Lỗi khi tìm người dùng ID %s: %v", id, err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
+		log.Printf("Error finding user ID %s: %v", id, err)
+		utils.HandleError(c, http.StatusNotFound, utils.ErrUserNotFound, "User not found")
 		return
 	}
 
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Lỗi khi bind JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Error binding JSON: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrInvalidInput, "Invalid input format")
 		return
 	}
 
-	// Xác thực dữ liệu (không validate password nếu không thay đổi)
+	// Validate input (partial)
 	if err := validate.StructPartial(&input, "Name", "Email"); err != nil {
-		log.Printf("Lỗi validation: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Validation error: %v", err)
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrValidationFailed, "Validation failed: "+err.Error())
 		return
 	}
 
-	// Cập nhật các trường
+	// Update fields
 	config.DB.Model(&user).Updates(map[string]interface{}{
 		"Name":  input.Name,
 		"Email": input.Email,
 	})
 
-	// Không trả về password
+	// Omit password in response
 	user.Password = ""
 	c.JSON(http.StatusOK, user)
 }
 
-// DeleteUser - Xóa người dùng
+// DeleteUser - Delete a user
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 
 	if err := config.DB.First(&user, id).Error; err != nil {
-		log.Printf("Lỗi khi tìm người dùng ID %s: %v", id, err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
+		log.Printf("Error finding user ID %s: %v", id, err)
+		utils.HandleError(c, http.StatusNotFound, utils.ErrUserNotFound, "User not found")
 		return
 	}
 
 	if err := config.DB.Delete(&user).Error; err != nil {
-		log.Printf("Lỗi khi xóa người dùng ID %s: %v", id, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể xóa người dùng"})
+		log.Printf("Error deleting user ID %s: %v", id, err)
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrDeleteUserFailed, "Failed to delete user")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Xóa người dùng thành công"})
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
