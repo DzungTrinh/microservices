@@ -49,13 +49,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Log for debugging
-	log.Printf("Password stored for user %s: %s", input.Email, user.Password)
-	log.Printf("Password input for user %s: %s", input.Email, input.Password)
-
 	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		log.Printf("Password mismatch for email %s, hash: %s, input: %s, error: %v", input.Email, user.Password, input.Password, err)
+		log.Printf("Password mismatch for email %s", input.Email)
 		utils.HandleError(c, http.StatusUnauthorized, utils.ErrIncorrectPassword, "Incorrect password")
 		return
 	}
