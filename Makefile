@@ -1,17 +1,30 @@
-SHELL := /bin/bash
+.PHONY: all build run test sqlc migrate-up migrate-down docker-build docker-run clean
 
-# Run individual services with their own env files
-run-user:
-	cd user-management && go mod tidy && go run main.go
-.PHONY: run-user
+all: build
 
-# Run all services (in separate terminals is ideal)
-run-all:
-	@echo "Run each service in a new terminal for proper logging."
-	@echo "Use: make run-user | make run-auth | make run-payment"
-.PHONY: run-all
+build:
+	go build -o bin/user ./cmd/user
 
-# Clean binaries (if you build any)
+run:
+	go run ./cmd/user
+
+test:
+	go test ./internal/user/...
+
+sqlc:
+	sqlc generate
+
+migrate-up:
+	migrate -source file://internal/user/infras/mysql/migrations -database "$$(grep DATABASE_DSN cmd/user/.env | cut -d '=' -f 2-)" up
+
+migrate-down:
+	migrate -source file://internal/user/infras/mysql/migrations -database "$$(grep DATABASE_DSN cmd/user/.env | cut -d '=' -f 2-)" down
+
+docker-build:
+	docker build -t user:latest -f docker/Dockerfile-user .
+
+docker-run:
+	docker run -d -p 8080:8080 --env-file cmd/user/.env user:latest
+
 clean:
-	find . -type f -name "*.out" -delete
-.PHONY: clean
+	rm -rf bin/*
