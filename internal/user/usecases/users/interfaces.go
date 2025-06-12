@@ -10,5 +10,6 @@ type (
 		Register(ctx context.Context, req domain.RegisterUserReq) (domain.UserResp, error)
 		Login(ctx context.Context, req domain.LoginReq) (domain.LoginResp, error)
 		GetUserByID(ctx context.Context, id int64) (domain.UserResp, error)
+		GetAllUsers(ctx context.Context) ([]domain.UserResp, error)
 	}
 )

@@ -1,29 +1,18 @@
 package main
 
 import (
-	"github.com/ilyakaznacheev/cleanenv"
 	"log"
+	"microservices/user-management/cmd/user/config"
 	"microservices/user-management/internal/user/app"
 )
 
-type Config struct {
-	DatabaseDSN string `env:"DATABASE_DSN" env-required:"true"`
-	JWTSecret   string `env:"JWT_SECRET" env-required:"true"`
-	Port        string `env:"PORT" env-default:"8080"`
-}
-
 func main() {
-	var cfg Config
-	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
-		log.Fatalf("Failed to load .env: %v", err)
-	}
+	cfg := config.Load()
 
-	app := app.NewApp(app.Config{
-		DatabaseDSN: cfg.DatabaseDSN,
-		JWTSecret:   cfg.JWTSecret,
-	})
-	defer app.Close()
-	if err := app.Run(":" + cfg.Port); err != nil {
-		log.Fatal(err)
+	application := app.NewApp(cfg)
+	defer application.Close()
+
+	if err := application.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
 	}
 }

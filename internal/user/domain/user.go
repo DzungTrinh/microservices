@@ -4,12 +4,12 @@ import (
 	"time"
 )
 
-// User represents the core entity.
 type User struct {
-	ID           int64
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Username     string
-	Email        string
-	PasswordHash string
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Username  string
+	Email     string
+	Password  string
+	Role      Role
 }

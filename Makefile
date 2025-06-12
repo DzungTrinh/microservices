@@ -26,5 +26,14 @@ docker-build:
 docker-run:
 	docker run -d -p 8080:8080 --env-file cmd/user/.env user:latest
 
+docker-compose-up:
+	docker-compose up -d
+
+docker-compose-down:
+	docker-compose down
+
+docker-compose-build:
+	docker-compose build
+
 clean:
 	rm -rf bin/*

@@ -1,23 +1,24 @@
 # Step 1: Modules caching
-FROM golang:1.24.3-alpine as modules
+FROM golang:1.24.3-alpine AS modules
+COPY go.mod go.sum /modules/
 WORKDIR /modules
-COPY go.mod go.sum ./
 RUN go mod download
 
 # Step 2: Builder
-FROM golang:1.24.3-alpine as builder
-WORKDIR /app
+FROM golang:1.24.3-alpine AS builder
 COPY --from=modules /go/pkg /go/pkg
-COPY . .
-
+COPY . /app
+WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o /bin/app ./cmd/user
+   go build -tags migrate -o /bin/app ./cmd/user
 
 # Step 3: Final
 FROM scratch
 
-EXPOSE 5000
+EXPOSE 8081
 
-# GOPATH for scratch images is /
 COPY --from=builder /bin/app /app
+COPY --from=builder /app/cmd/user/.env /.env
+COPY --from=builder /app/db/migrations/user /db/migrations
+
 CMD ["/app"]

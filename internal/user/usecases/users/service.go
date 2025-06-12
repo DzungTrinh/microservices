@@ -2,10 +2,10 @@ package users
 
 import (
 	"context"
-	"github.com/golang-jwt/jwt/v5"
+
 	"golang.org/x/crypto/bcrypt"
+	"microservices/user-management/internal/pkg/auth"
 	"microservices/user-management/internal/user/domain"
-	"time"
 )
 
 type UserUsecase struct {
@@ -22,11 +22,18 @@ func (u *UserUsecase) Register(ctx context.Context, req domain.RegisterUserReq) 
 	if err != nil {
 		return domain.UserResp{}, err
 	}
-	user, err := u.repo.CreateUser(ctx, req.Username, req.Email, string(hashedPassword))
+
+	user, err := u.repo.CreateUser(ctx, req.Username, req.Email, string(hashedPassword), domain.RoleUser)
 	if err != nil {
 		return domain.UserResp{}, err
 	}
-	return domain.UserResp{ID: user.ID, Username: user.Username, Email: user.Email}, nil
+
+	return domain.UserResp{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     user.Role,
+	}, nil
 }
 
 func (u *UserUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.LoginResp, error) {
@@ -34,19 +41,17 @@ func (u *UserUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.Lo
 	if err != nil {
 		return domain.LoginResp{}, err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return domain.LoginResp{}, err
+	}
+
+	token, err := auth.GenerateJWT(user.ID, user.Email, user.Role.String())
 	if err != nil {
 		return domain.LoginResp{}, err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
-	tokenString, err := token.SignedString(u.jwtSecret)
-	if err != nil {
-		return domain.LoginResp{}, err
-	}
-	return domain.LoginResp{Token: tokenString}, nil
+
+	return domain.LoginResp{Token: token}, nil
 }
 
 func (u *UserUsecase) GetUserByID(ctx context.Context, id int64) (domain.UserResp, error) {
@@ -54,5 +59,30 @@ func (u *UserUsecase) GetUserByID(ctx context.Context, id int64) (domain.UserRes
 	if err != nil {
 		return domain.UserResp{}, err
 	}
-	return domain.UserResp{ID: user.ID, Username: user.Username, Email: user.Email}, nil
+
+	return domain.UserResp{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     user.Role,
+	}, nil
+}
+
+func (u *UserUsecase) GetAllUsers(ctx context.Context) ([]domain.UserResp, error) {
+	users, err := u.repo.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.UserResp, len(users))
+	for i, user := range users {
+		result[i] = domain.UserResp{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
+		}
+	}
+
+	return result, nil
 }
