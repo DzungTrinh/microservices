@@ -9,7 +9,7 @@ import (
 type Config struct {
 	DatabaseDSN string `env:"DATABASE_DSN" env-required:"true"`
 	JWTSecret   string `env:"JWT_SECRET" env-required:"true"`
-	Port        string `env:"PORT" env-default:"8080"`
+	Port        string `env:"PORT" env-required:"true"`
 }
 
 func Load() Config {

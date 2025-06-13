@@ -1,21 +1,22 @@
 package domain
 
 type RegisterUserReq struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
+	Username string   `json:"username"`
+	Email    string   `json:"email"`
+	Password string   `json:"password"`
+	Roles    []string `json:"roles,omitempty"`
 }
 
 type LoginReq struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type UserResp struct {
-	ID       int64  `json:"id"`
+	ID       string `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	Role     Role   `json:"role"`
+	Roles    []Role `json:"roles"`
 }
 
 type LoginResp struct {

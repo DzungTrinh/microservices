@@ -1,0 +1,1 @@
+INSERT INTO roles (id, name) VALUES (UUID(), 'user'), (UUID(), 'admin');

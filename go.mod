@@ -9,6 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang-migrate/migrate/v4 v4.18.3
+	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.38.0

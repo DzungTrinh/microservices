@@ -8,41 +8,80 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)
+INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
+	ID       string `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Role     string `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, createUser,
+		arg.ID,
 		arg.Username,
 		arg.Email,
 		arg.Password,
-		arg.Role,
 	)
 }
 
-const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, created_at, updated_at, username, email, password, role FROM users
+const createUserRole = `-- name: CreateUserRole :exec
+INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)
 `
 
-func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+type CreateUserRoleParams struct {
+	UserID string `json:"user_id"`
+	RoleID string `json:"role_id"`
+}
+
+func (q *Queries) CreateUserRole(ctx context.Context, arg CreateUserRoleParams) error {
+	_, err := q.db.ExecContext(ctx, createUserRole, arg.UserID, arg.RoleID)
+	return err
+}
+
+const deleteUserRoles = `-- name: DeleteUserRoles :exec
+DELETE FROM user_roles WHERE user_id = ?
+`
+
+func (q *Queries) DeleteUserRoles(ctx context.Context, userID string) error {
+	_, err := q.db.ExecContext(ctx, deleteUserRoles, userID)
+	return err
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT u.id, u.created_at, u.updated_at, u.username, u.email, u.password,
+       GROUP_CONCAT(r.name) AS roles
+FROM users u
+         LEFT JOIN user_roles ur ON u.id = ur.user_id
+         LEFT JOIN roles r ON ur.role_id = r.id
+GROUP BY u.id
+`
+
+type GetAllUsersRow struct {
+	ID        string         `json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Username  string         `json:"username"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	Roles     sql.NullString `json:"roles"`
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []GetAllUsersRow
 	for rows.Next() {
-		var i User
+		var i GetAllUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -50,7 +89,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.Username,
 			&i.Email,
 			&i.Password,
-			&i.Role,
+			&i.Roles,
 		); err != nil {
 			return nil, err
 		}
@@ -65,13 +104,40 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, created_at, updated_at, username, email, password, role FROM users WHERE email = ?
+const getRoleIDByName = `-- name: GetRoleIDByName :one
+SELECT id FROM roles WHERE name = ?
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+func (q *Queries) GetRoleIDByName(ctx context.Context, name string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getRoleIDByName, name)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT u.id, u.created_at, u.updated_at, u.username, u.email, u.password,
+       GROUP_CONCAT(r.name) AS roles
+FROM users u
+         LEFT JOIN user_roles ur ON u.id = ur.user_id
+         LEFT JOIN roles r ON ur.role_id = r.id
+WHERE u.email = ?
+GROUP BY u.id
+`
+
+type GetUserByEmailRow struct {
+	ID        string         `json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Username  string         `json:"username"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	Roles     sql.NullString `json:"roles"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
-	var i User
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
@@ -79,18 +145,34 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.Role,
+		&i.Roles,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, created_at, updated_at, username, email, password, role FROM users WHERE id = ?
+SELECT u.id, u.created_at, u.updated_at, u.username, u.email, u.password,
+       GROUP_CONCAT(r.name) AS roles
+FROM users u
+         LEFT JOIN user_roles ur ON u.id = ur.user_id
+         LEFT JOIN roles r ON ur.role_id = r.id
+WHERE u.id = ?
+GROUP BY u.id
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
+type GetUserByIDRow struct {
+	ID        string         `json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	Username  string         `json:"username"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	Roles     sql.NullString `json:"roles"`
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id string) (GetUserByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserByID, id)
-	var i User
+	var i GetUserByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
@@ -98,7 +180,39 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Username,
 		&i.Email,
 		&i.Password,
-		&i.Role,
+		&i.Roles,
 	)
 	return i, err
+}
+
+const getUserRoles = `-- name: GetUserRoles :many
+SELECT GROUP_CONCAT(r.name) AS roles
+FROM users u
+         LEFT JOIN user_roles ur ON u.id = ur.user_id
+         LEFT JOIN roles r ON ur.role_id = r.id
+WHERE u.id = ?
+GROUP BY u.id
+`
+
+func (q *Queries) GetUserRoles(ctx context.Context, id string) ([]sql.NullString, error) {
+	rows, err := q.db.QueryContext(ctx, getUserRoles, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []sql.NullString
+	for rows.Next() {
+		var roles sql.NullString
+		if err := rows.Scan(&roles); err != nil {
+			return nil, err
+		}
+		items = append(items, roles)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

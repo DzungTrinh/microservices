@@ -5,11 +5,11 @@ import (
 )
 
 type User struct {
-	ID        int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string
 	Username  string
 	Email     string
 	Password  string
-	Role      Role
+	Roles     []Role
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

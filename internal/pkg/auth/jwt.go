@@ -16,21 +16,27 @@ import (
 )
 
 type Claims struct {
-	ID    int64  `json:"id"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID        int64  `json:"id"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	TokenType string `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(id int64, email, role string) (string, error) {
+func GenerateToken(id int64, email, role, tokenType string, ttl time.Duration) (string, error) {
 	claims := &Claims{
-		ID:    id,
-		Email: email,
-		Role:  role,
+		ID:        id,
+		Email:     email,
+		Role:      role,
+		TokenType: tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
+	}
+
+	if tokenType == "refresh" {
+		claims.Role = ""
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -42,7 +48,7 @@ func GenerateJWT(id int64, email, role string) (string, error) {
 	return token.SignedString([]byte(jwtSecret))
 }
 
-func VerifyJWT(tokenStr string) (*Claims, error) {
+func VerifyToken(tokenStr, tokenType string) (*Claims, error) {
 	if tokenStr == "" {
 		return nil, fmt.Errorf("token missing")
 	}
@@ -61,6 +67,10 @@ func VerifyJWT(tokenStr string) (*Claims, error) {
 
 	if !token.Valid {
 		return nil, fmt.Errorf("token is not valid")
+	}
+
+	if claims.TokenType != tokenType {
+		return nil, fmt.Errorf("invalid token type: expected %s, got %s", tokenType, claims.TokenType)
 	}
 
 	return claims, nil
@@ -82,7 +92,7 @@ func JWTVerifyMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := VerifyJWT(parts[1])
+		claims, err := VerifyToken(parts[1], "access")
 		if err != nil {
 			c.JSON(401, gin.H{"error": err.Error()})
 			c.Abort()
@@ -110,7 +120,7 @@ func JWTVerifyInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		return nil, status.Errorf(codes.Unauthenticated, "invalid authorization header")
 	}
 
-	claims, err := VerifyJWT(parts[1])
+	claims, err := VerifyToken(parts[1], "access")
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
 	}

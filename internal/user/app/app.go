@@ -1,10 +1,13 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"microservices/user-management/cmd/user/config"
 	"microservices/user-management/internal/pkg/auth"
+	"microservices/user-management/internal/user/infras/mysql"
+	"microservices/user-management/internal/user/infras/seed"
 	"time"
 
 	"microservices/user-management/internal/user/app/router"
@@ -46,6 +49,11 @@ func NewApp(cfg config.Config) *App {
 		log.Fatal(err)
 	}
 
+	// Seed admin
+	if err := seed.SeedAdmin(context.Background(), mysql.New(db), cfg.AdminEmail, cfg.AdminPassword); err != nil {
+		log.Fatalf("Failed to seed admin: %v", err)
+	}
+
 	r := gin.Default()
 
 	userRepo := repo.NewUserRepository(db)
@@ -58,10 +66,19 @@ func NewApp(cfg config.Config) *App {
 
 	// Protected routes
 	protected := r.Group("/api/v1")
-	protected.Use(auth.JWTVerifyMiddleware())
+	protected.Use(jwt.JWTVerifyMiddleware())
 	{
-		protected.GET("/users", userServer.GetAllUsers)
-		protected.GET("/users/:id", userServer.GetUserByID)
+		// Admin-only routes
+		adminProtected := protected.Group("")
+		adminProtected.Use(jwt.AdminOnlyMiddleware())
+		{
+			adminProtected.GET("/users", userServer.GetAllUsers)
+			adminProtected.PUT("/users/:id/roles", userServer.UpdateUserRoles)
+			adminProtected.GET("/users/:id", userServer.GetUserByID)
+		}
+
+		// User-accessible routes
+		protected.GET("/users/me", userServer.GetCurrentUser)
 	}
 
 	return &App{router: r, db: db}
