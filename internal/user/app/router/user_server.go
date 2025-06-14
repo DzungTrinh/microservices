@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,10 @@ import (
 )
 
 type UserServer struct {
-	usecase *users.userUsecase
+	usecase users.UserUseCase
 }
 
-func NewUserServer(usecase *users.userUsecase) *UserServer {
+func NewUserServer(usecase users.UserUseCase) *UserServer {
 	return &UserServer{usecase: usecase}
 }
 
@@ -24,7 +25,7 @@ func (s *UserServer) Register(c *gin.Context) {
 		return
 	}
 
-	resp, err := s.usecase.Register(c, req)
+	resp, err := s.usecase.Register(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,9 +41,31 @@ func (s *UserServer) Login(c *gin.Context) {
 		return
 	}
 
-	resp, err := s.usecase.Login(c, req)
+	ctx := context.WithValue(c.Request.Context(), "user-agent", c.GetHeader("User-Agent"))
+	ctx = context.WithValue(ctx, "ip-address", c.ClientIP())
+
+	resp, err := s.usecase.Login(ctx, req)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+func (s *UserServer) Refresh(c *gin.Context) {
+	var req domain.RefreshTokenModel
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := context.WithValue(c.Request.Context(), "user-agent", c.GetHeader("User-Agent"))
+	ctx = context.WithValue(ctx, "ip-address", c.ClientIP())
+
+	resp, err := s.usecase.RefreshToken(ctx, req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -50,19 +73,13 @@ func (s *UserServer) Login(c *gin.Context) {
 }
 
 func (s *UserServer) GetAllUsers(c *gin.Context) {
-	claims, ok := c.Get("claims")
+	_, ok := c.Get("claims")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
-	_, ok = claims.(*auth.Claims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claims type"})
-		return
-	}
-
-	allUsers, err := s.usecase.GetAllUsers(c)
+	allUsers, err := s.usecase.GetAllUsers(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,23 +91,17 @@ func (s *UserServer) GetAllUsers(c *gin.Context) {
 func (s *UserServer) GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 
-	claims, ok := c.Get("claims")
+	_, ok := c.Get("claims")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
-	_, ok = claims.(*auth.Claims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claims type"})
-		return
-	}
-
-	resp, err := s.usecase.GetUserByID(c, id)
+	resp, err := s.usecase.GetUserByID(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -102,17 +113,17 @@ func (s *UserServer) GetUserByID(c *gin.Context) {
 func (s *UserServer) GetCurrentUser(c *gin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
-	authClaims, ok := claims.(*auth.Claims)
+	authClaims, ok := claims.(*auth.AccessClaims)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claims type"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid claims type"})
 		return
 	}
 
-	resp, err := s.usecase.GetCurrentUser(c, authClaims.ID)
+	resp, err := s.usecase.GetCurrentUser(c.Request.Context(), authClaims.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -124,19 +135,19 @@ func (s *UserServer) GetCurrentUser(c *gin.Context) {
 func (s *UserServer) UpdateUserRoles(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 
 	var req struct {
-		Roles []string `json:"roles"`
+		Roles []string `json:"roles" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	resp, err := s.usecase.UpdateUserRoles(c, id, req.Roles)
+	resp, err := s.usecase.UpdateUserRoles(c.Request.Context(), id, req.Roles)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

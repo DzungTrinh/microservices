@@ -3,10 +3,12 @@ package users
 import (
 	"context"
 	"errors"
-	"microservices/user-management/internal/pkg/auth"
+	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"microservices/user-management/internal/pkg/auth"
 	"microservices/user-management/internal/user/domain"
 )
 
@@ -29,16 +31,9 @@ func (u *userUsecase) Register(ctx context.Context, req domain.RegisterUserReq) 
 	if err != nil {
 		return domain.UserResp{}, err
 	}
+	req.Password = string(hashedPassword)
 
-	roles := make([]domain.Role, len(req.Roles))
-	for i, role := range req.Roles {
-		roles[i] = domain.Role(role)
-	}
-	if len(roles) == 0 {
-		roles = []domain.Role{domain.RoleUser}
-	}
-
-	user, err := u.userRepo.CreateUser(ctx, req.Username, req.Email, string(hashedPassword), roles)
+	user, err := u.userRepo.CreateUser(ctx, req)
 	if err != nil {
 		return domain.UserResp{}, err
 	}
@@ -51,71 +46,122 @@ func (u *userUsecase) Register(ctx context.Context, req domain.RegisterUserReq) 
 	}, nil
 }
 
-func (u *userUsecase) Login(ctx context.Context, email, password string) (map[string]string, error) {
-	user, err := u.userRepo.GetUserByEmail(ctx, email)
+func (u *userUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.LoginResp, error) {
+	log.Printf("Login attempt for email: %s", req.Email)
+	user, err := u.userRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		return nil, errors.New("invalid credentials")
+		log.Printf("GetUserByEmail failed: %v", err)
+		return domain.LoginResp{}, errors.New("invalid credentials")
+	}
+	log.Printf("Found user: %+v", user)
+	log.Printf("Stored hash: %s, Input password: %s", user.Password, req.Password)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		log.Printf("Password comparison failed: %v", err)
+		return domain.LoginResp{}, errors.New("invalid credentials")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, errors.New("invalid credentials")
-	}
-
-	roles, err := u.userRepo.GetUserRoles(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	role := "user"
+	roles := user.Roles
+	role := string(domain.RoleUser)
 	if len(roles) > 0 {
-		role = roles[0].Name
+		role = string(roles[0])
 	}
 
-	accessToken, err := auth.GenerateToken(user.ID, user.Email, role, "access", u.accessTokenTTL)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, role, u.accessTokenTTL, u.refreshTokenTTL)
 	if err != nil {
-		return nil, err
+		log.Printf("Generate token pair failed: %v", err)
+		return domain.LoginResp{}, err
 	}
 
-	refreshToken, err := auth.GenerateToken(user.ID, user.Email, "", "refresh", u.refreshTokenTTL)
-	if err != nil {
-		return nil, err
+	refreshTokenID := uuid.New().String()
+	userAgent, _ := ctx.Value("user-agent").(string)
+	ipAddress, _ := ctx.Value("ip-address").(string)
+	log.Printf("Context: User-Agent=%s, IP=%s", userAgent, ipAddress)
+
+	if err := u.userRepo.CreateRefreshToken(ctx, domain.CreateRefreshTokenModel{
+		ID:        refreshTokenID,
+		UserID:    user.ID,
+		Token:     tokenPair.RefreshToken,
+		UserAgent: userAgent,
+		IpAddress: ipAddress,
+		ExpiresAt: time.Now().Add(u.refreshTokenTTL),
+	}); err != nil {
+		log.Printf("Error storing refresh token: %v", err)
+		return domain.LoginResp{}, err
 	}
 
-	return map[string]string{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
+	return domain.LoginResp{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
 	}, nil
 }
 
-func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (map[string]string, error) {
+func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (domain.LoginResp, error) {
+	token, err := u.userRepo.GetRefreshToken(ctx, refreshToken)
+	if err != nil || token.Revoked {
+		log.Printf("Invalid or revoked refresh token: %v", err)
+		return domain.LoginResp{}, errors.New("invalid or revoked refresh token")
+	}
+
+	if time.Now().After(token.ExpiresAt) {
+		log.Printf("Expired refresh token")
+		return domain.LoginResp{}, errors.New("expired refresh token")
+	}
+
 	claims, err := auth.VerifyToken(refreshToken, "refresh")
 	if err != nil {
-		return nil, errors.New("invalid refresh token")
+		log.Printf("Invalid refresh token claims: %v", err)
+		return domain.LoginResp{}, errors.New("invalid refresh token")
 	}
 
-	roles, err := u.userRepo.GetUserRoles(ctx, claims.ID)
+	refreshClaims, ok := claims.(*auth.RefreshClaims)
+	if !ok || refreshClaims.ID != token.UserID {
+		log.Printf("Invalid refresh token claims type or ID mismatch")
+		return domain.LoginResp{}, errors.New("invalid refresh token")
+	}
+
+	user, err := u.userRepo.GetUserByID(ctx, token.UserID)
 	if err != nil {
-		return nil, err
+		log.Printf("GetUserByID failed: %v", err)
+		return domain.LoginResp{}, err
 	}
 
-	role := "user"
+	roles := user.Roles
+	role := string(domain.RoleUser)
 	if len(roles) > 0 {
-		role = roles[0].Name
+		role = string(roles[0])
 	}
 
-	accessToken, err := auth.GenerateToken(claims.ID, claims.Email, role, "access", u.accessTokenTTL)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, role, u.accessTokenTTL, u.refreshTokenTTL)
 	if err != nil {
-		return nil, err
+		log.Printf("Generate token pair failed: %v", err)
+		return domain.LoginResp{}, err
 	}
 
-	newRefreshToken, err := auth.GenerateToken(claims.ID, claims.Email, "", "refresh", u.refreshTokenTTL)
-	if err != nil {
-		return nil, err
+	newRefreshTokenID := uuid.New().String()
+	userAgent, _ := ctx.Value("user-agent").(string)
+	ipAddress, _ := ctx.Value("ip-address").(string)
+	log.Printf("Context: User-Agent=%s, IP=%s", userAgent, ipAddress)
+
+	if err := u.userRepo.CreateRefreshToken(ctx, domain.CreateRefreshTokenModel{
+		ID:        newRefreshTokenID,
+		UserID:    user.ID,
+		Token:     tokenPair.RefreshToken,
+		UserAgent: userAgent,
+		IpAddress: ipAddress,
+		ExpiresAt: time.Now().Add(u.refreshTokenTTL),
+	}); err != nil {
+		log.Printf("Error storing refresh token: %v", err)
+		return domain.LoginResp{}, err
 	}
 
-	return map[string]string{
-		"access_token":  accessToken,
-		"refresh_token": newRefreshToken,
+	if err := u.userRepo.RevokeRefreshToken(ctx, refreshToken); err != nil {
+		log.Printf("Revoke refresh token failed: %v", err)
+		return domain.LoginResp{}, err
+	}
+
+	return domain.LoginResp{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
 	}, nil
 }
 
@@ -167,4 +213,8 @@ func (u *userUsecase) UpdateUserRoles(ctx context.Context, userID string, roles 
 	}
 
 	return u.GetUserByID(ctx, userID)
+}
+
+func (u *userUsecase) CleanExpiredTokens(ctx context.Context) error {
+	return u.userRepo.DeleteExpiredRefreshTokens(ctx)
 }

@@ -11,6 +11,32 @@ import (
 	"time"
 )
 
+const createRefreshToken = `-- name: CreateRefreshToken :exec
+INSERT INTO refresh_tokens (id, user_id, token, user_agent, ip_address, expires_at, revoked)
+VALUES (?, ?, ?, ?, ?, ?, 0)
+`
+
+type CreateRefreshTokenParams struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Token     string    `json:"token"`
+	UserAgent string    `json:"user_agent"`
+	IpAddress string    `json:"ip_address"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error {
+	_, err := q.db.ExecContext(ctx, createRefreshToken,
+		arg.ID,
+		arg.UserID,
+		arg.Token,
+		arg.UserAgent,
+		arg.IpAddress,
+		arg.ExpiresAt,
+	)
+	return err
+}
+
 const createUser = `-- name: CreateUser :execresult
 INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)
 `
@@ -42,6 +68,16 @@ type CreateUserRoleParams struct {
 
 func (q *Queries) CreateUserRole(ctx context.Context, arg CreateUserRoleParams) error {
 	_, err := q.db.ExecContext(ctx, createUserRole, arg.UserID, arg.RoleID)
+	return err
+}
+
+const deleteExpiredRefreshTokens = `-- name: DeleteExpiredRefreshTokens :exec
+DELETE FROM refresh_tokens
+WHERE expires_at < NOW() OR revoked = 1
+`
+
+func (q *Queries) DeleteExpiredRefreshTokens(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteExpiredRefreshTokens)
 	return err
 }
 
@@ -102,6 +138,28 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getRefreshToken = `-- name: GetRefreshToken :one
+SELECT id, user_id, token, user_agent, ip_address, created_at, expires_at, revoked
+FROM refresh_tokens
+WHERE token = ? AND expires_at > NOW() AND revoked = 0
+`
+
+func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshToken, error) {
+	row := q.db.QueryRowContext(ctx, getRefreshToken, token)
+	var i RefreshToken
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Token,
+		&i.UserAgent,
+		&i.IpAddress,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+		&i.Revoked,
+	)
+	return i, err
 }
 
 const getRoleIDByName = `-- name: GetRoleIDByName :one
@@ -215,4 +273,15 @@ func (q *Queries) GetUserRoles(ctx context.Context, id string) ([]sql.NullString
 		return nil, err
 	}
 	return items, nil
+}
+
+const revokeRefreshToken = `-- name: RevokeRefreshToken :exec
+UPDATE refresh_tokens
+SET revoked = 1
+WHERE token = ?
+`
+
+func (q *Queries) RevokeRefreshToken(ctx context.Context, token string) error {
+	_, err := q.db.ExecContext(ctx, revokeRefreshToken, token)
+	return err
 }
