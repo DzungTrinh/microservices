@@ -1,18 +1,19 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"log"
-	"microservices/user-management/cmd/user/config"
-	"microservices/user-management/internal/pkg/auth"
 	"time"
 
-	"microservices/user-management/internal/user/app/router"
-	"microservices/user-management/internal/user/infras/repo"
-	"microservices/user-management/internal/user/usecases/users"
-
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
+	"microservices/user-management/cmd/user/config"
+	"microservices/user-management/internal/pkg/auth"
+	"microservices/user-management/internal/user/app/router"
+	"microservices/user-management/internal/user/infras/mysql"
+	"microservices/user-management/internal/user/infras/repo"
+	"microservices/user-management/internal/user/infras/seed"
+	"microservices/user-management/internal/user/usecases/users"
 )
 
 type App struct {
@@ -43,26 +44,49 @@ func NewDB(dsn string) (*sql.DB, error) {
 func NewApp(cfg config.Config) *App {
 	db, err := NewDB(cfg.DatabaseDSN)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Seed admin account
+	if cfg.AdminEmail != "" && cfg.AdminPassword != "" {
+		if err := seed.SeedAdmin(context.Background(), mysql.New(db), cfg.AdminEmail, cfg.AdminPassword); err != nil {
+			log.Fatalf("Failed to seed admin: %v", err)
+		}
 	}
 
 	r := gin.Default()
 
 	userRepo := repo.NewUserRepository(db)
-	usecase := users.NewUserUsecase(userRepo, "5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd")
+	usecase := users.NewUserUsecase(userRepo)
 	userServer := router.NewUserServer(usecase)
 
-	// Public routes
 	r.POST("/api/v1/register", userServer.Register)
 	r.POST("/api/v1/login", userServer.Login)
+	r.POST("/api/v1/refresh", userServer.Refresh)
 
-	// Protected routes
 	protected := r.Group("/api/v1")
 	protected.Use(auth.JWTVerifyMiddleware())
 	{
-		protected.GET("/users", userServer.GetAllUsers)
-		protected.GET("/users/:id", userServer.GetUserByID)
+		adminProtected := protected.Group("")
+		adminProtected.Use(auth.AdminOnlyMiddleware())
+		{
+			adminProtected.GET("/users", userServer.GetAllUsers)
+			adminProtected.PUT("/users/:id/roles", userServer.UpdateUserRoles)
+			adminProtected.GET("/users/:id", userServer.GetUserByID)
+		}
+
+		protected.GET("/users/me", userServer.GetCurrentUser)
 	}
+
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := usecase.CleanExpiredTokens(context.Background()); err != nil {
+				log.Printf("Failed to clean expired tokens: %v", err)
+			}
+		}
+	}()
 
 	return &App{router: r, db: db}
 }

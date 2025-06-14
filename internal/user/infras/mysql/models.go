@@ -8,12 +8,32 @@ import (
 	"time"
 )
 
+type RefreshToken struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Token     string    `json:"token"`
+	UserAgent string    `json:"user_agent"`
+	IpAddress string    `json:"ip_address"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Revoked   bool      `json:"revoked"`
+}
+
+type Role struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type User struct {
-	ID        int64     `json:"id"`
+	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
-	Role      string    `json:"role"`
+}
+
+type UserRole struct {
+	UserID string `json:"user_id"`
+	RoleID string `json:"role_id"`
 }

@@ -2,46 +2,52 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "internal/user/infras/mysql/query/query.sql"
-    schema: "db/migrations/000001_create_user_service.up.sql"
+    schema: "db/migrations/user/*.up.sql"
     gen:
       go:
         package: "mysql"
         out: "internal/user/infras/mysql"
         emit_json_tags: true
+        overrides:
+          # Nullable VARCHAR → *string
+          - db_type: "varchar"
+            nullable: true
+            go_type:
+              type: string
 
-  - engine: "mysql"
-    queries: "internal/user/infras/mysql/query/query.sql"
-    schema: "db/migrations/000001_create_user_service.up.sql"
-    gen:
-      go:
-        package: "mysql"
-        out: "internal/user/infras/mysql"
-        emit_json_tags: true
-
-  - engine: "mysql"
-    queries: "internal/user/infras/mysql/query/query.sql"
-    schema: "db/migrations/000001_create_user_service.up.sql"
-    gen:
-      go:
-        package: "mysql"
-        out: "internal/user/infras/mysql"
-        emit_json_tags: true
-
-  - engine: "mysql"
-    queries: "internal/user/infras/mysql/query/query.sql"
-    schema: "db/migrations/000001_create_user_service.up.sql"
-    gen:
-      go:
-        package: "mysql"
-        out: "internal/user/infras/mysql"
-        emit_json_tags: true
-
-  - engine: "mysql"
-    queries: "internal/user/infras/mysql/query/query.sql"
-    schema: "db/migrations/000001_create_user_service.up.sql"
-    gen:
-      go:
-        package: "mysql"
-        out: "internal/user/infras/mysql"
-        emit_json_tags: true
-
+#  - engine: "mysql"
+#    queries: "internal/supplier/infras/mysql/query/query.sql"
+#    schema: "db/migrations/supplier/*.up.sql"
+#    gen:
+#      go:
+#        package: "mysql"
+#        out: "internal/supplier/infras/mysql"
+#        emit_json_tags: true
+#
+#  - engine: "mysql"
+#    queries: "internal/payment/infras/mysql/query/query.sql"
+#    schema: "db/migrations/payment/*.up.sql"
+#    gen:
+#      go:
+#        package: "mysql"
+#        out: "internal/payment/infras/mysql"
+#        emit_json_tags: true
+#
+#  - engine: "mysql"
+#    queries: "internal/order/infras/mysql/query/query.sql"
+#    schema: "db/migrations/order/*.up.sql"
+#    gen:
+#      go:
+#        package: "mysql"
+#        out: "internal/order/infras/mysql"
+#        emit_json_tags: true
+#
+#  - engine: "mysql"
+#    queries: "internal/notification/infras/mysql/query/query.sql"
+#    schema: "db/migrations/notification/*.up.sql"
+#    gen:
+#      go:
+#        package: "mysql"
+#        out: "internal/notification/infras/mysql"
+#        emit_json_tags: true
+#
