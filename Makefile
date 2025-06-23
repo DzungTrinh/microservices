@@ -24,6 +24,9 @@ docker-run:
 	docker run -d -p 8080:8080 --env-file cmd/user/.env user:latest
 
 docker-compose-up:
+	docker-compose up
+
+docker-compose-up-build:
 	docker-compose up -d --build
 
 docker-compose-down:

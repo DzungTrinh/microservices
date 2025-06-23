@@ -13,6 +13,7 @@ type Config struct {
 	Port          string `env:"PORT" env-required:"true"`
 	AdminEmail    string `env:"ADMIN_EMAIL" env-required:"true"`
 	AdminPassword string `env:"ADMIN_PASSWORD" env-required:"true"`
+	GRPCPort      string `env:"GRPC_PORT" env-required:"true"`
 }
 
 func Load() Config {

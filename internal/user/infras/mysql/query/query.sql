@@ -1,5 +1,6 @@
 -- name: CreateUser :execresult
-INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?);
+INSERT INTO users (id, username, email, password, created_at, updated_at)
+VALUES (?, ?, ?, ?, NOW(), NOW());
 
 -- name: CreateUserRole :exec
 INSERT INTO user_roles (user_id, role_id) VALUES (?, ?);

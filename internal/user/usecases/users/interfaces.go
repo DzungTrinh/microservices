@@ -6,12 +6,12 @@ import (
 )
 
 type UserUseCase interface {
-	Register(ctx context.Context, req domain.RegisterUserReq) (domain.UserResp, error)
-	Login(ctx context.Context, req domain.LoginReq) (domain.LoginResp, error)
-	GetUserByID(ctx context.Context, id string) (domain.UserResp, error)
-	GetAllUsers(ctx context.Context) ([]domain.UserResp, error)
-	GetCurrentUser(ctx context.Context, userID string) (domain.UserResp, error)
-	UpdateUserRoles(ctx context.Context, userID string, roles []string) (domain.UserResp, error)
-	RefreshToken(ctx context.Context, refreshToken string) (domain.LoginResp, error)
+	Register(ctx context.Context, req domain.RegisterUserReq) (domain.AuthTokens, error)
+	Login(ctx context.Context, req domain.LoginReq) (domain.AuthTokens, error)
+	GetUserByID(ctx context.Context, id string) (domain.UserDTO, error)
+	GetAllUsers(ctx context.Context) ([]domain.UserDTO, error)
+	GetCurrentUser(ctx context.Context, userID string) (domain.UserDTO, error)
+	UpdateUserRoles(ctx context.Context, userID string, roles []string) (domain.UserDTO, error)
+	RefreshToken(ctx context.Context, refreshToken string) (domain.AuthTokens, error)
 	CleanExpiredTokens(ctx context.Context) error
 }

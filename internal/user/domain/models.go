@@ -8,7 +8,13 @@ type RegisterUserReq struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
-	Roles    []Role `json:"roles,omitempty"`
+}
+
+type CreateUserModel struct {
+	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+	Roles    []Role `json:"roles" binding:"required"`
 }
 
 type LoginReq struct {
@@ -16,16 +22,17 @@ type LoginReq struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UserResp struct {
+type UserDTO struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Roles    []Role `json:"roles"`
 }
 
-type LoginResp struct {
+type AuthTokens struct {
 	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh-token"`
+	RefreshToken string `json:"refresh_token"`
+	MfaRequired  bool   `json:"mfa_required"`
 }
 
 type CreateRefreshTokenModel struct {

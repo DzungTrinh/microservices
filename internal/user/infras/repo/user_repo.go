@@ -5,8 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
+	"log"
+	"microservices/user-management/internal/pkg/auth"
 	"microservices/user-management/internal/user/infras/mysql"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"microservices/user-management/internal/user/domain"
@@ -20,42 +24,82 @@ func NewUserRepository(db *sql.DB) domain.UserRepository {
 	return &userRepository{queries: mysql.New(db)}
 }
 
-func (r *userRepository) CreateUser(ctx context.Context, req domain.RegisterUserReq) (domain.User, error) {
-	if len(req.Roles) == 0 {
-		req.Roles = []domain.Role{domain.RoleUser}
-	}
-	for _, role := range req.Roles {
-		if !domain.IsValidRole(string(role)) {
-			return domain.User{}, fmt.Errorf("invalid role: %s", role)
-		}
+func (r *userRepository) Register(ctx context.Context, req domain.RegisterUserReq) (domain.AuthTokens, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Password hashing failed: %v", err)
+		return domain.AuthTokens{}, err
 	}
 
+	user, err := r.CreateUser(ctx, req.Username, req.Email, string(hashedPassword), []domain.Role{domain.RoleUser})
+	if err != nil {
+		log.Printf("Create user failed: %v", err)
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return domain.AuthTokens{}, fmt.Errorf("email or username already exists")
+		}
+		return domain.AuthTokens{}, err
+	}
+
+	tokenPair, err := auth.GenerateTokenPair(user.ID, string(domain.RoleUser), 15*time.Minute, 7*24*time.Hour)
+	if err != nil {
+		log.Printf("Generate token pair failed: %v", err)
+		return domain.AuthTokens{}, err
+	}
+
+	refreshTokenID := uuid.New().String()
+	userAgent, _ := ctx.Value("user-agent").(string)
+	ipAddress, _ := ctx.Value("ip-address").(string)
+	log.Printf("Context: User-Agent=%s, IP=%s", userAgent, ipAddress)
+
+	if err := r.queries.CreateRefreshToken(ctx, mysql.CreateRefreshTokenParams{
+		ID:        refreshTokenID,
+		UserID:    user.ID,
+		Token:     tokenPair.RefreshToken,
+		UserAgent: userAgent,
+		IpAddress: ipAddress,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	}); err != nil {
+		log.Printf("Error storing refresh token: %v", err)
+		return domain.AuthTokens{}, err
+	}
+
+	return domain.AuthTokens{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		MfaRequired:  false,
+	}, nil
+}
+
+func (r *userRepository) CreateUser(ctx context.Context, username, email, password string, roles []domain.Role) (domain.User, error) {
 	id := uuid.New().String()
 	_, err := r.queries.CreateUser(ctx, mysql.CreateUserParams{
 		ID:       id,
-		Username: req.Username,
-		Email:    req.Email,
-		Password: req.Password,
+		Username: username,
+		Email:    email,
+		Password: password,
 	})
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	for _, role := range req.Roles {
+	for _, role := range roles {
 		roleID, err := r.queries.GetRoleIDByName(ctx, string(role))
 		if err != nil {
+			log.Printf("Role %s not found: %v", role, err)
 			return domain.User{}, fmt.Errorf("role %s not found: %w", role, err)
 		}
 		if err := r.queries.CreateUserRole(ctx, mysql.CreateUserRoleParams{
 			UserID: id,
 			RoleID: roleID,
 		}); err != nil {
+			log.Printf("Failed to assign role %s: %v", role, err)
 			return domain.User{}, err
 		}
 	}
 
 	user, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
+		log.Printf("Get user by ID failed: %v", err)
 		return domain.User{}, err
 	}
 

@@ -38,7 +38,8 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 }
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)
+INSERT INTO users (id, username, email, password, created_at, updated_at)
+VALUES (?, ?, ?, ?, NOW(), NOW())
 `
 
 type CreateUserParams struct {

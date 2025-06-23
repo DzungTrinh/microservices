@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS role_permissions (
     role_id  CHAR(36) NOT NULL,
     perm_id  CHAR(36) NOT NULL,
     tenant_id CHAR(36) NULL,
-      PRIMARY KEY (role_id, perm_id, COALESCE(tenant_id, '0')),
+    PRIMARY KEY (role_id, perm_id, tenant_id),
     INDEX idx_rp_tenant (tenant_id),
     CONSTRAINT fk_rp_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
     CONSTRAINT fk_rp_perm FOREIGN KEY (perm_id) REFERENCES permissions(id) ON DELETE CASCADE

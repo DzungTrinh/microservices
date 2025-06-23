@@ -5,7 +5,7 @@ import (
 )
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, req RegisterUserReq) (User, error)
+	CreateUser(ctx context.Context, username, email, password string, roles []Role) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id string) (User, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
