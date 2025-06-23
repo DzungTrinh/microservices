@@ -71,7 +71,7 @@ func NewApp(cfg config.Config) *App {
 
 	// gRPC-Gateway setup
 	gwmux := runtime.NewServeMux()
-	err = pb.RegisterAuthServiceHandlerFromEndpoint(context.Background(), gwmux, "localhost:8082", []grpc.DialOption{
+	err = pb.RegisterAuthServiceHandlerFromEndpoint(context.Background(), gwmux, "localhost"+cfg.GRPCPort, []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
 	if err != nil {
