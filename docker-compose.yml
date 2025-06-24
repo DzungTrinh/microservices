@@ -31,79 +31,81 @@ services:
     ports:
       - 8081:8081
       - 9090:9090
+    volumes:
+      - ./logs:/logs
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - coffee-shop
 
-  supplier:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile-supplier
-    image: microservices-supplier
-    environment:
-      IN_DOCKER: true
-      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/supplier_service?charset=utf8mb4&parseTime=True&loc=Local
-      PORT: 8082
-    ports:
-      - 8082:8082
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - coffee-shop
-
-  payment:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile-payment
-    image: microservices-payment
-    environment:
-      IN_DOCKER: true
-      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/payment_service?charset=utf8mb4&parseTime=True&loc=Local
-      PORT: 8083
-    ports:
-      - 8083:8083
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - coffee-shop
-
-  order:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile-order
-    image: microservices-order
-    environment:
-      IN_DOCKER: true
-      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/order_service?charset=utf8mb4&parseTime=True&loc=Local
-      PORT: 8084
-    ports:
-      - 8084:8084
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - coffee-shop
-
-  notification:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile-notification
-    image: microservices-notification
-    environment:
-      IN_DOCKER: true
-      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/notification_service?charset=utf8mb4&parseTime=True&loc=Local
-      PORT: 8085
-    ports:
-      - 8085:8085
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - coffee-shop
+#  supplier:
+#    build:
+#      context: .
+#      dockerfile: ./docker/Dockerfile-supplier
+#    image: microservices-supplier
+#    environment:
+#      IN_DOCKER: true
+#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/supplier_service?charset=utf8mb4&parseTime=True&loc=Local
+#      PORT: 8082
+#    ports:
+#      - 8082:8082
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - coffee-shop
+#
+#  payment:
+#    build:
+#      context: .
+#      dockerfile: ./docker/Dockerfile-payment
+#    image: microservices-payment
+#    environment:
+#      IN_DOCKER: true
+#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/payment_service?charset=utf8mb4&parseTime=True&loc=Local
+#      PORT: 8083
+#    ports:
+#      - 8083:8083
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - coffee-shop
+#
+#  order:
+#    build:
+#      context: .
+#      dockerfile: ./docker/Dockerfile-order
+#    image: microservices-order
+#    environment:
+#      IN_DOCKER: true
+#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/order_service?charset=utf8mb4&parseTime=True&loc=Local
+#      PORT: 8084
+#    ports:
+#      - 8084:8084
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - coffee-shop
+#
+#  notification:
+#    build:
+#      context: .
+#      dockerfile: ./docker/Dockerfile-notification
+#    image: microservices-notification
+#    environment:
+#      IN_DOCKER: true
+#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/notification_service?charset=utf8mb4&parseTime=True&loc=Local
+#      PORT: 8085
+#    ports:
+#      - 8085:8085
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - coffee-shop
 
 
 networks:

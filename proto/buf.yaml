@@ -8,10 +8,10 @@ lint:
     - DEFAULT
   ignore_only:
     PACKAGE_DIRECTORY_MATCH:
-      - auth.proto
+      - user.proto
     PACKAGE_VERSION_SUFFIX:
-      - auth.proto
+      - user.proto
     RPC_REQUEST_RESPONSE_UNIQUE:
-      - auth.proto
+      - user.proto
     RPC_RESPONSE_STANDARD_NAME:
-      - auth.proto
+      - user.proto

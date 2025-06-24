@@ -3,20 +3,22 @@ package app
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
+	"microservices/user-management/internal/pkg/middlewares"
+	"microservices/user-management/internal/user/app/router"
+	"microservices/user-management/internal/user/cron"
+	"microservices/user-management/internal/user/infras/mysql"
+	"microservices/user-management/pkg/logger"
+	mysqlDB "microservices/user-management/pkg/mysql"
 	pb "microservices/user-management/proto/gen"
 	"net"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"microservices/user-management/cmd/user/config"
-	"microservices/user-management/internal/pkg/auth"
-	"microservices/user-management/internal/user/app/router"
-	"microservices/user-management/internal/user/infras/mysql"
+
 	"microservices/user-management/internal/user/infras/repo"
 	"microservices/user-management/internal/user/infras/seed"
 	"microservices/user-management/internal/user/usecases/users"
@@ -24,120 +26,94 @@ import (
 
 type App struct {
 	router     *gin.Engine
-	db         *sql.DB
 	grpcServer *grpc.Server
+	db         *sql.DB
 }
 
-func NewDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
+// InterceptorChain returns a gRPC interceptor that applies middleware based on method
+func InterceptorChain() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		switch info.FullMethod {
+		case "/proto.UserService/GetAllUsers",
+			"/proto.UserService/UpdateUserRoles":
+			authCtx, err := middlewares.JWTVerifyInterceptor(ctx, req, func(c context.Context, _ interface{}) (interface{}, error) {
+				return c, nil
+			})
+			if err != nil {
+				return nil, err
+			}
+			return middlewares.AdminOnlyInterceptor(authCtx.(context.Context), req, handler)
+
+		case "/proto.UserService/GetUserByID",
+			"/proto.UserService/GetCurrentUser":
+			return middlewares.JWTVerifyInterceptor(ctx, req, handler)
+
+		default:
+			return handler(ctx, req)
+		}
 	}
-
-	db.SetMaxIdleConns(5)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxLifetime(30 * time.Minute)
-	db.SetConnMaxIdleTime(5 * time.Minute)
-
-	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, err
-	}
-
-	log.Println("Database connection pool initialized")
-	return db, nil
 }
 
 func NewApp(cfg config.Config) *App {
-	db, err := NewDB(cfg.DatabaseDSN)
+	db, err := mysqlDB.NewDB(cfg.DatabaseDSN)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.GetInstance().Fatalf("Failed to connect to database: %v", err)
 	}
 
 	// Seed admin account
 	if cfg.AdminEmail != "" && cfg.AdminPassword != "" {
 		if err := seed.SeedAdmin(context.Background(), mysql.New(db), cfg.AdminEmail, cfg.AdminPassword); err != nil {
-			log.Fatalf("Failed to seed admin: %v", err)
+			logger.GetInstance().Fatalf("Failed to seed admin: %v", err)
 		}
 	}
 
-	// Initialize use case and repository
+	// Initialize repository and usecase
 	userRepo := repo.NewUserRepository(db)
 	usecase := users.NewUserUsecase(userRepo)
 
-	// gRPC server setup
-	grpcServer := grpc.NewServer()
-	pb.RegisterAuthServiceServer(grpcServer, router.NewUserGrpcServer(usecase))
-
-	// gRPC-Gateway setup
-	gwmux := runtime.NewServeMux()
-	err = pb.RegisterAuthServiceHandlerFromEndpoint(context.Background(), gwmux, "localhost"+cfg.GRPCPort, []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	})
-	if err != nil {
-		log.Fatalf("Failed to register gRPC-Gateway: %v", err)
-	}
-
-	// Gin router setup
-	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:4200"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
-	// Mount gRPC-Gateway handlers
-	r.Any("/api/v1/register", func(c *gin.Context) {
-		gwmux.ServeHTTP(c.Writer, c.Request)
-	})
-	r.Any("/api/v1/login", func(c *gin.Context) {
-		gwmux.ServeHTTP(c.Writer, c.Request)
-	})
-	r.Any("/api/v1/refresh", func(c *gin.Context) {
-		gwmux.ServeHTTP(c.Writer, c.Request)
-	})
-
-	// Existing REST routes (optional, can be removed if gRPC-Gateway is sufficient)
-	userServer := router.NewUserRestServer(usecase)
-	protected := r.Group("/api/v1")
-	protected.Use(auth.JWTVerifyMiddleware())
-	{
-		adminProtected := protected.Group("")
-		adminProtected.Use(auth.AdminOnlyMiddleware())
-		{
-			adminProtected.GET("/users", userServer.GetAllUsers)
-			adminProtected.PUT("/users/:id/roles", userServer.UpdateUserRoles)
-			adminProtected.GET("/users/:id", userServer.GetUserByID)
-		}
-
-		protected.GET("/users/me", userServer.GetCurrentUser)
-	}
-
-	// Token cleanup goroutine
-	go func() {
-		ticker := time.NewTicker(24 * time.Hour)
-		defer ticker.Stop()
-		for range ticker.C {
-			if err := usecase.CleanExpiredTokens(context.Background()); err != nil {
-				log.Printf("Failed to clean expired tokens: %v", err)
-			}
-		}
-	}()
+	// gRPC server
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(InterceptorChain()))
+	server := router.NewUserGrpcServer(usecase)
+	pb.RegisterUserServiceServer(grpcServer, server)
 
 	// Start gRPC server in a goroutine
 	go func() {
 		lis, err := net.Listen("tcp", cfg.GRPCPort)
 		if err != nil {
-			log.Fatalf("Failed to listen for gRPC: %v", err)
+			logger.GetInstance().Fatalf("Failed to listen for gRPC: %v", err)
 		}
-		log.Printf("gRPC server running on %s", cfg.GRPCPort)
+		logger.GetInstance().Printf("gRPC server running on %s", cfg.GRPCPort)
 		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("Failed to serve gRPC: %v", err)
+			logger.GetInstance().Fatalf("Failed to serve gRPC: %v", err)
 		}
 	}()
+
+	// gRPC-Gateway setup
+	gwmux := runtime.NewServeMux()
+	grpcEndpoint := fmt.Sprintf("0.0.0.0%s", cfg.GRPCPort)
+	err = pb.RegisterUserServiceHandlerFromEndpoint(context.Background(), gwmux, grpcEndpoint, []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	})
+	if err != nil {
+		logger.GetInstance().Fatalf("Failed to register gRPC-Gateway: %v", err)
+	}
+
+	// Gin router
+	r := gin.Default()
+	r.Use(middlewares.CORS())
+
+	// Serve Swagger JSON
+	r.GET("/swagger.json", func(c *gin.Context) {
+		c.File("./third_party/OpenAPI/identity.swagger.json")
+	})
+
+	// Mount gRPC-Gateway handlers
+	r.Any("/api/v1/*path", func(c *gin.Context) {
+		gwmux.ServeHTTP(c.Writer, c.Request)
+	})
+
+	// Start token cleanup cron
+	cron.StartTokenCleanup(context.Background(), usecase)
 
 	return &App{
 		router:     r,
@@ -147,7 +123,7 @@ func NewApp(cfg config.Config) *App {
 }
 
 func (a *App) Run(addr string) error {
-	log.Printf("HTTP server running on %s", addr)
+	logger.GetInstance().Printf("HTTP server running on %s", addr)
 	return a.router.Run(addr)
 }
 

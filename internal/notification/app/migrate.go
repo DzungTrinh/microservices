@@ -25,7 +25,7 @@ const (
 func init() {
 	dsn, ok := os.LookupEnv("DATABASE_DSN")
 	if !ok || dsn == "" {
-		log.Fatal("migrate: DATABASE_DSN environment variable not set")
+		logger.GetInstance().Fatal("migrate: DATABASE_DSN environment variable not set")
 	}
 
 	var (
@@ -37,7 +37,7 @@ func init() {
 	for attempts > 0 {
 		inDocker, ok := os.LookupEnv("IN_DOCKER")
 		if !ok || len(inDocker) == 0 {
-			log.Fatalf("migrate: environment variable not declared: IN_DOCKER")
+			logger.GetInstance().Fatalf("migrate: environment variable not declared: IN_DOCKER")
 		}
 
 		dir := fmt.Sprintf("file://%s", migrationFilePath)
@@ -52,25 +52,25 @@ func init() {
 			break
 		}
 
-		log.Printf("Migration: MySQL is trying to connect, attempts left: %d, error: %v", attempts, err)
+		logger.GetInstance().Printf("Migration: MySQL is trying to connect, attempts left: %d, error: %v", attempts, err)
 		time.Sleep(defaultTimeout)
 		attempts--
 	}
 
 	if err != nil {
-		log.Fatalf("Migration: MySQL connect error: %v", err)
+		logger.GetInstance().Fatalf("Migration: MySQL connect error: %v", err)
 	}
 
 	defer m.Close()
 
 	err = m.Up()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatalf("Migration: up error: %v", err)
+		logger.GetInstance().Fatalf("Migration: up error: %v", err)
 	}
 
 	if errors.Is(err, migrate.ErrNoChange) {
-		log.Println("Migration: no change")
+		logger.GetInstance().Println("Migration: no change")
 	} else {
-		log.Println("Migration: up success")
+		logger.GetInstance().Println("Migration: up success")
 	}
 }

@@ -1,25 +1,18 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 // AccessClaims for access tokens
 type AccessClaims struct {
-	ID        string `json:"id"`
-	Role      string `json:"role"`
-	TokenType string `json:"token_type"`
+	ID        string   `json:"id"`
+	Roles     []string `json:"roles"`
+	TokenType string   `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
@@ -37,8 +30,8 @@ type TokenPair struct {
 }
 
 // GenerateTokenPair creates both access and refresh tokens
-func GenerateTokenPair(id, role string, accessTTL, refreshTTL time.Duration) (TokenPair, error) {
-	accessToken, err := GenerateAccessToken(id, role, accessTTL)
+func GenerateTokenPair(id string, roles []string, accessTTL, refreshTTL time.Duration) (TokenPair, error) {
+	accessToken, err := GenerateAccessToken(id, roles, accessTTL)
 	if err != nil {
 		return TokenPair{}, err
 	}
@@ -55,10 +48,10 @@ func GenerateTokenPair(id, role string, accessTTL, refreshTTL time.Duration) (To
 }
 
 // GenerateAccessToken creates an access token
-func GenerateAccessToken(id, role string, ttl time.Duration) (string, error) {
+func GenerateAccessToken(id string, roles []string, ttl time.Duration) (string, error) {
 	claims := &AccessClaims{
 		ID:        id,
-		Role:      role,
+		Roles:     roles,
 		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
@@ -131,80 +124,4 @@ func VerifyToken(tokenStr, tokenType string) (interface{}, error) {
 	}
 
 	return claims, nil
-}
-
-// JWTVerifyMiddleware for Gin
-func JWTVerifyMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(401, gin.H{"error": "Authorization header required"})
-			c.Abort()
-			return
-		}
-
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(401, gin.H{"error": "Invalid authorization header"})
-			c.Abort()
-			return
-		}
-
-		claims, err := VerifyToken(parts[1], "access")
-		if err != nil {
-			c.JSON(401, gin.H{"error": err.Error()})
-			c.Abort()
-			return
-		}
-
-		c.Set("claims", claims)
-		c.Next()
-	}
-}
-
-// JWTVerifyInterceptor for gRPC
-func JWTVerifyInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "metadata missing")
-	}
-
-	authHeaders := md.Get("authorization")
-	if len(authHeaders) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "authorization header required")
-	}
-
-	parts := strings.Split(authHeaders[0], " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid authorization header")
-	}
-
-	claims, err := VerifyToken(parts[1], "access")
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
-	}
-
-	newCtx := context.WithValue(ctx, "claims", claims)
-	return handler(newCtx, req)
-}
-
-// AdminOnlyMiddleware for Gin
-func AdminOnlyMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		claims, exists := c.Get("claims")
-		if !exists {
-			c.JSON(401, gin.H{"error": "Claims not found"})
-			c.Abort()
-			return
-		}
-
-		userClaims, ok := claims.(*AccessClaims)
-		if !ok || userClaims.Role != "admin" {
-			c.JSON(403, gin.H{"error": "Admin access required"})
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
 }

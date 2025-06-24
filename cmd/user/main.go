@@ -1,18 +1,18 @@
 package main
 
 import (
-	"log"
 	"microservices/user-management/cmd/user/config"
 	"microservices/user-management/internal/user/app"
+	"microservices/user-management/pkg/logger"
 )
 
 func main() {
-	cfg := config.Load()
+	cfg := config.GetInstance()
 
-	application := app.NewApp(cfg)
+	application := app.NewApp(*cfg)
 	defer application.Close()
 
 	if err := application.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
+		logger.GetInstance().Fatalf("Failed to run server: %v", err)
 	}
 }

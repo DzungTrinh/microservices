@@ -15,7 +15,7 @@ type Config struct {
 func Load() Config {
 	var cfg Config
 	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
-		log.Fatalf("Failed to load .env: %v", err)
+		logger.GetInstance().Fatalf("Failed to load .env: %v", err)
 	}
 	return cfg
 }

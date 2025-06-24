@@ -2,7 +2,7 @@ package seed
 
 import (
 	"context"
-	"log"
+	"microservices/user-management/pkg/logger"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +15,7 @@ func SeedAdmin(ctx context.Context, queries *mysql.Queries, adminEmail, adminPas
 	// Check if admin exists
 	_, err := queries.GetUserByEmail(ctx, adminEmail)
 	if err == nil {
-		log.Printf("Admin user %s already exists", adminEmail)
+		logger.GetInstance().Printf("Admin user %s already exists", adminEmail)
 		return nil
 	}
 
@@ -51,6 +51,6 @@ func SeedAdmin(ctx context.Context, queries *mysql.Queries, adminEmail, adminPas
 		return err
 	}
 
-	log.Printf("Admin user %s created successfully", adminEmail)
+	logger.GetInstance().Printf("Admin user %s created successfully", adminEmail)
 	return nil
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"microservices/user-management/pkg/logger"
 	"strings"
 	"time"
 
@@ -31,22 +31,22 @@ func NewUserUsecase(userRepo domain.UserRepository) UserUseCase {
 func (u *userUsecase) Register(ctx context.Context, req domain.RegisterUserReq) (domain.AuthTokens, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("Password hashing failed: %v", err)
+		logger.GetInstance().Printf("Password hashing failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
 	user, err := u.userRepo.CreateUser(ctx, req.Username, req.Email, string(hashedPassword), []domain.Role{domain.RoleUser})
 	if err != nil {
-		log.Printf("Create user failed: %v", err)
+		logger.GetInstance().Printf("Create user failed: %v", err)
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return domain.AuthTokens{}, fmt.Errorf("email or username already exists")
 		}
 		return domain.AuthTokens{}, err
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, string(domain.RoleUser), 15*time.Minute, 7*24*time.Hour)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{string(domain.RoleUser)}, 15*time.Minute, 7*24*time.Hour)
 	if err != nil {
-		log.Printf("Generate token pair failed: %v", err)
+		logger.GetInstance().Printf("Generate token pair failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -62,7 +62,7 @@ func (u *userUsecase) Register(ctx context.Context, req domain.RegisterUserReq) 
 		IpAddress: ipAddress,
 		ExpiresAt: time.Now().Add(u.refreshTokenTTL),
 	}); err != nil {
-		log.Printf("Error storing refresh token: %v", err)
+		logger.GetInstance().Printf("Error storing refresh token: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -76,24 +76,24 @@ func (u *userUsecase) Register(ctx context.Context, req domain.RegisterUserReq) 
 func (u *userUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.AuthTokens, error) {
 	user, err := u.userRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		log.Printf("GetUserByEmail failed: %v", err)
+		logger.GetInstance().Printf("GetUserByEmail failed: %v", err)
 		return domain.AuthTokens{}, errors.New("invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		log.Printf("Password comparison failed: %v", err)
+		logger.GetInstance().Printf("Password comparison failed: %v", err)
 		return domain.AuthTokens{}, errors.New("invalid credentials")
 	}
 
 	roles := user.Roles
-	role := string(domain.RoleUser)
-	if len(roles) > 0 {
-		role = string(roles[0])
+	strRoles := make([]string, len(roles))
+	for i, role := range roles {
+		strRoles[i] = role.String()
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, role, u.accessTokenTTL, u.refreshTokenTTL)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, strRoles, u.accessTokenTTL, u.refreshTokenTTL)
 	if err != nil {
-		log.Printf("Generate token pair failed: %v", err)
+		logger.GetInstance().Printf("Generate token pair failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -109,7 +109,7 @@ func (u *userUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.Au
 		IpAddress: ipAddress,
 		ExpiresAt: time.Now().Add(u.refreshTokenTTL),
 	}); err != nil {
-		log.Printf("Error storing refresh token: %v", err)
+		logger.GetInstance().Printf("Error storing refresh token: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -123,42 +123,42 @@ func (u *userUsecase) Login(ctx context.Context, req domain.LoginReq) (domain.Au
 func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (domain.AuthTokens, error) {
 	token, err := u.userRepo.GetRefreshToken(ctx, refreshToken)
 	if err != nil || token.Revoked {
-		log.Printf("Invalid or revoked refresh token: %v", err)
+		logger.GetInstance().Printf("Invalid or revoked refresh token: %v", err)
 		return domain.AuthTokens{}, errors.New("invalid or revoked refresh token")
 	}
 
 	if time.Now().After(token.ExpiresAt) {
-		log.Printf("Expired refresh token")
+		logger.GetInstance().Printf("Expired refresh token")
 		return domain.AuthTokens{}, errors.New("expired refresh token")
 	}
 
 	claims, err := auth.VerifyToken(refreshToken, "refresh")
 	if err != nil {
-		log.Printf("Invalid refresh token claims: %v", err)
+		logger.GetInstance().Printf("Invalid refresh token claims: %v", err)
 		return domain.AuthTokens{}, errors.New("invalid refresh token")
 	}
 
 	refreshClaims, ok := claims.(*auth.RefreshClaims)
 	if !ok || refreshClaims.ID != token.UserID {
-		log.Printf("Invalid refresh token claims type or ID mismatch")
+		logger.GetInstance().Printf("Invalid refresh token claims type or ID mismatch")
 		return domain.AuthTokens{}, errors.New("invalid refresh token")
 	}
 
 	user, err := u.userRepo.GetUserByID(ctx, token.UserID)
 	if err != nil {
-		log.Printf("GetUserByID failed: %v", err)
+		logger.GetInstance().Printf("GetUserByID failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
 	roles := user.Roles
-	role := string(domain.RoleUser)
-	if len(roles) > 0 {
-		role = string(roles[0])
+	strRoles := make([]string, len(roles))
+	for i, role := range roles {
+		strRoles[i] = role.String()
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, role, u.accessTokenTTL, u.refreshTokenTTL)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, strRoles, u.accessTokenTTL, u.refreshTokenTTL)
 	if err != nil {
-		log.Printf("Generate token pair failed: %v", err)
+		logger.GetInstance().Printf("Generate token pair failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -174,12 +174,12 @@ func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (do
 		IpAddress: ipAddress,
 		ExpiresAt: time.Now().Add(u.refreshTokenTTL),
 	}); err != nil {
-		log.Printf("Error storing refresh token: %v", err)
+		logger.GetInstance().Printf("Error storing refresh token: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
 	if err := u.userRepo.RevokeRefreshToken(ctx, refreshToken); err != nil {
-		log.Printf("Revoke refresh token failed: %v", err)
+		logger.GetInstance().Printf("Revoke refresh token failed: %v", err)
 		return domain.AuthTokens{}, err
 	}
 
@@ -241,25 +241,25 @@ func (u *userUsecase) UpdateUserRoles(ctx context.Context, userID string, roles 
 
 func (u *userUsecase) CreateUserAdmin(ctx context.Context, req domain.CreateUserModel) (domain.User, error) {
 	if len(req.Roles) == 0 {
-		log.Printf("No roles provided for admin user creation")
+		logger.GetInstance().Printf("No roles provided for admin user creation")
 		return domain.User{}, fmt.Errorf("at least one role required")
 	}
 	for _, role := range req.Roles {
 		if !domain.IsValidRole(string(role)) {
-			log.Printf("Invalid role: %s", role)
+			logger.GetInstance().Printf("Invalid role: %s", role)
 			return domain.User{}, fmt.Errorf("invalid role: %s", role)
 		}
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("Password hashing failed: %v", err)
+		logger.GetInstance().Printf("Password hashing failed: %v", err)
 		return domain.User{}, err
 	}
 
 	user, err := u.userRepo.CreateUser(ctx, req.Username, req.Email, string(hashedPassword), req.Roles)
 	if err != nil {
-		log.Printf("Create admin user failed: %v", err)
+		logger.GetInstance().Printf("Create admin user failed: %v", err)
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return domain.User{}, fmt.Errorf("email or username already exists")
 		}
