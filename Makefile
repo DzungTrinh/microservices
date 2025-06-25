@@ -15,7 +15,7 @@ sqlc:
 	sqlc generate
 
 migrate-create:
-	migrate create -ext sql -dir db/migrations/user -seq init_roles
+	migrate create -ext sql -dir db/migrations/user -seq create_user_service
 
 docker-build:
 	docker build -t user:latest -f docker/Dockerfile-user .

@@ -13,7 +13,8 @@ import (
 	"microservices/user-management/internal/user/infras/mysql"
 	"microservices/user-management/pkg/logger"
 	mysqlDB "microservices/user-management/pkg/mysql"
-	pb "microservices/user-management/proto/gen"
+	userv1 "microservices/user-management/proto/gen/user/v1"
+
 	"net"
 
 	"github.com/gin-gonic/gin"
@@ -34,8 +35,8 @@ type App struct {
 func InterceptorChain() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		switch info.FullMethod {
-		case "/proto.UserService/GetAllUsers",
-			"/proto.UserService/UpdateUserRoles":
+		case "/user.v1.UserService/GetAllUsers",
+			"/user.v1.UserService/UpdateUserRoles":
 			authCtx, err := middlewares.JWTVerifyInterceptor(ctx, req, func(c context.Context, _ interface{}) (interface{}, error) {
 				return c, nil
 			})
@@ -44,8 +45,8 @@ func InterceptorChain() grpc.UnaryServerInterceptor {
 			}
 			return middlewares.AdminOnlyInterceptor(authCtx.(context.Context), req, handler)
 
-		case "/proto.UserService/GetUserByID",
-			"/proto.UserService/GetCurrentUser":
+		case "/user.v1.UserService/GetUserByID",
+			"/user.v1.UserService/GetCurrentUser":
 			return middlewares.JWTVerifyInterceptor(ctx, req, handler)
 
 		default:
@@ -74,7 +75,7 @@ func NewApp(cfg config.Config) *App {
 	// gRPC server
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(InterceptorChain()))
 	server := router.NewUserGrpcServer(usecase)
-	pb.RegisterUserServiceServer(grpcServer, server)
+	userv1.RegisterUserServiceServer(grpcServer, server)
 
 	// Start gRPC server in a goroutine
 	go func() {
@@ -91,7 +92,7 @@ func NewApp(cfg config.Config) *App {
 	// gRPC-Gateway setup
 	gwmux := runtime.NewServeMux()
 	grpcEndpoint := fmt.Sprintf("0.0.0.0%s", cfg.GRPCPort)
-	err = pb.RegisterUserServiceHandlerFromEndpoint(context.Background(), gwmux, grpcEndpoint, []grpc.DialOption{
+	err = userv1.RegisterUserServiceHandlerFromEndpoint(context.Background(), gwmux, grpcEndpoint, []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
 	if err != nil {

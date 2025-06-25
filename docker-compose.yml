@@ -9,7 +9,7 @@ services:
     ports:
       - "3307:3306"
     networks:
-      - coffee-shop
+      - user-management
     volumes:
       - ./docker/mysql-init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
@@ -30,66 +30,36 @@ services:
       PORT: 8081
     ports:
       - 8081:8081
-      - 9090:9090
+      - 9091:9091
     volumes:
       - ./logs:/logs
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - coffee-shop
+      - user-management
 
-#  supplier:
-#    build:
-#      context: .
-#      dockerfile: ./docker/Dockerfile-supplier
-#    image: microservices-supplier
-#    environment:
-#      IN_DOCKER: true
-#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/supplier_service?charset=utf8mb4&parseTime=True&loc=Local
-#      PORT: 8082
-#    ports:
-#      - 8082:8082
-#    depends_on:
-#      mysql:
-#        condition: service_healthy
-#    networks:
-#      - coffee-shop
-#
-#  payment:
-#    build:
-#      context: .
-#      dockerfile: ./docker/Dockerfile-payment
-#    image: microservices-payment
-#    environment:
-#      IN_DOCKER: true
-#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/payment_service?charset=utf8mb4&parseTime=True&loc=Local
-#      PORT: 8083
-#    ports:
-#      - 8083:8083
-#    depends_on:
-#      mysql:
-#        condition: service_healthy
-#    networks:
-#      - coffee-shop
-#
-#  order:
-#    build:
-#      context: .
-#      dockerfile: ./docker/Dockerfile-order
-#    image: microservices-order
-#    environment:
-#      IN_DOCKER: true
-#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/order_service?charset=utf8mb4&parseTime=True&loc=Local
-#      PORT: 8084
-#    ports:
-#      - 8084:8084
-#    depends_on:
-#      mysql:
-#        condition: service_healthy
-#    networks:
-#      - coffee-shop
-#
+
+  rbac:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-rbac
+    image: microservices-rbac
+    environment:
+      IN_DOCKER: true
+      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/rbac_service?charset=utf8mb4&parseTime=True&loc=Local
+      PORT: 8082
+    ports:
+      - 8082:8082
+      - 9092:9092
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - user-management
+
 #  notification:
 #    build:
 #      context: .
@@ -105,10 +75,9 @@ services:
 #      mysql:
 #        condition: service_healthy
 #    networks:
-#      - coffee-shop
-
+#      - user-management
 
 networks:
-  coffee-shop:
-    name: coffee-shop
+  user-management:
+    name: user-management
     driver: bridge

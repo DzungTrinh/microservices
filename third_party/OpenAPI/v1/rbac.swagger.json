@@ -1,0 +1,1056 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "RBAC Service",
+    "description": "Service for managing roles and permissions.",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "RBACService"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/rbac/permissions": {
+      "get": {
+        "summary": "List all permissions",
+        "description": "Retrieves all permissions from rbac_db.permissions. Requires admin role.",
+        "operationId": "RBACService_ListPermissions",
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1ListPermissionsResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create permission",
+        "description": "Creates a new permission in rbac_db.permissions. Requires admin role.",
+        "operationId": "RBACService_CreatePermission",
+        "responses": {
+          "200": {
+            "description": "Permission created successfully",
+            "schema": {
+              "$ref": "#/definitions/v1CreatePermissionResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., missing permission name)",
+            "schema": {}
+          },
+          "409": {
+            "description": "Permission name already exists",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreatePermissionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/permissions/{id}": {
+      "delete": {
+        "summary": "Delete permission",
+        "description": "Soft-deletes a permission from rbac_db.permissions by setting deleted_at. Requires admin role.",
+        "operationId": "RBACService_DeletePermission",
+        "responses": {
+          "200": {
+            "description": "Permission deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/v1DeletePermissionResponse"
+            }
+          },
+          "404": {
+            "description": "Permission not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID of the permission",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/role-permissions": {
+      "post": {
+        "summary": "Assign permissions to role",
+        "description": "Assigns multiple permissions to a role, updating rbac_db.role_permissions. Requires admin role.",
+        "operationId": "RBACService_AssignPermissionsToRole",
+        "responses": {
+          "200": {
+            "description": "Permissions assigned successfully",
+            "schema": {
+              "$ref": "#/definitions/v1AssignPermissionsToRoleResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid role or permission IDs)",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AssignPermissionsToRoleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/roles": {
+      "get": {
+        "summary": "List roles",
+        "description": "Retrieves a list of all roles from rbac_db.roles. Requires admin role.",
+        "operationId": "RBACService_ListRoles",
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1ListRolesResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create role",
+        "description": "Creates a new role in the rbac_db.roles table. Requires admin role.",
+        "operationId": "RBACService_CreateRole",
+        "responses": {
+          "200": {
+            "description": "Role created successfully",
+            "schema": {
+              "$ref": "#/definitions/v1CreateRoleResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., missing role name)",
+            "schema": {}
+          },
+          "409": {
+            "description": "Role name already exists",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateRoleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/roles/{id}": {
+      "get": {
+        "summary": "Get role by ID",
+        "description": "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.",
+        "operationId": "RBACService_GetRoleByID",
+        "responses": {
+          "200": {
+            "description": "Role retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1GetRoleByIDResponse"
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete role",
+        "description": "Soft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.",
+        "operationId": "RBACService_DeleteRole",
+        "responses": {
+          "200": {
+            "description": "Role deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteRoleResponse"
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update role",
+        "description": "Updates the name or built-in status of a role in rbac_db.roles. Requires admin role.",
+        "operationId": "RBACService_UpdateRole",
+        "responses": {
+          "200": {
+            "description": "Role updated successfully",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateRoleResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid role ID)",
+            "schema": {}
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RBACServiceUpdateRoleBody"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/roles/{roleId}/permissions": {
+      "get": {
+        "summary": "List permissions for role",
+        "description": "Retrieves all permissions assigned to a role from rbac_db.role_permissions. Requires admin role.",
+        "operationId": "RBACService_ListPermissionsForRole",
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1ListPermissionsForRoleResponse"
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "roleId",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/user-permissions": {
+      "post": {
+        "summary": "Assign permissions to user",
+        "description": "Assigns permissions directly to a user, updating rbac_db.user_permissions. Requires admin role.",
+        "operationId": "RBACService_AssignPermissionsToUser",
+        "responses": {
+          "200": {
+            "description": "Permissions assigned successfully",
+            "schema": {
+              "$ref": "#/definitions/v1AssignPermissionsToUserResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid user or permission IDs)",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AssignPermissionsToUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/user-roles": {
+      "post": {
+        "summary": "Assign roles to user",
+        "description": "Assigns multiple roles to a user, updating rbac_db.user_roles. Used during registration or role management. Requires admin role for non-self assignments.",
+        "operationId": "RBACService_AssignRolesToUser",
+        "responses": {
+          "200": {
+            "description": "Roles assigned successfully",
+            "schema": {
+              "$ref": "#/definitions/v1AssignRolesToUserResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid user or role IDs)",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AssignRolesToUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/users/{userId}/permissions": {
+      "get": {
+        "summary": "List permissions for user",
+        "description": "Retrieves all permissions assigned to a user from rbac_db.user_permissions. Requires admin role.",
+        "operationId": "RBACService_ListPermissionsForUser",
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1ListPermissionsForUserResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/users/{userId}/roles": {
+      "get": {
+        "summary": "List roles for user",
+        "description": "Retrieves all roles assigned to a user from rbac_db.user_roles. Requires admin role.",
+        "operationId": "RBACService_ListRolesForUser",
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1ListRolesForUserResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "RBACServiceUpdateRoleBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Updated role name"
+        },
+        "builtIn": {
+          "type": "boolean",
+          "title": "Updated built-in status"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1AssignPermissionsToRoleRequest": {
+      "type": "object",
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "title": "UUID of the role"
+        },
+        "permissionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "List of permission UUIDs"
+        }
+      }
+    },
+    "v1AssignPermissionsToRoleResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if permissions were assigned"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1AssignPermissionsToUserRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "title": "UUID of the user"
+        },
+        "permissionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "List of permission UUIDs"
+        },
+        "granterId": {
+          "type": "string",
+          "title": "UUID of the granter (optional)"
+        },
+        "expiresAt": {
+          "type": "string",
+          "title": "Expiration timestamp (optional, ISO8601)"
+        }
+      }
+    },
+    "v1AssignPermissionsToUserResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if permissions were assigned"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1AssignRolesToUserRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "title": "UUID of the user"
+        },
+        "roleIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "List of role UUIDs"
+        }
+      }
+    },
+    "v1AssignRolesToUserResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if roles were assigned"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1CreatePermissionRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Permission name (e.g., \"read:users\")"
+        }
+      }
+    },
+    "v1CreatePermissionResponse": {
+      "type": "object",
+      "properties": {
+        "permissionId": {
+          "type": "string",
+          "title": "UUID of the created permission"
+        },
+        "name": {
+          "type": "string",
+          "title": "Permission name"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if the permission was created"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1CreateRoleRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Role name (e.g., \"admin\", \"user\")"
+        },
+        "builtIn": {
+          "type": "boolean",
+          "title": "Whether the role is built-in"
+        }
+      }
+    },
+    "v1CreateRoleResponse": {
+      "type": "object",
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "title": "UUID of the created role"
+        },
+        "name": {
+          "type": "string",
+          "title": "Role name"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if the role was created"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1DeletePermissionResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if the permission was deleted"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1DeleteRoleResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if the role was deleted"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1GetRoleByIDResponse": {
+      "type": "object",
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "title": "UUID of the role"
+        },
+        "name": {
+          "type": "string",
+          "title": "Role name"
+        },
+        "builtIn": {
+          "type": "boolean",
+          "title": "Whether the role is built-in"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if the role was retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1ListPermissionsForRoleResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Permission"
+          },
+          "title": "List of permissions"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if permissions were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1ListPermissionsForUserResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Permission"
+          }
+        },
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1ListPermissionsResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Permission"
+          }
+        },
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1ListRolesForUserResponse": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Role"
+          }
+        },
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1ListRolesResponse": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Role"
+          },
+          "title": "List of roles"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if roles were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1Permission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "UUID of the permission"
+        },
+        "name": {
+          "type": "string",
+          "title": "Permission name"
+        }
+      }
+    },
+    "v1Role": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "UUID of the role"
+        },
+        "name": {
+          "type": "string",
+          "title": "Role name"
+        },
+        "builtIn": {
+          "type": "boolean",
+          "title": "Whether the role is built-in"
+        }
+      }
+    },
+    "v1UpdateRoleResponse": {
+      "type": "object",
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "title": "UUID of the updated role"
+        },
+        "name": {
+          "type": "string",
+          "title": "Updated role name"
+        },
+        "success": {
+          "type": "boolean",
+          "title": "True if the role was updated"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "description": "JWT token using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

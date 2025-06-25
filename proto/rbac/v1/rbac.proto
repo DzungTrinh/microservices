@@ -1,0 +1,726 @@
+syntax = "proto3";
+package rbac.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "rbac/v1;rbacv1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "RBAC Service";
+    version: "1.0";
+    description: "Service for managing roles and permissions.";
+  };
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+  security_definitions: {
+    security: {
+      key: "BearerAuth"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "JWT token using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
+      }
+    }
+  };
+};
+
+// RBACService manages roles and permissions for users.
+service RBACService {
+  // CreateRole creates a new role.
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rbac/roles"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create role";
+      description: "Creates a new role in the rbac_db.roles table. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Role created successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., missing role name)";
+        }
+      };
+      responses: {
+        key: "409";
+        value: {
+          description: "Role name already exists";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // GetRoleByID retrieves a role by its ID.
+  rpc GetRoleByID(GetRoleByIDRequest) returns (GetRoleByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/roles/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get role by ID";
+      description: "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Role retrieved successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "Role not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // ListRoles retrieves all roles.
+  rpc ListRoles(Empty) returns (ListRolesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/roles"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List roles";
+      description: "Retrieves a list of all roles from rbac_db.roles. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Roles retrieved successfully";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // UpdateRole updates an existing role.
+  rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/rbac/roles/{id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Update role";
+      description: "Updates the name or built-in status of a role in rbac_db.roles. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Role updated successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., invalid role ID)";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "Role not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // DeleteRole soft-deletes a role.
+  rpc DeleteRole(DeleteRoleRequest) returns (DeleteRoleResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/rbac/roles/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete role";
+      description: "Soft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Role deleted successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "Role not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // AssignRolesToUser assigns multiple roles to a user.
+  rpc AssignRolesToUser(AssignRolesToUserRequest) returns (AssignRolesToUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rbac/user-roles"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Assign roles to user";
+      description: "Assigns multiple roles to a user, updating rbac_db.user_roles. Used during registration or role management. Requires admin role for non-self assignments.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Roles assigned successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., invalid user or role IDs)";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // CreatePermission creates a new permission.
+  rpc CreatePermission(CreatePermissionRequest) returns (CreatePermissionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rbac/permissions"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create permission";
+      description: "Creates a new permission in rbac_db.permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permission created successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., missing permission name)";
+        }
+      };
+      responses: {
+        key: "409";
+        value: {
+          description: "Permission name already exists";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // DeletePermission soft-deletes a permission.
+  rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/rbac/permissions/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete permission";
+      description: "Soft-deletes a permission from rbac_db.permissions by setting deleted_at. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permission deleted successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "Permission not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // AssignPermissionsToRole assigns permissions to a role.
+  rpc AssignPermissionsToRole(AssignPermissionsToRoleRequest) returns (AssignPermissionsToRoleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rbac/role-permissions"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Assign permissions to role";
+      description: "Assigns multiple permissions to a role, updating rbac_db.role_permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permissions assigned successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., invalid role or permission IDs)";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // AssignPermissionsToUser assigns permissions directly to a user.
+  rpc AssignPermissionsToUser(AssignPermissionsToUserRequest) returns (AssignPermissionsToUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rbac/user-permissions"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Assign permissions to user";
+      description: "Assigns permissions directly to a user, updating rbac_db.user_permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permissions assigned successfully";
+        }
+      };
+      responses: {
+        key: "400";
+        value: {
+          description: "Invalid request (e.g., invalid user or permission IDs)";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // ListPermissionsForRole retrieves all permissions assigned to a role.
+  rpc ListPermissionsForRole(ListPermissionsForRoleRequest) returns (ListPermissionsForRoleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/roles/{role_id}/permissions"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List permissions for role";
+      description: "Retrieves all permissions assigned to a role from rbac_db.role_permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permissions retrieved successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "Role not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // ListPermissions retrieves all permissions.
+  rpc ListPermissions(Empty) returns (ListPermissionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/permissions"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List all permissions";
+      description: "Retrieves all permissions from rbac_db.permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permissions retrieved successfully";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // ListPermissionsForUser retrieves all permissions assigned to a user.
+  rpc ListPermissionsForUser(ListPermissionsForUserRequest) returns (ListPermissionsForUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/users/{user_id}/permissions"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List permissions for user";
+      description: "Retrieves all permissions assigned to a user from rbac_db.user_permissions. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Permissions retrieved successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "User not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+
+  // ListRolesForUser retrieves all roles assigned to a user.
+  rpc ListRolesForUser(ListRolesForUserRequest) returns (ListRolesForUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rbac/users/{user_id}/roles"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List roles for user";
+      description: "Retrieves all roles assigned to a user from rbac_db.user_roles. Requires admin role.";
+      tags: ["RBAC"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {
+          description: "Roles retrieved successfully";
+        }
+      };
+      responses: {
+        key: "404";
+        value: {
+          description: "User not found";
+        }
+      };
+      responses: {
+        key: "500";
+        value: {
+          description: "Internal server error";
+        }
+      };
+    };
+  }
+}
+
+message Empty {}
+
+message CreateRoleRequest {
+  string name = 1; // Role name (e.g., "admin", "user")
+  bool built_in = 2; // Whether the role is built-in
+}
+
+message CreateRoleResponse {
+  string role_id = 1; // UUID of the created role
+  string name = 2; // Role name
+  bool success = 3; // True if the role was created
+  string error = 4; // Error message if failed
+}
+
+message GetRoleByIDRequest {
+  string id = 1; // UUID of the role
+}
+
+message GetRoleByIDResponse {
+  string role_id = 1; // UUID of the role
+  string name = 2; // Role name
+  bool built_in = 3; // Whether the role is built-in
+  bool success = 4; // True if the role was retrieved
+  string error = 5; // Error message if failed
+}
+
+message ListRolesResponse {
+  repeated Role roles = 1; // List of roles
+  bool success = 2; // True if roles were retrieved
+  string error = 3; // Error message if failed
+}
+
+message UpdateRoleRequest {
+  string id = 1; // UUID of the role
+  string name = 2; // Updated role name
+  bool built_in = 3; // Updated built-in status
+}
+
+message UpdateRoleResponse {
+  string role_id = 1; // UUID of the updated role
+  string name = 2; // Updated role name
+  bool success = 3; // True if the role was updated
+  string error = 4; // Error message if failed
+}
+
+message DeleteRoleRequest {
+  string id = 1; // UUID of the role
+}
+
+message DeleteRoleResponse {
+  bool success = 1; // True if the role was deleted
+  string error = 2; // Error message if failed
+}
+
+message AssignRolesToUserRequest {
+  string user_id = 1; // UUID of the user
+  repeated string role_ids = 2; // List of role UUIDs
+}
+
+message AssignRolesToUserResponse {
+  bool success = 1; // True if roles were assigned
+  string error = 2; // Error message if failed
+}
+
+message CreatePermissionRequest {
+  string name = 1; // Permission name (e.g., "read:users")
+}
+
+message CreatePermissionResponse {
+  string permission_id = 1; // UUID of the created permission
+  string name = 2; // Permission name
+  bool success = 3; // True if the permission was created
+  string error = 4; // Error message if failed
+}
+
+message DeletePermissionRequest {
+  string id = 1; // UUID of the permission
+}
+
+message DeletePermissionResponse {
+  bool success = 1; // True if the permission was deleted
+  string error = 2; // Error message if failed
+}
+
+message AssignPermissionsToRoleRequest {
+  string role_id = 1; // UUID of the role
+  repeated string permission_ids = 2; // List of permission UUIDs
+}
+
+message AssignPermissionsToRoleResponse {
+  bool success = 1; // True if permissions were assigned
+  string error = 2; // Error message if failed
+}
+
+message AssignPermissionsToUserRequest {
+  string user_id = 1; // UUID of the user
+  repeated string permission_ids = 2; // List of permission UUIDs
+  string granter_id = 3; // UUID of the granter (optional)
+  string expires_at = 4; // Expiration timestamp (optional, ISO8601)
+}
+
+message AssignPermissionsToUserResponse {
+  bool success = 1; // True if permissions were assigned
+  string error = 2; // Error message if failed
+}
+
+message ListPermissionsForRoleRequest {
+  string role_id = 1; // UUID of the role
+}
+
+message ListPermissionsForRoleResponse {
+  repeated Permission permissions = 1; // List of permissions
+  bool success = 2; // True if permissions were retrieved
+  string error = 3; // Error message if failed
+}
+
+message Role {
+  string id = 1; // UUID of the role
+  string name = 2; // Role name
+  bool built_in = 3; // Whether the role is built-in
+}
+
+message Permission {
+  string id = 1; // UUID of the permission
+  string name = 2; // Permission name
+}
+
+message ListPermissionsResponse {
+  repeated Permission permissions = 1;
+  bool success = 2;
+}
+
+message ListPermissionsForUserRequest {
+  string user_id = 1;
+}
+
+message ListPermissionsForUserResponse {
+  repeated Permission permissions = 1;
+  bool success = 2;
+}
+
+message ListRolesForUserRequest {
+  string user_id = 1;
+}
+
+message ListRolesForUserResponse {
+  repeated Role roles = 1;
+  bool success = 2;
+}
