@@ -1,0 +1,80 @@
+syntax = "proto3";
+package notification.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "notification/v1;notificationv1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Notification Service";
+    version: "1.0";
+    description: "Service to send notifications and manage templates.";
+  };
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications/send"
+      body: "*"
+    };
+  }
+
+  rpc GetTemplate(GetTemplateRequest) returns (GetTemplateResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/notifications/templates/{name}"
+    };
+  }
+
+  rpc CreateTemplate(CreateTemplateRequest) returns (CreateTemplateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications/templates"
+      body: "*"
+    };
+  }
+
+  rpc DeleteTemplate(DeleteTemplateRequest) returns (DeleteTemplateResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/notifications/templates/{name}"
+    };
+  }
+}
+
+message SendNotificationRequest {
+  string to = 1;
+  string subject = 2;
+  string body = 3;
+  string template = 4;
+  map<string, string> data = 5;
+}
+
+message SendNotificationResponse {}
+
+message GetTemplateRequest {
+  string name = 1;
+}
+
+message GetTemplateResponse {
+  string name = 1;
+  string subject = 2;
+  string body = 3;
+}
+
+message CreateTemplateRequest {
+  string name = 1;
+  string subject = 2;
+  string body = 3;
+}
+
+message CreateTemplateResponse {}
+
+message DeleteTemplateRequest {
+  string name = 1;
+}
+
+message DeleteTemplateResponse {}
