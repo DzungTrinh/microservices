@@ -12,16 +12,16 @@ import (
 	"time"
 )
 
-type service struct {
+type refreshTokenUseCase struct {
 	rtRepo   repo.RefreshTokenRepository
 	userRepo repo.UserRepository
 }
 
-func NewUserService(rtRepo repo.RefreshTokenRepository, userRepo repo.UserRepository) RefreshTokenUseCase {
-	return &service{rtRepo: rtRepo, userRepo: userRepo}
+func NewRefreshTokenUseCase(rtRepo repo.RefreshTokenRepository, userRepo repo.UserRepository) RefreshTokenUseCase {
+	return &refreshTokenUseCase{rtRepo: rtRepo, userRepo: userRepo}
 }
 
-func (s *service) RefreshToken(ctx context.Context, refreshToken, userAgent, ipAddress string) (string, string, error) {
+func (s *refreshTokenUseCase) RefreshToken(ctx context.Context, refreshToken, userAgent, ipAddress string) (string, string, error) {
 	token, err := s.rtRepo.GetRefreshToken(ctx, refreshToken)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to get refresh token: %v", err)

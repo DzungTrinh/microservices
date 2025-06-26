@@ -124,3 +124,17 @@ CREATE TABLE IF NOT EXISTS user_profiles
     INDEX idx_display_name (display_name),
     CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS outbox_events
+(
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    aggregate_type VARCHAR(100) NOT NULL,
+    aggregate_id   VARCHAR(100) NOT NULL,
+    type           VARCHAR(100) NOT NULL,
+    payload        JSON         NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processed_at   DATETIME
+);
+
+CREATE INDEX idx_outbox_status ON outbox_events (status);

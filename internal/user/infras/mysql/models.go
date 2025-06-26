@@ -41,6 +41,17 @@ type MfaFactor struct {
 	DeletedAt time.Time      `json:"deleted_at"`
 }
 
+type OutboxEvent struct {
+	ID            int64           `json:"id"`
+	AggregateType string          `json:"aggregate_type"`
+	AggregateID   string          `json:"aggregate_id"`
+	Type          string          `json:"type"`
+	Payload       json.RawMessage `json:"payload"`
+	Status        string          `json:"status"`
+	CreatedAt     time.Time       `json:"created_at"`
+	ProcessedAt   time.Time       `json:"processed_at"`
+}
+
 type RefreshToken struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`

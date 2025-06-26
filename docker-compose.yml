@@ -18,6 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest ports
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - user-management
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   user:
     build:
       context: .
@@ -60,23 +75,6 @@ services:
         condition: service_healthy
     networks:
       - user-management
-
-#  notification:
-#    build:
-#      context: .
-#      dockerfile: ./docker/Dockerfile-notification
-#    image: microservices-notification
-#    environment:
-#      IN_DOCKER: true
-#      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/notification_service?charset=utf8mb4&parseTime=True&loc=Local
-#      PORT: 8085
-#    ports:
-#      - 8085:8085
-#    depends_on:
-#      mysql:
-#        condition: service_healthy
-#    networks:
-#      - user-management
 
 networks:
   user-management:

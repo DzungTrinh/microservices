@@ -8,10 +8,12 @@ import (
 )
 
 type Config struct {
-	DatabaseDSN string        `env:"DATABASE_DSN" env-required:"true"`
-	Port        string        `env:"PORT" env-required:"true"`
-	GRPCPort    string        `env:"GRPC_PORT" env-required:"true"`
-	Logger      logger.Config `env:"LOGGER"`
+	DatabaseDSN   string        `env:"DATABASE_DSN" env-required:"true"`
+	Port          string        `env:"PORT" env-required:"true"`
+	GRPCPort      string        `env:"GRPC_PORT" env-required:"true"`
+	Logger        logger.Config `env:"LOGGER"`
+	RabbitmqUrl   string        `env:"RABBITMQ_URL" env-required:"true"`
+	RabbitmqQueue string        `env:"RABBITMQ_QUEUE" env-required:"true"`
 }
 
 func Load() error {

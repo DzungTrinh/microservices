@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
 	"microservices/user-management/internal/pkg/auth"
@@ -14,13 +15,16 @@ import (
 )
 
 type authUseCase struct {
-	userRepo repo.UserRepository
-	credRepo repo.CredentialRepository
-	rtRepo   repo.RefreshTokenRepository
+	userRepo   repo.UserRepository
+	credRepo   repo.CredentialRepository
+	rtRepo     repo.RefreshTokenRepository
+	outboxRepo repo.OutboxRepository
+	txManager  repo.TxManager
 }
 
-func NewAuthUseCase(userRepo repo.UserRepository, credRepo repo.CredentialRepository, rtRepo repo.RefreshTokenRepository) AuthUseCase {
-	return &authUseCase{userRepo: userRepo, credRepo: credRepo, rtRepo: rtRepo}
+func NewAuthUseCase(userRepo repo.UserRepository, credRepo repo.CredentialRepository, rtRepo repo.RefreshTokenRepository,
+	outboxRepo repo.OutboxRepository, txManager repo.TxManager) AuthUseCase {
+	return &authUseCase{userRepo: userRepo, credRepo: credRepo, rtRepo: rtRepo, outboxRepo: outboxRepo, txManager: txManager}
 }
 
 func (s *authUseCase) Register(ctx context.Context, email, username, password, userAgent, ipAddress string) (domain.User, string, string, error) {
@@ -44,12 +48,6 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		UpdatedAt:     time.Now(),
 	}
 
-	err = s.userRepo.CreateUser(ctx, user)
-	if err != nil {
-		logger.GetInstance().Errorf("Failed to create user %s: %v", userID, err)
-		return domain.User{}, "", "", err
-	}
-
 	credential := domain.Credential{
 		ID:         uuid.New().String(),
 		UserID:     userID,
@@ -57,36 +55,77 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		SecretHash: hashedPassword,
 		CreatedAt:  time.Now(),
 	}
-	err = s.credRepo.CreateCredential(ctx, credential)
-	if err != nil {
-		logger.GetInstance().Errorf("Failed to create credential for user %s: %v", userID, err)
-		return domain.User{}, "", "", err
-	}
-
-	tokenPair, err := auth.GenerateTokenPair(userID, []string{dto.RoleUser}, 15*time.Minute, 7*24*time.Hour)
-	if err != nil {
-		logger.GetInstance().Errorf("Failed to generate token pair for user %s: %v", userID, err)
-		return domain.User{}, "", "", err
-	}
 
 	refreshTokenEntity := domain.RefreshToken{
 		ID:        uuid.New().String(),
 		UserID:    userID,
-		Token:     tokenPair.RefreshToken,
+		Token:     "", // will set below
 		UserAgent: userAgent,
 		IPAddress: ipAddress,
 		CreatedAt: time.Now(),
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 		Revoked:   false,
 	}
-	err = s.rtRepo.CreateRefreshToken(ctx, refreshTokenEntity)
+
+	var accessToken, refreshToken string
+
+	err = s.txManager.WithTx(ctx, func(txCtx context.Context) error {
+		if err := s.userRepo.CreateUser(txCtx, user); err != nil {
+			return err
+		}
+		if err := s.credRepo.CreateCredential(txCtx, credential); err != nil {
+			return err
+		}
+
+		// generate JWT tokens
+		tokenPair, err := auth.GenerateTokenPair(userID, []string{dto.RoleUser}, 15*time.Minute, 7*24*time.Hour)
+		if err != nil {
+			return err
+		}
+		accessToken = tokenPair.AccessToken
+		refreshToken = tokenPair.RefreshToken
+		refreshTokenEntity.Token = refreshToken
+
+		if err := s.rtRepo.CreateRefreshToken(txCtx, refreshTokenEntity); err != nil {
+			return err
+		}
+
+		// build outbox event
+		rolePayload := struct {
+			UserID string `json:"user_id"`
+			Role   string `json:"role"`
+		}{
+			UserID: userID,
+			Role:   dto.RoleUser,
+		}
+
+		payloadBytes, err := json.Marshal(rolePayload)
+		if err != nil {
+			return err
+		}
+
+		outboxEvent := domain.OutboxEvent{
+			AggregateType: "User",
+			AggregateID:   userID,
+			Type:          "UserRegistered",
+			Payload:       string(payloadBytes),
+			Status:        dto.OutboxPending,
+			CreatedAt:     time.Now(),
+		}
+
+		if err := s.outboxRepo.InsertEvent(txCtx, &outboxEvent); err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		logger.GetInstance().Errorf("Failed to create refresh token for user %s: %v", userID, err)
+		logger.GetInstance().Errorf("Failed to register user %s: %v", userID, err)
 		return domain.User{}, "", "", err
 	}
 
 	logger.GetInstance().Infof("User registered: %s (ID: %s)", username, userID)
-	return user, tokenPair.AccessToken, tokenPair.RefreshToken, nil
+	return user, accessToken, refreshToken, nil
 }
 
 func (s *authUseCase) Login(ctx context.Context, email, password, userAgent, ipAddress string) (domain.User, string, string, error) {

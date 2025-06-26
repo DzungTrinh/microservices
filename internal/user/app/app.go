@@ -22,7 +22,7 @@ import (
 
 	"microservices/user-management/internal/user/infras/repo"
 	"microservices/user-management/internal/user/infras/seed"
-	"microservices/user-management/internal/user/usecases/users"
+	"microservices/user-management/internal/user/usecases/user"
 )
 
 type App struct {

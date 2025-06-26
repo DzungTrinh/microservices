@@ -2,7 +2,8 @@
 INSERT INTO user_roles (user_id, role_id, created_at)
 SELECT ?, ?, NOW()
 FROM roles
-WHERE roles.id = ? AND roles.deleted_at IS NULL;
+WHERE roles.id = ? AND roles.deleted_at IS NULL
+ON DUPLICATE KEY UPDATE user_id = user_id;
 
 -- name: ListRolesForUser :many
 SELECT r.id, r.name, r.built_in, r.created_at, COALESCE(r.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
