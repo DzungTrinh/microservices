@@ -70,7 +70,7 @@ func NewApp(cfg config.Config) *App {
 
 	// Initialize repository and usecase
 	userRepo := repo.NewUserRepository(db)
-	usecase := users.NewUserUsecase(userRepo)
+	usecase := user.NewUserUsecase(userRepo)
 
 	// gRPC server
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(InterceptorChain()))

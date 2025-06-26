@@ -21,7 +21,7 @@ func NewRoleRepository(db *sql.DB) repo.RoleRepository {
 }
 
 func (r *roleRepository) CreateRole(ctx context.Context, role domain.Role) (domain.Role, error) {
-	_, err := r.Queries.CreateRole(ctx, mysql.CreateRoleParams{
+	err := r.Queries.CreateRole(ctx, mysql.CreateRoleParams{
 		ID:      role.ID,
 		Name:    role.Name,
 		BuiltIn: role.BuiltIn,
@@ -42,6 +42,7 @@ func (r *roleRepository) GetRoleByID(ctx context.Context, id string) (domain.Rol
 		Name:      result.Name,
 		BuiltIn:   result.BuiltIn,
 		CreatedAt: result.CreatedAt,
+		DeletedAt: result.DeletedAt,
 	}, nil
 }
 

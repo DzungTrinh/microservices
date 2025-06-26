@@ -4,7 +4,7 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"microservices/user-management/internal/user/domain"
+	"microservices/user-management/internal/user/dto"
 	"microservices/user-management/internal/user/usecases/users"
 	"microservices/user-management/pkg/logger"
 	userv1 "microservices/user-management/proto/gen/user/v1"
@@ -12,15 +12,15 @@ import (
 
 type UserGrpcServer struct {
 	userv1.UnimplementedUserServiceServer
-	uc users.UserUseCase
+	uc user.UserUseCase
 }
 
-func NewUserGrpcServer(uc users.UserUseCase) *UserGrpcServer {
+func NewUserGrpcServer(uc user.UserUseCase) *UserGrpcServer {
 	return &UserGrpcServer{uc: uc}
 }
 
 func (h *UserGrpcServer) Register(ctx context.Context, r *userv1.RegisterRequest) (*userv1.AuthTokens, error) {
-	req := domain.RegisterUserReq{
+	req := dto.RegisterUserReq{
 		Email:    r.GetEmail(),
 		Username: r.GetUsername(),
 		Password: r.GetPassword(),
@@ -38,7 +38,7 @@ func (h *UserGrpcServer) Register(ctx context.Context, r *userv1.RegisterRequest
 }
 
 func (h *UserGrpcServer) Login(ctx context.Context, r *userv1.LoginRequest) (*userv1.AuthTokens, error) {
-	req := domain.LoginReq{
+	req := dto.LoginReq{
 		Email:    r.GetEmail(),
 		Password: r.GetPassword(),
 	}

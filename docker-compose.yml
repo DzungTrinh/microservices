@@ -48,6 +48,7 @@ services:
     environment:
       IN_DOCKER: true
       DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/rbac_service?charset=utf8mb4&parseTime=True&loc=Local
+      JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
       PORT: 8082
     ports:
       - 8082:8082

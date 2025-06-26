@@ -54,10 +54,10 @@ func (c *UserPermissionController) AssignPermissionsToUser(ctx context.Context, 
 	dtos := make([]domain.UserPermission, len(req.PermissionIds))
 	for i, permID := range req.PermissionIds {
 		dtos[i] = domain.UserPermission{
-			UserID:    req.UserId,
-			PermID:    permID,
-			GranterID: req.GranterId,
-			ExpiresAt: *expiresAt,
+			UserID:       req.UserId,
+			PermissionID: permID,
+			GranterID:    req.GranterId,
+			ExpiresAt:    *expiresAt,
 		}
 	}
 	err = c.uc.AssignPermissionsToUser(ctx, dtos)
@@ -83,7 +83,7 @@ func (c *UserPermissionController) ListPermissionsForUser(ctx context.Context, r
 	}
 	pbPerms := make([]*rbacv1.Permission, len(resp))
 	for i, p := range resp {
-		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name}
+		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name, CreatedAt: p.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListPermissionsForUserResponse{Permissions: pbPerms, Success: true}, nil
 }

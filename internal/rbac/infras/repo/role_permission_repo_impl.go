@@ -22,8 +22,10 @@ func NewRolePermissionRepository(db *sql.DB) repo.RolePermissionRepository {
 
 func (r *rolePermissionRepository) AssignPermissionsToRole(ctx context.Context, rolePerm domain.RolePermission) error {
 	return r.Queries.AssignPermissionsToRole(ctx, mysql.AssignPermissionsToRoleParams{
-		RoleID: rolePerm.RoleID,
-		PermID: rolePerm.PermID,
+		RoleID:       rolePerm.RoleID,
+		PermissionID: rolePerm.PermissionID,
+		ID:           rolePerm.RoleID,
+		ID_2:         rolePerm.PermissionID,
 	})
 }
 
@@ -38,6 +40,7 @@ func (r *rolePermissionRepository) ListPermissionsForRole(ctx context.Context, r
 			ID:        p.ID,
 			Name:      p.Name,
 			CreatedAt: p.CreatedAt,
+			DeletedAt: p.DeletedAt,
 		}
 	}
 	return perms, nil

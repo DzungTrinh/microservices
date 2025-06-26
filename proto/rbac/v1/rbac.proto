@@ -574,8 +574,22 @@ service RBACService {
     };
   }
 }
-
 message Empty {}
+
+message Role {
+  string id = 1; // UUID of the role
+  string name = 2; // Role name
+  bool built_in = 3; // Whether the role is built-in
+  string created_at = 4; // Creation timestamp (ISO8601)
+  string deleted_at = 5; // Deletion timestamp (ISO8601, optional)
+}
+
+message Permission {
+  string id = 1; // UUID of the permission
+  string name = 2; // Permission name
+  string created_at = 3; // Creation timestamp (ISO8601)
+  string deleted_at = 4; // Deletion timestamp (ISO8601, optional)
+}
 
 message CreateRoleRequest {
   string name = 1; // Role name (e.g., "admin", "user")
@@ -599,6 +613,8 @@ message GetRoleByIDResponse {
   bool built_in = 3; // Whether the role is built-in
   bool success = 4; // True if the role was retrieved
   string error = 5; // Error message if failed
+  string created_at = 6; // Creation timestamp (ISO8601)
+  string deleted_at = 7; // Deletion timestamp (ISO8601, optional)
 }
 
 message ListRolesResponse {
@@ -691,36 +707,28 @@ message ListPermissionsForRoleResponse {
   string error = 3; // Error message if failed
 }
 
-message Role {
-  string id = 1; // UUID of the role
-  string name = 2; // Role name
-  bool built_in = 3; // Whether the role is built-in
-}
-
-message Permission {
-  string id = 1; // UUID of the permission
-  string name = 2; // Permission name
-}
-
 message ListPermissionsResponse {
-  repeated Permission permissions = 1;
-  bool success = 2;
+  repeated Permission permissions = 1; // List of permissions
+  bool success = 2; // True if permissions were retrieved
+  string error = 3; // Error message if failed
 }
 
 message ListPermissionsForUserRequest {
-  string user_id = 1;
+  string user_id = 1; // UUID of the user
 }
 
 message ListPermissionsForUserResponse {
-  repeated Permission permissions = 1;
-  bool success = 2;
+  repeated Permission permissions = 1; // List of permissions
+  bool success = 2; // True if permissions were retrieved
+  string error = 3; // Error message if failed
 }
 
 message ListRolesForUserRequest {
-  string user_id = 1;
+  string user_id = 1; // UUID of the user
 }
 
 message ListRolesForUserResponse {
-  repeated Role roles = 1;
-  bool success = 2;
+  repeated Role roles = 1; // List of roles
+  bool success = 2; // True if roles were retrieved
+  string error = 3; // Error message if failed
 }

@@ -1,6 +1,7 @@
-package domain
+package dto
 
 import (
+	"microservices/user-management/internal/user/domain"
 	"time"
 )
 
@@ -11,10 +12,10 @@ type RegisterUserReq struct {
 }
 
 type CreateUserModel struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-	Roles    []Role `json:"roles" binding:"required"`
+	Username string        `json:"username" binding:"required"`
+	Email    string        `json:"email" binding:"required,email"`
+	Password string        `json:"password" binding:"required"`
+	Roles    []domain.Role `json:"roles" binding:"required"`
 }
 
 type LoginReq struct {
@@ -23,10 +24,10 @@ type LoginReq struct {
 }
 
 type UserDTO struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Roles    []Role `json:"roles"`
+	ID       string        `json:"id"`
+	Username string        `json:"username"`
+	Email    string        `json:"email"`
+	Roles    []domain.Role `json:"roles"`
 }
 
 type AuthTokens struct {

@@ -593,6 +593,7 @@
         "parameters": [
           {
             "name": "userId",
+            "description": "UUID of the user",
             "in": "path",
             "required": true,
             "type": "string"
@@ -638,6 +639,7 @@
         "parameters": [
           {
             "name": "userId",
+            "description": "UUID of the user",
             "in": "path",
             "required": true,
             "type": "string"
@@ -903,6 +905,14 @@
         "error": {
           "type": "string",
           "title": "Error message if failed"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },
@@ -935,10 +945,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Permission"
-          }
+          },
+          "title": "List of permissions"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if permissions were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -950,10 +966,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Permission"
-          }
+          },
+          "title": "List of permissions"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if permissions were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -965,10 +987,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Role"
-          }
+          },
+          "title": "List of roles"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if roles were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -1003,6 +1031,14 @@
         "name": {
           "type": "string",
           "title": "Permission name"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },
@@ -1020,6 +1056,14 @@
         "builtIn": {
           "type": "boolean",
           "title": "Whether the role is built-in"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },

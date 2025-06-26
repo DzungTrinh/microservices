@@ -7,12 +7,11 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createPermission = `-- name: CreatePermission :execresult
+const createPermission = `-- name: CreatePermission :exec
 INSERT INTO permissions (id, name, created_at)
-    VALUES (?, ?, NOW())
+VALUES (?, ?, NOW())
 `
 
 type CreatePermissionParams struct {
@@ -20,8 +19,9 @@ type CreatePermissionParams struct {
 	Name string `json:"name"`
 }
 
-func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPermission, arg.ID, arg.Name)
+func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) error {
+	_, err := q.db.ExecContext(ctx, createPermission, arg.ID, arg.Name)
+	return err
 }
 
 const deletePermission = `-- name: DeletePermission :exec
@@ -36,8 +36,9 @@ func (q *Queries) DeletePermission(ctx context.Context, id string) error {
 }
 
 const listPermissions = `-- name: ListPermissions :many
-SELECT id, name, created_at, deleted_at
+SELECT id, name, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM permissions
+WHERE deleted_at IS NULL
 `
 
 func (q *Queries) ListPermissions(ctx context.Context) ([]Permission, error) {

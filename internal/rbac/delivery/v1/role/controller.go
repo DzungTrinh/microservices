@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/role"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
+	"time"
 )
 
 type RoleController struct {
@@ -57,10 +58,12 @@ func (c *RoleController) GetRoleByID(ctx context.Context, req *rbacv1.GetRoleByI
 		return nil, status.Errorf(codes.NotFound, err.Error())
 	}
 	return &rbacv1.GetRoleByIDResponse{
-		RoleId:  resp.ID,
-		Name:    resp.Name,
-		BuiltIn: resp.BuiltIn,
-		Success: true,
+		RoleId:    resp.ID,
+		Name:      resp.Name,
+		BuiltIn:   resp.BuiltIn,
+		CreatedAt: resp.CreatedAt.Format(time.RFC3339),
+		DeletedAt: "",
+		Success:   true,
 	}, nil
 }
 
@@ -72,7 +75,7 @@ func (c *RoleController) ListRoles(ctx context.Context, _ *rbacv1.Empty) (*rbacv
 	}
 	rbacv1Roles := make([]*rbacv1.Role, len(resp))
 	for i, r := range resp {
-		rbacv1Roles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn}
+		rbacv1Roles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn, CreatedAt: r.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListRolesResponse{Roles: rbacv1Roles, Success: true}, nil
 }

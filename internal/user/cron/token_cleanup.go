@@ -9,7 +9,7 @@ import (
 )
 
 // StartTokenCleanup runs a periodic task to clean expired tokens
-func StartTokenCleanup(ctx context.Context, usecase users.UserUseCase) {
+func StartTokenCleanup(ctx context.Context, usecase user.UserUseCase) {
 	ticker := time.NewTicker(24 * time.Hour)
 	go func() {
 		defer ticker.Stop()
