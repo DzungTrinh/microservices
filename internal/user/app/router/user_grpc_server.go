@@ -24,41 +24,56 @@ func NewUserGrpcServer(authUC auth.AuthUseCase, refreshTokenUC refresh_token.Ref
 }
 
 func (h *UserGrpcServer) Register(ctx context.Context, r *userv1.RegisterRequest) (*userv1.RegisterResponse, error) {
-	user, accessToken, refreshToken, err := h.authUC.Register(ctx, r.GetEmail(), r.GetUsername(), r.GetPassword(), r.GetUserAgent(), r.GetIpAddress())
+	user, accessToken, refreshToken, err := h.authUC.Register(ctx, r.GetEmail(), r.GetUsername(), r.GetPassword(), "", "")
 	if err != nil {
 		logger.GetInstance().Errorf("Register failed: %v", err)
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return &userv1.RegisterResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Errorf(codes.Internal, err.Error())
 	}
-	return &userv1.AuthTokens{
+	return &userv1.RegisterResponse{
+		UserId:       user.ID,
+		Email:        user.Email,
+		Username:     user.Username,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		MfaRequired:  false,
+		Success:      true,
 	}, nil
 }
 
 func (h *UserGrpcServer) Login(ctx context.Context, r *userv1.LoginRequest) (*userv1.LoginResponse, error) {
-	user, accessToken, refreshToken, err := h.authUC.Login(ctx, r.GetEmail(), r.GetPassword(), r.GetUserAgent(), r.GetIpAddress())
+	user, accessToken, refreshToken, err := h.authUC.Login(ctx, r.GetEmail(), r.GetPassword(), "", "")
 	if err != nil {
 		logger.GetInstance().Errorf("Login failed: %v", err)
-		return nil, status.Errorf(codes.Unauthenticated, err.Error())
+		return &userv1.LoginResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Errorf(codes.Unauthenticated, err.Error())
 	}
-	return &userv1.AuthTokens{
+	return &userv1.LoginResponse{
+		UserId:       user.ID,
+		Email:        user.Email,
+		Username:     user.Username,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		MfaRequired:  false,
+		Success:      true,
 	}, nil
 }
 
-func (h *UserGrpcServer) Refresh(ctx context.Context, r *userv1.RefreshTokenRequest) (*userv1.RefreshTokenResponse, error) {
-	accessToken, refreshToken, err := h.refreshTokenUC.RefreshToken(ctx, r.GetRefreshToken(), r.GetUserAgent(), r.GetIpAddress())
+func (h *UserGrpcServer) RefreshToken(ctx context.Context, r *userv1.RefreshTokenRequest) (*userv1.RefreshTokenResponse, error) {
+	accessToken, refreshToken, err := h.refreshTokenUC.RefreshToken(ctx, r.GetRefreshToken(), "", "")
 	if err != nil {
-		logger.GetInstance().Errorf("Refresh failed: %v", err)
-		return nil, status.Errorf(codes.Unauthenticated, err.Error())
+		logger.GetInstance().Errorf("RefreshToken failed: %v", err)
+		return &userv1.RefreshTokenResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Errorf(codes.Unauthenticated, err.Error())
 	}
-	return &userv1.AuthTokens{
+	return &userv1.RefreshTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		MfaRequired:  false,
+		Success:      true,
 	}, nil
 }
 

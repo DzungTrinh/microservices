@@ -7,7 +7,7 @@ import (
 	"microservices/user-management/internal/pkg/auth"
 	"microservices/user-management/internal/user/domain"
 	"microservices/user-management/internal/user/domain/repo"
-	"microservices/user-management/internal/user/dto"
+	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
 	"time"
 )
@@ -39,7 +39,7 @@ func (s *refreshTokenUseCase) RefreshToken(ctx context.Context, refreshToken, us
 		return "", "", errors.New("user not found")
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{dto.RoleUser}, 15*time.Minute, 7*24*time.Hour)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{constants.RoleUser}, 15*time.Minute, 7*24*time.Hour)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to generate token pair for user %s: %v", user.ID, err)
 		return "", "", err
@@ -68,4 +68,8 @@ func (s *refreshTokenUseCase) RefreshToken(ctx context.Context, refreshToken, us
 
 	logger.GetInstance().Infof("Tokens refreshed for user %s", token.UserID)
 	return tokenPair.AccessToken, tokenPair.RefreshToken, nil
+}
+
+func (u *refreshTokenUseCase) CleanExpiredTokens(ctx context.Context) error {
+	return u.rtRepo.DeleteExpiredRefreshTokens(ctx)
 }

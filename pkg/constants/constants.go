@@ -46,3 +46,8 @@ const (
 	Search = "search"
 	ID     = "id"
 )
+
+const (
+	RoleUser  = "user"
+	RoleAdmin = "admin"
+)

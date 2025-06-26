@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"microservices/user-management/cmd/rbac/config"
-	"microservices/user-management/internal/pkg/middlewares"
+	"microservices/user-management/internal/rbac/app/router"
 	"microservices/user-management/internal/rbac/infras/rabbitmq"
+	"microservices/user-management/internal/rbac/infras/seed"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"net"
@@ -23,46 +24,18 @@ type App struct {
 	logger     *logger.LoggerService
 }
 
-func InterceptorChain() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		switch info.FullMethod {
-		case "/rbac.v1.RBACService/CreateRole",
-			"/rbac.v1.RBACService/UpdateRole",
-			"/rbac.v1.RBACService/DeleteRole",
-			"/rbac.v1.RBACService/CreatePermission",
-			"/rbac.v1.RBACService/DeletePermission",
-			"/rbac.v1.RBACService/AssignRolesToUser",
-			"/rbac.v1.RBACService/AssignPermissionsToRole",
-			"/rbac.v1.RBACService/AssignPermissionsToUser":
-			authCtx, err := middlewares.JWTVerifyInterceptor(ctx, req, func(c context.Context, _ interface{}) (interface{}, error) {
-				return c, nil
-			})
-			if err != nil {
-				return nil, err
-			}
-			return middlewares.AdminOnlyInterceptor(authCtx.(context.Context), req, handler)
-
-		case "/rbac.v1.RBACService/GetRoleByID",
-			"/rbac.v1.RBACService/ListRoles",
-			"/rbac.v1.RBACService/ListPermissions",
-			"/rbac.v1.RBACService/ListPermissionsForRole",
-			"/rbac.v1.RBACService/ListPermissionsForUser",
-			"/rbac.v1.RBACService/ListRolesForUser":
-			return middlewares.JWTVerifyInterceptor(ctx, req, handler)
-
-		default:
-			return handler(ctx, req)
-		}
-	}
-}
-
 func NewApp(cfg config.Config) *App {
 	l := logger.GetInstance()
 	l.WithName("rbac-service")
 
 	deps := InitializeDependencies(cfg)
 
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(InterceptorChain()))
+	// Seed roles
+	if err := seed.SeedRoles(context.Background(), deps.RoleUC); err != nil {
+		l.Errorf("Failed to seed roles: %v", err)
+	}
+
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(router.InterceptorChain()))
 	rbacv1.RegisterRBACServiceServer(grpcServer, deps.RBACGrpcHandler)
 
 	go func() {
@@ -76,16 +49,8 @@ func NewApp(cfg config.Config) *App {
 		}
 	}()
 
-	// Initialize gRPC client for consumer
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0%s", cfg.GRPCPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		l.Fatalf("Failed to dial gRPC: %v", err)
-	}
-
-	rbacClient := rbacv1.NewRBACServiceClient(conn)
-
 	// Initialize RabbitMQ consumer
-	consumer, err := rabbitmq.NewConsumer(rbacClient)
+	consumer, err := rabbitmq.NewConsumer(deps.UserRoleUC)
 	if err != nil {
 		l.Fatalf("Failed to initialize RabbitMQ consumer: %v", err)
 	}

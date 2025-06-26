@@ -278,50 +278,6 @@
       }
     },
     "/api/v1/rbac/roles/{id}": {
-      "get": {
-        "summary": "Get role by ID",
-        "description": "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.",
-        "operationId": "RBACService_GetRoleByID",
-        "responses": {
-          "200": {
-            "description": "Role retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/v1GetRoleByIDResponse"
-            }
-          },
-          "404": {
-            "description": "Role not found",
-            "schema": {}
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {}
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "UUID of the role",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "RBAC"
-        ],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      },
       "delete": {
         "summary": "Delete role",
         "description": "Soft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.",
@@ -411,6 +367,52 @@
             "schema": {
               "$ref": "#/definitions/RBACServiceUpdateRoleBody"
             }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/roles/{name}": {
+      "get": {
+        "summary": "Get role by ID",
+        "description": "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.",
+        "operationId": "RBACService_GetRoleByName",
+        "responses": {
+          "200": {
+            "description": "Role retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1GetRoleByNameResponse"
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -883,7 +885,7 @@
         }
       }
     },
-    "v1GetRoleByIDResponse": {
+    "v1GetRoleByNameResponse": {
       "type": "object",
       "properties": {
         "roleId": {

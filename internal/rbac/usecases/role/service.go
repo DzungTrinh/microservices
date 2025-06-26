@@ -27,10 +27,10 @@ func (s *roleService) CreateRole(ctx context.Context, role *domain.Role) (*domai
 	return &created, nil
 }
 
-func (s *roleService) GetRoleByID(ctx context.Context, id string) (*domain.Role, error) {
-	role, err := s.repo.GetRoleByID(ctx, id)
+func (s *roleService) GetRoleByName(ctx context.Context, name string) (*domain.Role, error) {
+	role, err := s.repo.GetRoleByName(ctx, name)
 	if err != nil {
-		logger.GetInstance().Errorf("Failed to get role %s: %v", id, err)
+		logger.GetInstance().Errorf("Failed to get role %s: %v", name, err)
 		return nil, err
 	}
 	return &role, nil

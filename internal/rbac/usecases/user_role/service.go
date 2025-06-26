@@ -4,11 +4,13 @@ import (
 	"context"
 	"microservices/user-management/internal/rbac/domain"
 	"microservices/user-management/internal/rbac/domain/repo"
+	"microservices/user-management/internal/rbac/usecases/role"
 	"microservices/user-management/pkg/logger"
 )
 
 type userRoleService struct {
-	repo repo.UserRoleRepository
+	repo   repo.UserRoleRepository
+	roleUC role.RoleUseCase
 }
 
 func NewUserRoleService(repo repo.UserRoleRepository) UserRoleUseCase {
@@ -16,6 +18,18 @@ func NewUserRoleService(repo repo.UserRoleRepository) UserRoleUseCase {
 }
 
 func (s *userRoleService) AssignRolesToUser(ctx context.Context, userRoles []domain.UserRole) error {
+
+	for i, userRole := range userRoles {
+		// Fetch role ID by name
+		role, err := s.roleUC.GetRoleByName(ctx, userRole.RoleName)
+		if err != nil {
+			logger.GetInstance().Errorf("Failed to get role %s for user %s: %v", userRole.RoleID, userRole.UserID, err)
+			return err
+		}
+		// Update userRole with actual role ID
+		userRoles[i].RoleID = role.ID
+	}
+
 	for _, ur := range userRoles {
 		err := s.repo.AssignRolesToUser(ctx, ur)
 		if err != nil {

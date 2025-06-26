@@ -5,11 +5,6 @@ const (
 )
 
 const (
-	RoleUser  = "user"
-	RoleAdmin = "admin"
-)
-
-const (
 	OutboxPending   = "pending"
 	OutboxProcessed = "processed"
 )

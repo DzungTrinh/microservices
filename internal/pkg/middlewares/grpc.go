@@ -8,13 +8,13 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"microservices/user-management/internal/pkg/auth"
-	"microservices/user-management/internal/user/domain"
+	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
 	"strings"
 )
 
 func ExtractClaimsFromContext(ctx context.Context) (*auth.AccessClaims, error) {
-	// First, try getting from context (already injected)
+	// First, try getting from context
 	if claims, ok := ctx.Value("claims").(*auth.AccessClaims); ok {
 		return claims, nil
 	}
@@ -51,7 +51,6 @@ func JWTVerifyInterceptor(ctx context.Context, req interface{}, handler grpc.Una
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
 	}
 
-	// Inject into context so other interceptors/handlers reuse it
 	newCtx := context.WithValue(ctx, "claims", claims)
 	newCtx = context.WithValue(newCtx, "user_id", claims.ID)
 
@@ -67,7 +66,7 @@ func AdminOnlyInterceptor(ctx context.Context, req interface{}, handler grpc.Una
 
 	hasAdmin := false
 	for _, role := range claims.Roles {
-		if role == string(domain.RoleAdmin) {
+		if role == constants.RoleAdmin {
 			hasAdmin = true
 			break
 		}

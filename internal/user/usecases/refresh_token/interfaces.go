@@ -6,4 +6,5 @@ import (
 
 type RefreshTokenUseCase interface {
 	RefreshToken(ctx context.Context, refreshToken, userAgent, ipAddress string) (string, string, error)
+	CleanExpiredTokens(ctx context.Context) error
 }

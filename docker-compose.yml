@@ -22,7 +22,8 @@ services:
     image: rabbitmq:3.11-management-alpine
     environment:
       - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest ports
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
       - "5672:5672"
       - "15672:15672"
     networks:
@@ -43,6 +44,8 @@ services:
       DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/user_service?charset=utf8mb4&parseTime=True&loc=Local
       JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
       PORT: 8081
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      RABBITMQ_QUEUE: user-events
     ports:
       - 8081:8081
       - 9091:9091
@@ -65,6 +68,8 @@ services:
       DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/rbac_service?charset=utf8mb4&parseTime=True&loc=Local
       JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
       PORT: 8082
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      RABBITMQ_QUEUE: user-events
     ports:
       - 8082:8082
       - 9092:9092

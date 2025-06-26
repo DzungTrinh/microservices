@@ -10,5 +10,5 @@ type OutboxEvent struct {
 	Payload       string // assuming JSON string
 	Status        string
 	CreatedAt     time.Time
-	ProcessedAt   time.Time
+	ProcessedAt   *time.Time
 }

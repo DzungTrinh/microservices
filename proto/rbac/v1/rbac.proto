@@ -75,14 +75,14 @@ service RBACService {
     };
   }
 
-  // GetRoleByID retrieves a role by its ID.
-  rpc GetRoleByID(GetRoleByIDRequest) returns (GetRoleByIDResponse) {
+  // GetRoleByName retrieves a role by its ID.
+  rpc GetRoleByName(GetRoleByNameRequest) returns (GetRoleByNameResponse) {
     option (google.api.http) = {
-      get: "/api/v1/rbac/roles/{id}"
+      get: "/api/v1/rbac/roles/{name}"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Get role by ID";
-      description: "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.";
+      summary: "Get role by Name";
+      description: "Retrieves details of a role from rbac_db.roles by its name. Requires admin role.";
       tags: ["RBAC"];
       security: [
         {
@@ -603,11 +603,11 @@ message CreateRoleResponse {
   string error = 4; // Error message if failed
 }
 
-message GetRoleByIDRequest {
-  string id = 1; // UUID of the role
+message GetRoleByNameRequest {
+  string name = 1; // UUID of the role
 }
 
-message GetRoleByIDResponse {
+message GetRoleByNameResponse {
   string role_id = 1; // UUID of the role
   string name = 2; // Role name
   bool built_in = 3; // Whether the role is built-in

@@ -44,20 +44,13 @@ func (c *RoleController) CreateRole(ctx context.Context, req *rbacv1.CreateRoleR
 	}, nil
 }
 
-func (c *RoleController) GetRoleByID(ctx context.Context, req *rbacv1.GetRoleByIDRequest) (*rbacv1.GetRoleByIDResponse, error) {
-	// Validate UUID
-	_, err := uuid.Parse(req.Id)
+func (c *RoleController) GetRoleByName(ctx context.Context, req *rbacv1.GetRoleByNameRequest) (*rbacv1.GetRoleByNameResponse, error) {
+	resp, err := c.uc.GetRoleByName(ctx, req.Name)
 	if err != nil {
-		logger.GetInstance().Errorf("Invalid Role ID format: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid Role ID format")
-	}
-
-	resp, err := c.uc.GetRoleByID(ctx, req.Id)
-	if err != nil {
-		logger.GetInstance().Errorf("GetRoleByID failed: %v", err)
+		logger.GetInstance().Errorf("GetRoleByName failed: %v", err)
 		return nil, status.Errorf(codes.NotFound, err.Error())
 	}
-	return &rbacv1.GetRoleByIDResponse{
+	return &rbacv1.GetRoleByNameResponse{
 		RoleId:    resp.ID,
 		Name:      resp.Name,
 		BuiltIn:   resp.BuiltIn,

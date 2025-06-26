@@ -20,6 +20,7 @@ sql:
           - db_type: "datetime"
             nullable: true
             go_type:
+              pointer: true
               import: "time"
               type: "Time"
 

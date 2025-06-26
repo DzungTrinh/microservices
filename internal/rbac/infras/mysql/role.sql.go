@@ -36,14 +36,14 @@ func (q *Queries) DeleteRole(ctx context.Context, id string) error {
 	return err
 }
 
-const getRoleByID = `-- name: GetRoleByID :one
+const getRoleByName = `-- name: GetRoleByName :one
 SELECT id, name, built_in, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM roles
-WHERE id = ? AND deleted_at IS NULL
+WHERE name = ? AND deleted_at IS NULL
 `
 
-func (q *Queries) GetRoleByID(ctx context.Context, id string) (Role, error) {
-	row := q.db.QueryRowContext(ctx, getRoleByID, id)
+func (q *Queries) GetRoleByName(ctx context.Context, name string) (Role, error) {
+	row := q.db.QueryRowContext(ctx, getRoleByName, name)
 	var i Role
 	err := row.Scan(
 		&i.ID,

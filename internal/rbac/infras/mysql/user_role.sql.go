@@ -14,6 +14,7 @@ INSERT INTO user_roles (user_id, role_id, created_at)
 SELECT ?, ?, NOW()
 FROM roles
 WHERE roles.id = ? AND roles.deleted_at IS NULL
+ON DUPLICATE KEY UPDATE user_id = user_id
 `
 
 type AssignRolesToUserParams struct {

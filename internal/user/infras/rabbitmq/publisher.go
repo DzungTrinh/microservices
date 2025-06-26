@@ -76,6 +76,7 @@ func (p *Publisher) PublishEvents(ctx context.Context) error {
 			false,       // immediate
 			amqp091.Publishing{
 				ContentType: "application/json",
+				Type:        event.Type,
 				Body:        []byte(event.Payload),
 				MessageId:   string(event.ID),
 			},

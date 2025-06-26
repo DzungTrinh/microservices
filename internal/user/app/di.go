@@ -10,6 +10,7 @@ import (
 	"microservices/user-management/internal/user/infras/repo"
 	authUC "microservices/user-management/internal/user/usecases/auth"
 	rtUC "microservices/user-management/internal/user/usecases/refresh_token"
+	"microservices/user-management/internal/user/usecases/user"
 	"microservices/user-management/pkg/logger"
 	"microservices/user-management/pkg/mysql"
 )
@@ -17,6 +18,7 @@ import (
 type Dependencies struct {
 	AuthUC           authUC.AuthUseCase
 	RefreshTokenUC   rtUC.RefreshTokenUseCase
+	UserUC           user.UserUseCase
 	AuthCtrl         *auth.AuthController
 	RefreshTokenCtrl *refresh_token.RefreshTokenController
 	UserGrpcHandler  *router.UserGrpcServer
@@ -41,11 +43,12 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 
 	authUseCase := authUC.NewAuthUseCase(userRepo, credRepo, rtRepo, outboxRepo, txManager)
 	refreshTokenUC := rtUC.NewRefreshTokenUseCase(rtRepo, userRepo)
+	userUseCase := user.NewUserUseCase(userRepo, credRepo, rtRepo, outboxRepo, txManager)
 
 	authCtrl := auth.NewAuthController(authUseCase)
 	refreshTokenCtrl := refresh_token.NewRefreshTokenController(refreshTokenUC)
 
-	userGrpcHandler := router.NewUserGrpcServer(authUseCase)
+	userGrpcHandler := router.NewUserGrpcServer(authUseCase, refreshTokenUC)
 
 	publisher, err := rabbitmq.NewPublisher(outboxRepo)
 	if err != nil {
@@ -55,6 +58,7 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 	return &Dependencies{
 		AuthUC:           authUseCase,
 		RefreshTokenUC:   refreshTokenUC,
+		UserUC:           userUseCase,
 		AuthCtrl:         authCtrl,
 		RefreshTokenCtrl: refreshTokenCtrl,
 		UserGrpcHandler:  userGrpcHandler,

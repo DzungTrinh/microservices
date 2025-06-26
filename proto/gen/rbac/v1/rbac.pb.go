@@ -323,27 +323,27 @@ func (x *CreateRoleResponse) GetError() string {
 	return ""
 }
 
-type GetRoleByIDRequest struct {
+type GetRoleByNameRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // UUID of the role
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` // UUID of the role
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetRoleByIDRequest) Reset() {
-	*x = GetRoleByIDRequest{}
+func (x *GetRoleByNameRequest) Reset() {
+	*x = GetRoleByNameRequest{}
 	mi := &file_v1_rbac_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetRoleByIDRequest) String() string {
+func (x *GetRoleByNameRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetRoleByIDRequest) ProtoMessage() {}
+func (*GetRoleByNameRequest) ProtoMessage() {}
 
-func (x *GetRoleByIDRequest) ProtoReflect() protoreflect.Message {
+func (x *GetRoleByNameRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_rbac_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -355,19 +355,19 @@ func (x *GetRoleByIDRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetRoleByIDRequest.ProtoReflect.Descriptor instead.
-func (*GetRoleByIDRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetRoleByNameRequest.ProtoReflect.Descriptor instead.
+func (*GetRoleByNameRequest) Descriptor() ([]byte, []int) {
 	return file_v1_rbac_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetRoleByIDRequest) GetId() string {
+func (x *GetRoleByNameRequest) GetName() string {
 	if x != nil {
-		return x.Id
+		return x.Name
 	}
 	return ""
 }
 
-type GetRoleByIDResponse struct {
+type GetRoleByNameResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleId        string                 `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`          // UUID of the role
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // Role name
@@ -380,20 +380,20 @@ type GetRoleByIDResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetRoleByIDResponse) Reset() {
-	*x = GetRoleByIDResponse{}
+func (x *GetRoleByNameResponse) Reset() {
+	*x = GetRoleByNameResponse{}
 	mi := &file_v1_rbac_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetRoleByIDResponse) String() string {
+func (x *GetRoleByNameResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetRoleByIDResponse) ProtoMessage() {}
+func (*GetRoleByNameResponse) ProtoMessage() {}
 
-func (x *GetRoleByIDResponse) ProtoReflect() protoreflect.Message {
+func (x *GetRoleByNameResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_rbac_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -405,54 +405,54 @@ func (x *GetRoleByIDResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetRoleByIDResponse.ProtoReflect.Descriptor instead.
-func (*GetRoleByIDResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetRoleByNameResponse.ProtoReflect.Descriptor instead.
+func (*GetRoleByNameResponse) Descriptor() ([]byte, []int) {
 	return file_v1_rbac_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetRoleByIDResponse) GetRoleId() string {
+func (x *GetRoleByNameResponse) GetRoleId() string {
 	if x != nil {
 		return x.RoleId
 	}
 	return ""
 }
 
-func (x *GetRoleByIDResponse) GetName() string {
+func (x *GetRoleByNameResponse) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *GetRoleByIDResponse) GetBuiltIn() bool {
+func (x *GetRoleByNameResponse) GetBuiltIn() bool {
 	if x != nil {
 		return x.BuiltIn
 	}
 	return false
 }
 
-func (x *GetRoleByIDResponse) GetSuccess() bool {
+func (x *GetRoleByNameResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *GetRoleByIDResponse) GetError() string {
+func (x *GetRoleByNameResponse) GetError() string {
 	if x != nil {
 		return x.Error
 	}
 	return ""
 }
 
-func (x *GetRoleByIDResponse) GetCreatedAt() string {
+func (x *GetRoleByNameResponse) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *GetRoleByIDResponse) GetDeletedAt() string {
+func (x *GetRoleByNameResponse) GetDeletedAt() string {
 	if x != nil {
 		return x.DeletedAt
 	}
@@ -1680,10 +1680,10 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\arole_id\x18\x01 \x01(\tR\x06roleId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
 	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x04 \x01(\tR\x05error\"$\n" +
-	"\x12GetRoleByIDRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xcb\x01\n" +
-	"\x13GetRoleByIDResponse\x12\x17\n" +
+	"\x05error\x18\x04 \x01(\tR\x05error\"*\n" +
+	"\x14GetRoleByNameRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\xcd\x01\n" +
+	"\x15GetRoleByNameResponse\x12\x17\n" +
 	"\arole_id\x18\x01 \x01(\tR\x06roleId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x19\n" +
 	"\bbuilt_in\x18\x03 \x01(\bR\abuiltIn\x12\x18\n" +
@@ -1766,7 +1766,7 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x18ListRolesForUserResponse\x12#\n" +
 	"\x05roles\x18\x01 \x03(\v2\r.rbac.v1.RoleR\x05roles\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error2\xdb)\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error2\xe3)\n" +
 	"\vRBACService\x12\xee\x02\n" +
 	"\n" +
 	"CreateRole\x12\x1a.rbac.v1.CreateRoleRequest\x1a\x1b.rbac.v1.CreateRoleResponse\"\xa6\x02\x92A\x85\x02\n" +
@@ -1781,8 +1781,8 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xc5\x02\n" +
-	"\vGetRoleByID\x12\x1b.rbac.v1.GetRoleByIDRequest\x1a\x1c.rbac.v1.GetRoleByIDResponse\"\xfa\x01\x92A\xd7\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xcd\x02\n" +
+	"\rGetRoleByName\x12\x1d.rbac.v1.GetRoleByNameRequest\x1a\x1e.rbac.v1.GetRoleByNameResponse\"\xfc\x01\x92A\xd7\x01\n" +
 	"\x04RBAC\x12\x0eGet role by ID\x1aNRetrieves details of a role from rbac_db.roles by its ID. Requires admin role.J$\n" +
 	"\x03200\x12\x1d\n" +
 	"\x1bRole retrieved successfullyJ\x17\n" +
@@ -1792,7 +1792,7 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/rbac/roles/{id}\x12\x8b\x02\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/rbac/roles/{name}\x12\x8b\x02\n" +
 	"\tListRoles\x12\x0e.rbac.v1.Empty\x1a\x1a.rbac.v1.ListRolesResponse\"\xd1\x01\x92A\xb3\x01\n" +
 	"\x04RBAC\x12\n" +
 	"List roles\x1aFRetrieves a list of all roles from rbac_db.roles. Requires admin role.J%\n" +
@@ -1952,8 +1952,8 @@ var file_v1_rbac_proto_goTypes = []any{
 	(*Permission)(nil),                      // 2: rbac.v1.Permission
 	(*CreateRoleRequest)(nil),               // 3: rbac.v1.CreateRoleRequest
 	(*CreateRoleResponse)(nil),              // 4: rbac.v1.CreateRoleResponse
-	(*GetRoleByIDRequest)(nil),              // 5: rbac.v1.GetRoleByIDRequest
-	(*GetRoleByIDResponse)(nil),             // 6: rbac.v1.GetRoleByIDResponse
+	(*GetRoleByNameRequest)(nil),            // 5: rbac.v1.GetRoleByNameRequest
+	(*GetRoleByNameResponse)(nil),           // 6: rbac.v1.GetRoleByNameResponse
 	(*ListRolesResponse)(nil),               // 7: rbac.v1.ListRolesResponse
 	(*UpdateRoleRequest)(nil),               // 8: rbac.v1.UpdateRoleRequest
 	(*UpdateRoleResponse)(nil),              // 9: rbac.v1.UpdateRoleResponse
@@ -1984,7 +1984,7 @@ var file_v1_rbac_proto_depIdxs = []int32{
 	2,  // 3: rbac.v1.ListPermissionsForUserResponse.permissions:type_name -> rbac.v1.Permission
 	1,  // 4: rbac.v1.ListRolesForUserResponse.roles:type_name -> rbac.v1.Role
 	3,  // 5: rbac.v1.RBACService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
-	5,  // 6: rbac.v1.RBACService.GetRoleByID:input_type -> rbac.v1.GetRoleByIDRequest
+	5,  // 6: rbac.v1.RBACService.GetRoleByName:input_type -> rbac.v1.GetRoleByNameRequest
 	0,  // 7: rbac.v1.RBACService.ListRoles:input_type -> rbac.v1.Empty
 	8,  // 8: rbac.v1.RBACService.UpdateRole:input_type -> rbac.v1.UpdateRoleRequest
 	10, // 9: rbac.v1.RBACService.DeleteRole:input_type -> rbac.v1.DeleteRoleRequest
@@ -1998,7 +1998,7 @@ var file_v1_rbac_proto_depIdxs = []int32{
 	25, // 17: rbac.v1.RBACService.ListPermissionsForUser:input_type -> rbac.v1.ListPermissionsForUserRequest
 	27, // 18: rbac.v1.RBACService.ListRolesForUser:input_type -> rbac.v1.ListRolesForUserRequest
 	4,  // 19: rbac.v1.RBACService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
-	6,  // 20: rbac.v1.RBACService.GetRoleByID:output_type -> rbac.v1.GetRoleByIDResponse
+	6,  // 20: rbac.v1.RBACService.GetRoleByName:output_type -> rbac.v1.GetRoleByNameResponse
 	7,  // 21: rbac.v1.RBACService.ListRoles:output_type -> rbac.v1.ListRolesResponse
 	9,  // 22: rbac.v1.RBACService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
 	11, // 23: rbac.v1.RBACService.DeleteRole:output_type -> rbac.v1.DeleteRoleResponse

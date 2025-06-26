@@ -10,6 +10,7 @@ import (
 	"microservices/user-management/internal/user/domain/repo"
 	"microservices/user-management/internal/user/dto"
 	"microservices/user-management/internal/user/infras/hash"
+	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
 	"time"
 )
@@ -49,11 +50,12 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 	}
 
 	credential := domain.Credential{
-		ID:         uuid.New().String(),
-		UserID:     userID,
-		Provider:   dto.ProviderLocal,
-		SecretHash: hashedPassword,
-		CreatedAt:  time.Now(),
+		ID:          uuid.New().String(),
+		UserID:      userID,
+		Provider:    dto.ProviderLocal,
+		ProviderUID: userID,
+		SecretHash:  hashedPassword,
+		CreatedAt:   time.Now(),
 	}
 
 	refreshTokenEntity := domain.RefreshToken{
@@ -78,7 +80,7 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		}
 
 		// generate JWT tokens
-		tokenPair, err := auth.GenerateTokenPair(userID, []string{dto.RoleUser}, 15*time.Minute, 7*24*time.Hour)
+		tokenPair, err := auth.GenerateTokenPair(userID, []string{constants.RoleUser}, 15*time.Minute, 7*24*time.Hour)
 		if err != nil {
 			return err
 		}
@@ -93,10 +95,8 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		// build outbox event
 		rolePayload := struct {
 			UserID string `json:"user_id"`
-			Role   string `json:"role"`
 		}{
 			UserID: userID,
-			Role:   dto.RoleUser,
 		}
 
 		payloadBytes, err := json.Marshal(rolePayload)
@@ -146,7 +146,7 @@ func (s *authUseCase) Login(ctx context.Context, email, password, userAgent, ipA
 		return domain.User{}, "", "", errors.New("invalid email or password")
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{dto.RoleUser}, 15*time.Minute, 7*24*time.Hour)
+	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{constants.RoleUser}, 15*time.Minute, 7*24*time.Hour)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to generate token pair for user %s: %v", user.ID, err)
 		return domain.User{}, "", "", err

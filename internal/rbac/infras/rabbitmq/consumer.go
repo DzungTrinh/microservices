@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"github.com/rabbitmq/amqp091-go"
 	"microservices/user-management/cmd/rbac/config"
+	"microservices/user-management/internal/rbac/domain"
+	"microservices/user-management/internal/rbac/usecases/user_role"
+	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
-	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 )
 
 type Consumer struct {
-	client    rbacv1.RBACServiceClient
+	urUC      user_role.UserRoleUseCase
 	conn      *amqp091.Connection
 	channel   *amqp091.Channel
 	queueName string
@@ -19,10 +21,13 @@ type Consumer struct {
 
 type UserRegisteredPayload struct {
 	UserID string `json:"user_id"`
-	Role   string `json:"role"`
 }
 
-func NewConsumer(client rbacv1.RBACServiceClient) (*Consumer, error) {
+type AdminUserCreatedPayload struct {
+	UserID string `json:"user_id"`
+}
+
+func NewConsumer(urUC user_role.UserRoleUseCase) (*Consumer, error) {
 	amqpURL := config.GetInstance().RabbitmqUrl
 	queueName := config.GetInstance().RabbitmqQueue
 
@@ -51,8 +56,23 @@ func NewConsumer(client rbacv1.RBACServiceClient) (*Consumer, error) {
 		return nil, err
 	}
 
+	// Declare compensating queue
+	_, err = channel.QueueDeclare(
+		"user-compensation",
+		true,  // durable
+		false, // autoDelete
+		false, // exclusive
+		false, // noWait
+		nil,   // args
+	)
+	if err != nil {
+		channel.Close()
+		conn.Close()
+		return nil, err
+	}
+
 	return &Consumer{
-		client:    client,
+		urUC:      urUC,
 		conn:      conn,
 		channel:   channel,
 		queueName: queueName,
@@ -76,23 +96,73 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 	}
 
 	for msg := range msgs {
-		var payload UserRegisteredPayload
-		if err := json.Unmarshal(msg.Body, &payload); err != nil {
-			c.logger.Errorf("Failed to unmarshal event: %v", err)
+		var userID string
+		var role string
+
+		switch msg.Type {
+		case "UserRegistered":
+			var payload UserRegisteredPayload
+			if err := json.Unmarshal(msg.Body, &payload); err != nil {
+				c.logger.Errorf("Failed to unmarshal UserRegistered event: %v", err)
+				continue
+			}
+			userID = payload.UserID
+			role = constants.RoleUser
+
+		case "AdminUserCreated":
+			var payload AdminUserCreatedPayload
+			if err := json.Unmarshal(msg.Body, &payload); err != nil {
+				c.logger.Errorf("Failed to unmarshal AdminUserCreated event: %v", err)
+				continue
+			}
+			userID = payload.UserID
+			role = constants.RoleAdmin
+
+		default:
+			c.logger.Errorf("Unknown event type: '%s', full message: %s", msg.Type, string(msg.Body))
 			continue
 		}
 
-		_, err = c.client.AssignRolesToUser(ctx, &rbacv1.AssignRolesToUserRequest{
-			UserId:  payload.UserID,
-			RoleIds: []string{payload.Role},
+		err = c.urUC.AssignRolesToUser(ctx, []domain.UserRole{
+			{
+				UserID:   userID,
+				RoleName: role,
+			},
 		})
 		if err != nil {
-			c.logger.Errorf("Failed to assign role %s to user %s: %v", payload.Role, payload.UserID, err)
-			// TODO: Publish compensating event (e.g., UserRegistrationFailed)
+			c.logger.Errorf("Failed to assign role %s to user %s: %v", role, userID, err)
+			// Publish compensating event
+			compPayload := struct {
+				UserID string `json:"user_id"`
+				Reason string `json:"reason"`
+			}{
+				UserID: userID,
+				Reason: "Failed to assign role",
+			}
+			compBytes, err := json.Marshal(compPayload)
+			if err != nil {
+				c.logger.Errorf("Failed to marshal compensating event for user %s: %v", userID, err)
+				continue
+			}
+			err = c.channel.PublishWithContext(
+				ctx,
+				"",                  // exchange
+				"user-compensation", // routing key
+				false,               // mandatory
+				false,               // immediate
+				amqp091.Publishing{
+					ContentType: "application/json",
+					Body:        compBytes,
+					MessageId:   "comp-" + userID,
+				},
+			)
+			if err != nil {
+				c.logger.Errorf("Failed to publish compensating event for user %s: %v", userID, err)
+			}
 			continue
 		}
 
-		c.logger.Infof("Assigned role %s to user %s", payload.Role, payload.UserID)
+		c.logger.Infof("Assigned role %s to user %s", role, userID)
 	}
 	return nil
 }
