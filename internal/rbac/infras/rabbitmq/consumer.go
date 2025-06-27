@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/user_role"
 	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
+	"time"
 )
 
 type Consumer struct {
@@ -56,21 +57,6 @@ func NewConsumer(urUC user_role.UserRoleUseCase) (*Consumer, error) {
 		return nil, err
 	}
 
-	// Declare compensating queue
-	_, err = channel.QueueDeclare(
-		"user-compensation",
-		true,  // durable
-		false, // autoDelete
-		false, // exclusive
-		false, // noWait
-		nil,   // args
-	)
-	if err != nil {
-		channel.Close()
-		conn.Close()
-		return nil, err
-	}
-
 	return &Consumer{
 		urUC:      urUC,
 		conn:      conn,
@@ -84,7 +70,7 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 	msgs, err := c.channel.Consume(
 		c.queueName, // queue
 		"",          // consumer
-		true,        // autoAck
+		false,       // autoAck
 		false,       // exclusive
 		false,       // noLocal
 		false,       // noWait
@@ -104,6 +90,7 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 			var payload UserRegisteredPayload
 			if err := json.Unmarshal(msg.Body, &payload); err != nil {
 				c.logger.Errorf("Failed to unmarshal UserRegistered event: %v", err)
+				msg.Nack(false, false)
 				continue
 			}
 			userID = payload.UserID
@@ -113,6 +100,7 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 			var payload AdminUserCreatedPayload
 			if err := json.Unmarshal(msg.Body, &payload); err != nil {
 				c.logger.Errorf("Failed to unmarshal AdminUserCreated event: %v", err)
+				msg.Nack(false, false)
 				continue
 			}
 			userID = payload.UserID
@@ -120,49 +108,34 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 
 		default:
 			c.logger.Errorf("Unknown event type: '%s', full message: %s", msg.Type, string(msg.Body))
+			msg.Ack(true) // Acknowledge to avoid requeueing unknown types
 			continue
 		}
 
-		err = c.urUC.AssignRolesToUser(ctx, []domain.UserRole{
-			{
-				UserID:   userID,
-				RoleName: role,
-			},
-		})
-		if err != nil {
-			c.logger.Errorf("Failed to assign role %s to user %s: %v", role, userID, err)
-			// Publish compensating event
-			compPayload := struct {
-				UserID string `json:"user_id"`
-				Reason string `json:"reason"`
-			}{
-				UserID: userID,
-				Reason: "Failed to assign role",
-			}
-			compBytes, err := json.Marshal(compPayload)
-			if err != nil {
-				c.logger.Errorf("Failed to marshal compensating event for user %s: %v", userID, err)
-				continue
-			}
-			err = c.channel.PublishWithContext(
-				ctx,
-				"",                  // exchange
-				"user-compensation", // routing key
-				false,               // mandatory
-				false,               // immediate
-				amqp091.Publishing{
-					ContentType: "application/json",
-					Body:        compBytes,
-					MessageId:   "comp-" + userID,
+		// Retry logic
+		const maxRetries = 5
+		const retryDelay = 1 * time.Second
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			err = c.urUC.AssignRolesToUser(ctx, []domain.UserRole{
+				{
+					UserID:   userID,
+					RoleName: role,
 				},
-			)
-			if err != nil {
-				c.logger.Errorf("Failed to publish compensating event for user %s: %v", userID, err)
+			})
+			if err == nil {
+				c.logger.Infof("Assigned role %s to user %s", role, userID)
+				msg.Ack(true) // Acknowledge successful processing
+				break
 			}
-			continue
-		}
 
-		c.logger.Infof("Assigned role %s to user %s", role, userID)
+			c.logger.Errorf("Attempt %d/%d: Failed to assign role %s to user %s: %v", attempt, maxRetries, role, userID, err)
+			if attempt == maxRetries {
+				c.logger.Errorf("Exhausted retries for assigning role %s to user %s", role, userID)
+				msg.Ack(true) // Acknowledge to prevent infinite retries
+				break
+			}
+			time.Sleep(retryDelay)
+		}
 	}
 	return nil
 }

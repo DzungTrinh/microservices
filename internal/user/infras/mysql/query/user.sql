@@ -11,3 +11,8 @@ WHERE email = ? AND deleted_at IS NULL;
 SELECT id, email, username, email_verified, created_at, updated_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM users
 WHERE id = ? AND deleted_at IS NULL;
+
+-- name: GetAllUsers :many
+SELECT id, email, username, email_verified, created_at, updated_at
+FROM users
+WHERE deleted_at IS NULL;

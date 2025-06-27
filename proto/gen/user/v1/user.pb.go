@@ -465,32 +465,32 @@ const file_v1_user_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x18\n" +
 	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x04 \x01(\tR\x05error2\x92\a\n" +
-	"\vUserService\x12\xba\x02\n" +
-	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\"\xf8\x01\x92A\xd9\x01\n" +
+	"\x05error\x18\x04 \x01(\tR\x05error2\xa1\a\n" +
+	"\vUserService\x12\xbf\x02\n" +
+	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\"\xfd\x01\x92A\xd9\x01\n" +
 	"\x04Auth\x12\x0fRegister a user\x1a_Creates a new user in user_db.users, stores credentials, and assigns default role via rbac-svc.J%\n" +
 	"\x03200\x12\x1e\n" +
 	"\x1cUser registered successfullyJ\x18\n" +
 	"\x03400\x12\x11\n" +
 	"\x0fInvalid requestJ\x1e\n" +
 	"\x03500\x12\x17\n" +
-	"\x15Internal server error\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/api/v1/register\x12\x89\x02\n" +
-	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponse\"\xd0\x01\x92A\xb4\x01\n" +
+	"\x15Internal server error\x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/user/register\x12\x8e\x02\n" +
+	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponse\"\xd5\x01\x92A\xb4\x01\n" +
 	"\x04Auth\x12\fLogin a user\x1a:Authenticates a user and issues access and refresh tokens.J$\n" +
 	"\x03200\x12\x1d\n" +
 	"\x1bUser logged in successfullyJ\x1c\n" +
 	"\x03401\x12\x15\n" +
 	"\x13Invalid credentialsJ\x1e\n" +
 	"\x03500\x12\x17\n" +
-	"\x15Internal server error\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/api/v1/login\x12\xb9\x02\n" +
-	"\fRefreshToken\x12\x1c.user.v1.RefreshTokenRequest\x1a\x1d.user.v1.RefreshTokenResponse\"\xeb\x01\x92A\xcd\x01\n" +
+	"\x15Internal server error\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/user/login\x12\xbe\x02\n" +
+	"\fRefreshToken\x12\x1c.user.v1.RefreshTokenRequest\x1a\x1d.user.v1.RefreshTokenResponse\"\xf0\x01\x92A\xcd\x01\n" +
 	"\x04Auth\x12\rRefresh token\x1aCValidates a refresh token and issues new access and refresh tokens.J&\n" +
 	"\x03200\x12\x1f\n" +
 	"\x1dTokens refreshed successfullyJ)\n" +
 	"\x03401\x12\"\n" +
 	" Invalid or expired refresh tokenJ\x1e\n" +
 	"\x03500\x12\x17\n" +
-	"\x15Internal server error\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/refreshB\x8a\x02\x92A\xf6\x01\x12[\n" +
+	"\x15Internal server error\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/user/refreshB\x8a\x02\x92A\xf6\x01\x12[\n" +
 	"\x13User Management API\x12?API for user registration, authentication, and user management.2\x031.0*\x01\x022\x10application/json:\x10application/jsonZp\n" +
 	"n\n" +
 	"\n" +

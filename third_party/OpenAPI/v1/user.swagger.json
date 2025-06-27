@@ -20,7 +20,7 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/login": {
+    "/api/v1/user/login": {
       "post": {
         "summary": "Login a user",
         "description": "Authenticates a user and issues access and refresh tokens.",
@@ -62,7 +62,7 @@
         ]
       }
     },
-    "/api/v1/refresh": {
+    "/api/v1/user/refresh": {
       "post": {
         "summary": "Refresh token",
         "description": "Validates a refresh token and issues new access and refresh tokens.",
@@ -104,7 +104,7 @@
         ]
       }
     },
-    "/api/v1/register": {
+    "/api/v1/user/register": {
       "post": {
         "summary": "Register a user",
         "description": "Creates a new user in user_db.users, stores credentials, and assigns default role via rbac-svc.",

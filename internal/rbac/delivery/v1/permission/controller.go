@@ -31,7 +31,7 @@ func (c *PermissionController) CreatePermission(ctx context.Context, req *rbacv1
 	dto := domain.Permission{
 		Name: req.Name,
 	}
-	err = c.uc.CreatePermission(ctx, &dto)
+	_, err = c.uc.CreatePermission(ctx, &dto)
 	if err != nil {
 		logger.GetInstance().Errorf("CreatePermission failed: %v", err)
 		return nil, status.Errorf(codes.Internal, err.Error())

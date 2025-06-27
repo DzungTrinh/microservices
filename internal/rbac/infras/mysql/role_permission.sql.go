@@ -12,25 +12,15 @@ import (
 const assignPermissionsToRole = `-- name: AssignPermissionsToRole :exec
 INSERT INTO role_permissions (role_id, permission_id, created_at)
 SELECT ?, ?, NOW()
-FROM roles r, permissions p
-WHERE r.id = ? AND r.deleted_at IS NULL
-  AND p.id = ? AND p.deleted_at IS NULL
 `
 
 type AssignPermissionsToRoleParams struct {
 	RoleID       string `json:"role_id"`
 	PermissionID string `json:"permission_id"`
-	ID           string `json:"id"`
-	ID_2         string `json:"id_2"`
 }
 
 func (q *Queries) AssignPermissionsToRole(ctx context.Context, arg AssignPermissionsToRoleParams) error {
-	_, err := q.db.ExecContext(ctx, assignPermissionsToRole,
-		arg.RoleID,
-		arg.PermissionID,
-		arg.ID,
-		arg.ID_2,
-	)
+	_, err := q.db.ExecContext(ctx, assignPermissionsToRole, arg.RoleID, arg.PermissionID)
 	return err
 }
 

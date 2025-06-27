@@ -34,30 +34,6 @@ services:
       timeout: 5s
       retries: 5
 
-  user:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile-user
-    image: microservices-user
-    environment:
-      IN_DOCKER: true
-      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/user_service?charset=utf8mb4&parseTime=True&loc=Local
-      JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
-      PORT: 8081
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-      RABBITMQ_QUEUE: user-events
-    ports:
-      - 8081:8081
-      - 9091:9091
-    volumes:
-      - ./logs:/logs
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - user-management
-
-
   rbac:
     build:
       context: .
@@ -78,8 +54,54 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - user-management
+
+  user:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-user
+    image: microservices-user
+    environment:
+      IN_DOCKER: true
+      DATABASE_DSN: mysql://user:password@tcp(mysql:3306)/user_service?charset=utf8mb4&parseTime=True&loc=Local
+      JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
+      PORT: 8081
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      RABBITMQ_QUEUE: user-events
+      RBAC_GRPC_ADDR: rbac:8082
+    ports:
+      - 8081:8081
+      - 9091:9091
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - user-management
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-api-gateway
+    image: microservices-api-gateway
+    environment:
+      PORT: 8080
+      USER_HTTP_PORT: http://user:8081
+      RBAC_HTTP_PORT: http://rbac:8082
+      JWT_SECRET: 5f3d4923ba202dad5036098efa1fe856f2bb9492063eb978571bcbb4fd934edd
+    ports:
+      - 8080:8080
+    networks:
+      - user-management
+    depends_on:
+      - rbac
+      - user
 
 networks:
   user-management:

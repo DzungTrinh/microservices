@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 	"microservices/user-management/internal/user/usecases/auth"
 	"microservices/user-management/internal/user/usecases/refresh_token"
+	"microservices/user-management/internal/user/usecases/user"
 	"microservices/user-management/pkg/logger"
 	userv1 "microservices/user-management/proto/gen/user/v1"
 )
@@ -14,12 +15,14 @@ type UserGrpcServer struct {
 	userv1.UnimplementedUserServiceServer
 	authUC         auth.AuthUseCase
 	refreshTokenUC refresh_token.RefreshTokenUseCase
+	userUC         user.UserUseCase
 }
 
-func NewUserGrpcServer(authUC auth.AuthUseCase, refreshTokenUC refresh_token.RefreshTokenUseCase) *UserGrpcServer {
+func NewUserGrpcServer(authUC auth.AuthUseCase, refreshTokenUC refresh_token.RefreshTokenUseCase, userUC user.UserUseCase) *UserGrpcServer {
 	return &UserGrpcServer{
 		authUC:         authUC,
 		refreshTokenUC: refreshTokenUC,
+		userUC:         userUC,
 	}
 }
 
@@ -77,28 +80,29 @@ func (h *UserGrpcServer) RefreshToken(ctx context.Context, r *userv1.RefreshToke
 	}, nil
 }
 
-//func (h *UserGrpcServer) GetAllUsers(ctx context.Context, _ *userv1.Empty) (*userv1.UserList, error) {
-//	users, err := h.uc.GetAllUsers(ctx)
-//	if err != nil {
-//		logger.GetInstance().Errorf("GetAllUsers failed: %v", err)
-//		return nil, status.Errorf(codes.Internal, err.Error())
-//	}
-//
-//	userList := &userv1.UserList{Users: make([]*userv1.User, len(users))}
-//	for i, user := range users {
-//		roles := make([]string, len(user.Roles))
-//		for j, role := range user.Roles {
-//			roles[j] = string(role)
-//		}
-//		userList.Users[i] = &userv1.User{
-//			Id:       user.ID,
-//			Username: user.Username,
-//			Email:    user.Email,
-//			Roles:    roles,
-//		}
-//	}
-//	return userList, nil
-//}
+func (h *UserGrpcServer) GetAllUsers(ctx context.Context, _ *userv1.Empty) (*userv1.UserList, error) {
+	users, err := h.userUC.GetAllUsers(ctx)
+	if err != nil {
+		logger.GetInstance().Errorf("GetAllUsers failed: %v", err)
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
+	userList := &userv1.UserList{Users: make([]*userv1.User, len(users))}
+	for i, user := range users {
+		roles := make([]string, len(user.Roles))
+		for j, role := range user.Roles {
+			roles[j] = string(role)
+		}
+		userList.Users[i] = &userv1.User{
+			Id:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Roles:    roles,
+		}
+	}
+	return userList, nil
+}
+
 //
 //func (h *UserGrpcServer) GetUserByID(ctx context.Context, r *userv1.GetUserByIDRequest) (*userv1.User, error) {
 //	user, err := h.uc.GetUserByID(ctx, r.Id)

@@ -302,3 +302,22 @@ func (r *userRepository) GetUserById(ctx context.Context, id string) (domain.Use
 		DeletedAt:     user.DeletedAt,
 	}, nil
 }
+
+func (r *userRepository) GetAllUsers(ctx context.Context) ([]domain.User, error) {
+	rows, err := r.Queries.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	users := make([]domain.User, len(rows))
+	for i, row := range rows {
+		users[i] = domain.User{
+			ID:            row.ID,
+			Email:         row.Email,
+			Username:      row.Username,
+			EmailVerified: row.EmailVerified,
+			CreatedAt:     row.CreatedAt,
+			UpdatedAt:     row.UpdatedAt,
+		}
+	}
+	return users, nil
+}

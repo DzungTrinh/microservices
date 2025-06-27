@@ -10,8 +10,8 @@ import (
 	"microservices/user-management/internal/user/domain/repo"
 	"microservices/user-management/internal/user/dto"
 	"microservices/user-management/internal/user/infras/hash"
-	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
+	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"time"
 )
 
@@ -21,11 +21,17 @@ type authUseCase struct {
 	rtRepo     repo.RefreshTokenRepository
 	outboxRepo repo.OutboxRepository
 	txManager  repo.TxManager
+	rbacClient rbacv1.RBACServiceClient
+	accessTtl  time.Duration
+	refreshTtl time.Duration
 }
 
 func NewAuthUseCase(userRepo repo.UserRepository, credRepo repo.CredentialRepository, rtRepo repo.RefreshTokenRepository,
-	outboxRepo repo.OutboxRepository, txManager repo.TxManager) AuthUseCase {
-	return &authUseCase{userRepo: userRepo, credRepo: credRepo, rtRepo: rtRepo, outboxRepo: outboxRepo, txManager: txManager}
+	outboxRepo repo.OutboxRepository, txManager repo.TxManager, rbacClient rbacv1.RBACServiceClient) AuthUseCase {
+	return &authUseCase{userRepo: userRepo, credRepo: credRepo, rtRepo: rtRepo,
+		outboxRepo: outboxRepo, txManager: txManager,
+		accessTtl: time.Minute * 15, refreshTtl: time.Hour * 24 * 7,
+		rbacClient: rbacClient}
 }
 
 func (s *authUseCase) Register(ctx context.Context, email, username, password, userAgent, ipAddress string) (domain.User, string, string, error) {
@@ -58,17 +64,6 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		CreatedAt:   time.Now(),
 	}
 
-	refreshTokenEntity := domain.RefreshToken{
-		ID:        uuid.New().String(),
-		UserID:    userID,
-		Token:     "", // will set below
-		UserAgent: userAgent,
-		IPAddress: ipAddress,
-		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
-		Revoked:   false,
-	}
-
 	var accessToken, refreshToken string
 
 	err = s.txManager.WithTx(ctx, func(txCtx context.Context) error {
@@ -76,19 +71,6 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 			return err
 		}
 		if err := s.credRepo.CreateCredential(txCtx, credential); err != nil {
-			return err
-		}
-
-		// generate JWT tokens
-		tokenPair, err := auth.GenerateTokenPair(userID, []string{constants.RoleUser}, 15*time.Minute, 7*24*time.Hour)
-		if err != nil {
-			return err
-		}
-		accessToken = tokenPair.AccessToken
-		refreshToken = tokenPair.RefreshToken
-		refreshTokenEntity.Token = refreshToken
-
-		if err := s.rtRepo.CreateRefreshToken(txCtx, refreshTokenEntity); err != nil {
 			return err
 		}
 
@@ -124,6 +106,13 @@ func (s *authUseCase) Register(ctx context.Context, email, username, password, u
 		return domain.User{}, "", "", err
 	}
 
+	// Call Login to generate tokens
+	createdUser, accessToken, refreshToken, err := s.Login(ctx, email, password, userAgent, ipAddress)
+	if err != nil {
+		logger.GetInstance().Errorf("Failed to login after registering user %s: %v", userID, err)
+		return createdUser, "", "", err
+	}
+
 	logger.GetInstance().Infof("User registered: %s (ID: %s)", username, userID)
 	return user, accessToken, refreshToken, nil
 }
@@ -146,7 +135,30 @@ func (s *authUseCase) Login(ctx context.Context, email, password, userAgent, ipA
 		return domain.User{}, "", "", errors.New("invalid email or password")
 	}
 
-	tokenPair, err := auth.GenerateTokenPair(user.ID, []string{constants.RoleUser}, 15*time.Minute, 7*24*time.Hour)
+	// Fetch user roles from RBAC service
+	roleResp, err := s.rbacClient.ListRolesForUser(ctx, &rbacv1.ListRolesForUserRequest{UserId: user.ID})
+	if err != nil {
+		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
+		return domain.User{}, "", "", errors.New("failed to fetch user roles")
+	}
+	var roles []string
+	for _, role := range roleResp.Roles {
+		roles = append(roles, role.Name)
+	}
+
+	// Fetch user permissions from RBAC service
+	permResp, err := s.rbacClient.ListPermissionsForUser(ctx, &rbacv1.ListPermissionsForUserRequest{UserId: user.ID})
+	if err != nil {
+		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
+		return domain.User{}, "", "", errors.New("failed to fetch user roles")
+	}
+	var perms []string
+	for _, role := range permResp.Permissions {
+		perms = append(perms, role.Name)
+	}
+
+	// Generate tokens with actual roles
+	tokenPair, err := auth.GenerateTokenPair(user.ID, roles, perms, s.accessTtl, s.refreshTtl)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to generate token pair for user %s: %v", user.ID, err)
 		return domain.User{}, "", "", err
@@ -159,7 +171,7 @@ func (s *authUseCase) Login(ctx context.Context, email, password, userAgent, ipA
 		UserAgent: userAgent,
 		IPAddress: ipAddress,
 		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+		ExpiresAt: time.Now().Add(s.refreshTtl),
 		Revoked:   false,
 	}
 	err = s.rtRepo.CreateRefreshToken(ctx, refreshTokenEntity)

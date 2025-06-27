@@ -27,30 +27,6 @@ type App struct {
 	db         *sql.DB
 }
 
-// InterceptorChain returns a gRPC interceptor that applies middleware based on method
-func InterceptorChain() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		switch info.FullMethod {
-		//case "/user.v1.UserService/GetAllUsers",
-		//	"/user.v1.UserService/UpdateUserRoles":
-		//	authCtx, err := middlewares.JWTVerifyInterceptor(ctx, req, func(c context.Context, _ interface{}) (interface{}, error) {
-		//		return c, nil
-		//	})
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return middlewares.AdminOnlyInterceptor(authCtx.(context.Context), req, handler)
-		//
-		//case "/user.v1.UserService/GetUserByID",
-		//	"/user.v1.UserService/GetCurrentUser":
-		//	return middlewares.JWTVerifyInterceptor(ctx, req, handler)
-
-		default:
-			return handler(ctx, req)
-		}
-	}
-}
-
 func NewApp(cfg config.Config) *App {
 	l := logger.GetInstance()
 	l.WithName("user-service")
@@ -64,7 +40,7 @@ func NewApp(cfg config.Config) *App {
 		}
 	}
 
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(InterceptorChain()))
+	grpcServer := grpc.NewServer()
 	userv1.RegisterUserServiceServer(grpcServer, deps.UserGrpcHandler)
 
 	go func() {

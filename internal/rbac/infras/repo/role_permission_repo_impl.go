@@ -24,8 +24,6 @@ func (r *rolePermissionRepository) AssignPermissionsToRole(ctx context.Context, 
 	return r.Queries.AssignPermissionsToRole(ctx, mysql.AssignPermissionsToRoleParams{
 		RoleID:       rolePerm.RoleID,
 		PermissionID: rolePerm.PermissionID,
-		ID:           rolePerm.RoleID,
-		ID_2:         rolePerm.PermissionID,
 	})
 }
 

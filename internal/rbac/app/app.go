@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"microservices/user-management/cmd/rbac/config"
-	"microservices/user-management/internal/rbac/app/router"
 	"microservices/user-management/internal/rbac/infras/rabbitmq"
 	"microservices/user-management/internal/rbac/infras/seed"
 	"microservices/user-management/pkg/logger"
@@ -31,11 +30,11 @@ func NewApp(cfg config.Config) *App {
 	deps := InitializeDependencies(cfg)
 
 	// Seed roles
-	if err := seed.SeedRoles(context.Background(), deps.RoleUC); err != nil {
+	if err := seed.SeedRoles(context.Background(), deps.RoleUC, deps.RolePermUC, deps.PermUC); err != nil {
 		l.Errorf("Failed to seed roles: %v", err)
 	}
 
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(router.InterceptorChain()))
+	grpcServer := grpc.NewServer()
 	rbacv1.RegisterRBACServiceServer(grpcServer, deps.RBACGrpcHandler)
 
 	go func() {
@@ -72,7 +71,7 @@ func NewApp(cfg config.Config) *App {
 	}
 
 	r := gin.Default()
-	r.Any("/api/v1/*path", func(c *gin.Context) {
+	r.Any("/*path", func(c *gin.Context) {
 		gwmux.ServeHTTP(c.Writer, c.Request)
 	})
 
