@@ -381,8 +381,8 @@
     },
     "/api/v1/rbac/roles/{name}": {
       "get": {
-        "summary": "Get role by ID",
-        "description": "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.",
+        "summary": "Get role by Name",
+        "description": "Retrieves details of a role from rbac_db.roles by its name. Requires admin role.",
         "operationId": "RBACService_GetRoleByName",
         "responses": {
           "200": {

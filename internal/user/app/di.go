@@ -43,7 +43,7 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 
 	authUseCase := authUC.NewAuthUseCase(userRepo, credRepo, rtRepo, outboxRepo, txManager)
 	refreshTokenUC := rtUC.NewRefreshTokenUseCase(rtRepo, userRepo)
-	userUseCase := user.NewUserUseCase(userRepo, credRepo, rtRepo, outboxRepo, txManager)
+	userUseCase := user.NewUserUseCase(userRepo, credRepo, outboxRepo, txManager)
 
 	authCtrl := auth.NewAuthController(authUseCase)
 	refreshTokenCtrl := refresh_token.NewRefreshTokenController(refreshTokenUC)

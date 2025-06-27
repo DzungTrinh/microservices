@@ -41,7 +41,7 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 
 	roleUC := role.NewRoleService(roleRepo)
 	permUC := permission.NewPermissionService(permRepo)
-	userRoleUC := user_role.NewUserRoleService(userRoleRepo)
+	userRoleUC := user_role.NewUserRoleService(userRoleRepo, roleUC)
 	userPermUC := user_permission.NewUserPermissionService(userPermRepo)
 	rolePermUC := role_permission.NewRolePermissionService(rolePermRepo)
 

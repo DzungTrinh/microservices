@@ -1766,7 +1766,7 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x18ListRolesForUserResponse\x12#\n" +
 	"\x05roles\x18\x01 \x03(\v2\r.rbac.v1.RoleR\x05roles\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error2\xe3)\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error2\xe7)\n" +
 	"\vRBACService\x12\xee\x02\n" +
 	"\n" +
 	"CreateRole\x12\x1a.rbac.v1.CreateRoleRequest\x1a\x1b.rbac.v1.CreateRoleResponse\"\xa6\x02\x92A\x85\x02\n" +
@@ -1781,9 +1781,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xcd\x02\n" +
-	"\rGetRoleByName\x12\x1d.rbac.v1.GetRoleByNameRequest\x1a\x1e.rbac.v1.GetRoleByNameResponse\"\xfc\x01\x92A\xd7\x01\n" +
-	"\x04RBAC\x12\x0eGet role by ID\x1aNRetrieves details of a role from rbac_db.roles by its ID. Requires admin role.J$\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xd1\x02\n" +
+	"\rGetRoleByName\x12\x1d.rbac.v1.GetRoleByNameRequest\x1a\x1e.rbac.v1.GetRoleByNameResponse\"\x80\x02\x92A\xdb\x01\n" +
+	"\x04RBAC\x12\x10Get role by Name\x1aPRetrieves details of a role from rbac_db.roles by its name. Requires admin role.J$\n" +
 	"\x03200\x12\x1d\n" +
 	"\x1bRole retrieved successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +

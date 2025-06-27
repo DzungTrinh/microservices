@@ -13,13 +13,21 @@ type userRoleService struct {
 	roleUC role.RoleUseCase
 }
 
-func NewUserRoleService(repo repo.UserRoleRepository) UserRoleUseCase {
-	return &userRoleService{repo: repo}
+func NewUserRoleService(repo repo.UserRoleRepository, roleUC role.RoleUseCase) UserRoleUseCase {
+	return &userRoleService{
+		repo:   repo,
+		roleUC: roleUC,
+	}
 }
 
 func (s *userRoleService) AssignRolesToUser(ctx context.Context, userRoles []domain.UserRole) error {
 
 	for i, userRole := range userRoles {
+		if s.roleUC == nil {
+			logger.GetInstance().Error("roleUC is nil in AssignRolesToUser")
+			panic("roleUC is nil in AssignRolesToUser")
+		}
+
 		// Fetch role ID by name
 		role, err := s.roleUC.GetRoleByName(ctx, userRole.RoleName)
 		if err != nil {
