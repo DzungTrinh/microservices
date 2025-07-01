@@ -10,8 +10,8 @@ import (
 	"microservices/user-management/internal/user/domain/repo"
 	"microservices/user-management/internal/user/dto"
 	"microservices/user-management/internal/user/infras/hash"
+	"microservices/user-management/internal/user/usecases/grpc"
 	"microservices/user-management/pkg/logger"
-	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"time"
 )
 
@@ -21,13 +21,13 @@ type authUseCase struct {
 	rtRepo     repo.RefreshTokenRepository
 	outboxRepo repo.OutboxRepository
 	txManager  repo.TxManager
-	rbacClient rbacv1.RBACServiceClient
+	rbacClient grpc.RBACService
 	accessTtl  time.Duration
 	refreshTtl time.Duration
 }
 
 func NewAuthUseCase(userRepo repo.UserRepository, credRepo repo.CredentialRepository, rtRepo repo.RefreshTokenRepository,
-	outboxRepo repo.OutboxRepository, txManager repo.TxManager, rbacClient rbacv1.RBACServiceClient) AuthUseCase {
+	outboxRepo repo.OutboxRepository, txManager repo.TxManager, rbacClient grpc.RBACService) AuthUseCase {
 	return &authUseCase{userRepo: userRepo, credRepo: credRepo, rtRepo: rtRepo,
 		outboxRepo: outboxRepo, txManager: txManager,
 		accessTtl: time.Minute * 15, refreshTtl: time.Hour * 24 * 7,
@@ -136,25 +136,17 @@ func (s *authUseCase) Login(ctx context.Context, email, password, userAgent, ipA
 	}
 
 	// Fetch user roles from RBAC service
-	roleResp, err := s.rbacClient.ListRolesForUser(ctx, &rbacv1.ListRolesForUserRequest{UserId: user.ID})
+	roles, err := s.rbacClient.ListRolesForUser(ctx, user.ID)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
-		return domain.User{}, "", "", errors.New("failed to fetch user roles")
-	}
-	var roles []string
-	for _, role := range roleResp.Roles {
-		roles = append(roles, role.Name)
+		return domain.User{}, "", "", err
 	}
 
 	// Fetch user permissions from RBAC service
-	permResp, err := s.rbacClient.ListPermissionsForUser(ctx, &rbacv1.ListPermissionsForUserRequest{UserId: user.ID})
+	perms, err := s.rbacClient.ListPermissionsForUser(ctx, user.ID)
 	if err != nil {
-		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
-		return domain.User{}, "", "", errors.New("failed to fetch user roles")
-	}
-	var perms []string
-	for _, role := range permResp.Permissions {
-		perms = append(perms, role.Name)
+		logger.GetInstance().Errorf("Failed to fetch permissions for user %s: %v", user.ID, err)
+		return domain.User{}, "", "", err
 	}
 
 	// Generate tokens with actual roles

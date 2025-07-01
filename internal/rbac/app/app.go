@@ -10,7 +10,6 @@ import (
 	"log"
 	"microservices/user-management/cmd/rbac/config"
 	"microservices/user-management/internal/rbac/app/seed"
-	"microservices/user-management/internal/rbac/infras/rabbitmq"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"net"
@@ -65,22 +64,9 @@ func NewApp(cfg config.Config) *App {
 		}
 	}()
 
-	// Initialize RabbitMQ consumer
-	consumer, err := rabbitmq.NewConsumer(deps.UserRoleUC, deps.RoleUC)
-	if err != nil {
-		l.Fatalf("Failed to initialize RabbitMQ consumer: %v", err)
-	}
-
-	// Start consumer in background
-	go func() {
-		if err := consumer.ConsumeEvents(context.Background()); err != nil {
-			l.Errorf("Failed to consume events: %v", err)
-		}
-	}()
-
 	gwmux := runtime.NewServeMux()
 	grpcEndpoint := fmt.Sprintf("0.0.0.0%s", cfg.GRPCPort)
-	err = rbacv1.RegisterRBACServiceHandlerFromEndpoint(context.Background(), gwmux, grpcEndpoint, []grpc.DialOption{
+	err := rbacv1.RegisterRBACServiceHandlerFromEndpoint(context.Background(), gwmux, grpcEndpoint, []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
 	if err != nil {

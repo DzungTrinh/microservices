@@ -7,18 +7,19 @@ import (
 	"microservices/user-management/internal/pkg/auth"
 	"microservices/user-management/internal/user/domain"
 	"microservices/user-management/internal/user/domain/repo"
+	"microservices/user-management/internal/user/usecases/grpc"
+
 	"microservices/user-management/pkg/logger"
-	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"time"
 )
 
 type refreshTokenUseCase struct {
 	rtRepo     repo.RefreshTokenRepository
 	userRepo   repo.UserRepository
-	rbacClient rbacv1.RBACServiceClient
+	rbacClient grpc.RBACService
 }
 
-func NewRefreshTokenUseCase(rtRepo repo.RefreshTokenRepository, userRepo repo.UserRepository, rbacClient rbacv1.RBACServiceClient) RefreshTokenUseCase {
+func NewRefreshTokenUseCase(rtRepo repo.RefreshTokenRepository, userRepo repo.UserRepository, rbacClient grpc.RBACService) RefreshTokenUseCase {
 	return &refreshTokenUseCase{rtRepo: rtRepo, userRepo: userRepo, rbacClient: rbacClient}
 }
 
@@ -41,25 +42,17 @@ func (s *refreshTokenUseCase) RefreshToken(ctx context.Context, refreshToken, us
 	}
 
 	// Fetch user roles from RBAC service
-	resp, err := s.rbacClient.ListRolesForUser(ctx, &rbacv1.ListRolesForUserRequest{UserId: user.ID})
+	roles, err := s.rbacClient.ListRolesForUser(ctx, user.ID)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
 		return "", "", errors.New("failed to fetch user roles")
-	}
-	var roles []string
-	for _, role := range resp.Roles {
-		roles = append(roles, role.Name)
 	}
 
 	// Fetch user permissions from RBAC service
-	permResp, err := s.rbacClient.ListPermissionsForUser(ctx, &rbacv1.ListPermissionsForUserRequest{UserId: user.ID})
+	perms, err := s.rbacClient.ListPermissionsForUser(ctx, user.ID)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
 		return "", "", errors.New("failed to fetch user roles")
-	}
-	var perms []string
-	for _, role := range permResp.Permissions {
-		perms = append(perms, role.Name)
 	}
 
 	tokenPair, err := auth.GenerateTokenPair(user.ID, roles, perms, 15*time.Minute, 7*24*time.Hour)

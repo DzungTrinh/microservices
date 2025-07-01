@@ -9,8 +9,8 @@ import (
 	"microservices/user-management/internal/user/domain/repo"
 	"microservices/user-management/internal/user/dto"
 	"microservices/user-management/internal/user/infras/hash"
+	"microservices/user-management/internal/user/usecases/grpc"
 	"microservices/user-management/pkg/logger"
-	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"time"
 )
 
@@ -19,11 +19,11 @@ type userUseCase struct {
 	credRepo   repo.CredentialRepository
 	outboxRepo repo.OutboxRepository
 	txManager  repo.TxManager
-	rbacClient rbacv1.RBACServiceClient
+	rbacClient grpc.RBACService
 }
 
 func NewUserUseCase(userRepo repo.UserRepository, credRepo repo.CredentialRepository,
-	outboxRepo repo.OutboxRepository, txManager repo.TxManager, rbacClient rbacv1.RBACServiceClient) UserUseCase {
+	outboxRepo repo.OutboxRepository, txManager repo.TxManager, rbacClient grpc.RBACService) UserUseCase {
 	return &userUseCase{
 		userRepo:   userRepo,
 		credRepo:   credRepo,
@@ -119,25 +119,17 @@ func (s *userUseCase) GetAllUsers(ctx context.Context) ([]dto.UserDTO, error) {
 	userDTOs := make([]dto.UserDTO, len(users))
 	for i, user := range users {
 		// Fetch roles
-		roleResp, err := s.rbacClient.ListRolesForUser(ctx, &rbacv1.ListRolesForUserRequest{UserId: user.ID})
+		roles, err := s.rbacClient.ListRolesForUser(ctx, user.ID)
 		if err != nil {
 			logger.GetInstance().Errorf("Failed to fetch roles for user %s: %v", user.ID, err)
 			return nil, err
 		}
 
 		// Fetch permissions
-		permResp, err := s.rbacClient.ListPermissionsForUser(ctx, &rbacv1.ListPermissionsForUserRequest{UserId: user.ID})
+		permissions, err := s.rbacClient.ListPermissionsForUser(ctx, user.ID)
 		if err != nil {
 			logger.GetInstance().Errorf("Failed to fetch permissions for user %s: %v", user.ID, err)
 			return nil, err
-		}
-
-		var roles, permissions []string
-		for _, role := range roleResp.Roles {
-			roles = append(roles, role.Name)
-		}
-		for _, perm := range permResp.Permissions {
-			permissions = append(permissions, perm.Name)
 		}
 
 		userDTOs[i] = dto.UserDTO{

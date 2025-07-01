@@ -8,6 +8,7 @@ import (
 	"microservices/user-management/internal/user/app/router"
 	"microservices/user-management/internal/user/delivery/v1/auth"
 	"microservices/user-management/internal/user/delivery/v1/refresh_token"
+	rbacUC "microservices/user-management/internal/user/infras/grpc"
 	"microservices/user-management/internal/user/infras/rabbitmq"
 	"microservices/user-management/internal/user/infras/repo"
 	authUC "microservices/user-management/internal/user/usecases/auth"
@@ -43,7 +44,8 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 	if err != nil {
 		l.Fatalf("Failed to connect to RBAC gRPC service: %v", err)
 	}
-	rbacClient := rbacv1.NewRBACServiceClient(conn)
+	rbacConn := rbacv1.NewRBACServiceClient(conn)
+	rbacClient := rbacUC.NewRBACService(rbacConn)
 
 	userRepo := repo.NewUserRepository(db)
 	credRepo := repo.NewCredentialRepository(db)
