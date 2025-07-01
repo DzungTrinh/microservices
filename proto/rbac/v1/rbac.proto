@@ -12,7 +12,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     version: "1.0";
     description: "Service for managing roles and permissions.";
   };
-  schemes: HTTPS;
+  host: "localhost:8080";
+  schemes: HTTP;
   consumes: "application/json";
   produces: "application/json";
   security_definitions: {
@@ -39,7 +40,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Create role";
       description: "Creates a new role in the rbac_db.roles table. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Roles"];
       security: [
         {
           security_requirement: {
@@ -83,7 +84,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Get role by Name";
       description: "Retrieves details of a role from rbac_db.roles by its name. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Roles"];
       security: [
         {
           security_requirement: {
@@ -121,7 +122,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List roles";
       description: "Retrieves a list of all roles from rbac_db.roles. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Roles"];
       security: [
         {
           security_requirement: {
@@ -154,7 +155,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Update role";
       description: "Updates the name or built-in status of a role in rbac_db.roles. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Roles"];
       security: [
         {
           security_requirement: {
@@ -198,7 +199,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Delete role";
       description: "Soft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Roles"];
       security: [
         {
           security_requirement: {
@@ -237,7 +238,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Assign roles to user";
       description: "Assigns multiple roles to a user, updating rbac_db.user_roles. Used during registration or role management. Requires admin role for non-self assignments.";
-      tags: ["RBAC"];
+      tags: ["User-roles"];
       security: [
         {
           security_requirement: {
@@ -276,7 +277,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Create permission";
       description: "Creates a new permission in rbac_db.permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Permissions"];
       security: [
         {
           security_requirement: {
@@ -320,7 +321,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Delete permission";
       description: "Soft-deletes a permission from rbac_db.permissions by setting deleted_at. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Permissions"];
       security: [
         {
           security_requirement: {
@@ -359,7 +360,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Assign permissions to role";
       description: "Assigns multiple permissions to a role, updating rbac_db.role_permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Role-permissions"];
       security: [
         {
           security_requirement: {
@@ -398,7 +399,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Assign permissions to user";
       description: "Assigns permissions directly to a user, updating rbac_db.user_permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["User-permissions"];
       security: [
         {
           security_requirement: {
@@ -436,7 +437,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List permissions for role";
       description: "Retrieves all permissions assigned to a role from rbac_db.role_permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Role-permissions"];
       security: [
         {
           security_requirement: {
@@ -474,7 +475,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List all permissions";
       description: "Retrieves all permissions from rbac_db.permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["Permissions"];
       security: [
         {
           security_requirement: {
@@ -506,7 +507,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List permissions for user";
       description: "Retrieves all permissions assigned to a user from rbac_db.user_permissions. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["User-permissions"];
       security: [
         {
           security_requirement: {
@@ -544,7 +545,7 @@ service RBACService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List roles for user";
       description: "Retrieves all roles assigned to a user from rbac_db.user_roles. Requires admin role.";
-      tags: ["RBAC"];
+      tags: ["User-roles"];
       security: [
         {
           security_requirement: {
@@ -570,6 +571,113 @@ service RBACService {
         value: {
           description: "Internal server error";
         }
+      };
+    };
+  }
+  // RemovePermissionFromRole removes a permission from a role.
+  rpc RemovePermissionFromRole(RemovePermissionFromRoleRequest) returns (RemovePermissionFromRoleResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/rbac/role-permissions/{role_id}/{permission_id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Remove permission from role";
+      description: "Removes a permission from a role in rbac_db.role_permissions. Requires admin role.";
+      tags: ["Role-permissions"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {description: "Permission removed successfully";}
+      };
+      responses: {
+        key: "400";
+        value: {description: "Invalid request (e.g., invalid role or permission ID)";}
+      };
+      responses: {
+        key: "404";
+        value: {description: "Role or permission not found";}
+      };
+      responses: {
+        key: "500";
+        value: {description: "Internal server error";}
+      };
+    };
+  }
+
+  // RemoveRoleFromUser removes a role from a user.
+  rpc RemoveRoleFromUser(RemoveRoleFromUserRequest) returns (RemoveRoleFromUserResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/rbac/user-roles/{user_id}/{role_id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Remove role from user";
+      description: "Removes a role from a user in rbac_db.user_roles. Requires admin role.";
+      tags: ["User-roles"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {description: "Role removed successfully";}
+      };
+      responses: {
+        key: "400";
+        value: {description: "Invalid request (e.g., invalid user or role ID)";}
+      };
+      responses: {
+        key: "404";
+        value: {description: "User or role not found";}
+      };
+      responses: {
+        key: "500";
+        value: {description: "Internal server error";}
+      };
+    };
+  }
+
+  // RemovePermissionFromUser removes a permission from a user.
+  rpc RemovePermissionFromUser(RemovePermissionFromUserRequest) returns (RemovePermissionFromUserResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/rbac/user-permissions/{user_id}/{permission_id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Remove permission from user";
+      description: "Removes a permission from a user in rbac_db.user_permissions. Requires admin role.";
+      tags: ["User-permissions"];
+      security: [
+        {
+          security_requirement: {
+            key: "BearerAuth",
+            value: {}
+          }
+        }
+      ];
+      responses: {
+        key: "200";
+        value: {description: "Permission removed successfully";}
+      };
+      responses: {
+        key: "400";
+        value: {description: "Invalid request (e.g., invalid user or permission ID)";}
+      };
+      responses: {
+        key: "404";
+        value: {description: "User or permission not found";}
+      };
+      responses: {
+        key: "500";
+        value: {description: "Internal server error";}
       };
     };
   }
@@ -731,4 +839,34 @@ message ListRolesForUserResponse {
   repeated Role roles = 1; // List of roles
   bool success = 2; // True if roles were retrieved
   string error = 3; // Error message if failed
+}
+
+message RemovePermissionFromRoleRequest {
+  string role_id = 1; // UUID of the role
+  string permission_id = 2; // UUID of the permission
+}
+
+message RemovePermissionFromRoleResponse {
+  bool success = 1; // True if permission was removed
+  string error = 2; // Error message if failed
+}
+
+message RemoveRoleFromUserRequest {
+  string user_id = 1; // UUID of the user
+  string role_id = 2; // UUID of the role
+}
+
+message RemoveRoleFromUserResponse {
+  bool success = 1; // True if role was removed
+  string error = 2; // Error message if failed
+}
+
+message RemovePermissionFromUserRequest {
+  string user_id = 1; // UUID of the user
+  string permission_id = 2; // UUID of the permission
+}
+
+message RemovePermissionFromUserResponse {
+  bool success = 1; // True if permission was removed
+  string error = 2; // Error message if failed
 }

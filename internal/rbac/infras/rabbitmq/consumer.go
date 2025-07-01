@@ -6,6 +6,7 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"microservices/user-management/cmd/rbac/config"
 	"microservices/user-management/internal/rbac/domain"
+	"microservices/user-management/internal/rbac/usecases/role"
 	"microservices/user-management/internal/rbac/usecases/user_role"
 	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
@@ -14,6 +15,7 @@ import (
 
 type Consumer struct {
 	urUC      user_role.UserRoleUseCase
+	rUC       role.RoleUseCase
 	conn      *amqp091.Connection
 	channel   *amqp091.Channel
 	queueName string
@@ -28,7 +30,7 @@ type AdminUserCreatedPayload struct {
 	UserID string `json:"user_id"`
 }
 
-func NewConsumer(urUC user_role.UserRoleUseCase) (*Consumer, error) {
+func NewConsumer(urUC user_role.UserRoleUseCase, rUC role.RoleUseCase) (*Consumer, error) {
 	amqpURL := config.GetInstance().RabbitmqUrl
 	queueName := config.GetInstance().RabbitmqQueue
 
@@ -59,6 +61,7 @@ func NewConsumer(urUC user_role.UserRoleUseCase) (*Consumer, error) {
 
 	return &Consumer{
 		urUC:      urUC,
+		rUC:       rUC,
 		conn:      conn,
 		channel:   channel,
 		queueName: queueName,
@@ -112,14 +115,21 @@ func (c *Consumer) ConsumeEvents(ctx context.Context) error {
 			continue
 		}
 
+		// Fetch role ID by name
+		res, err := c.rUC.GetRoleByName(ctx, role)
+		if err != nil {
+			logger.GetInstance().Errorf("Failed to get role %s: %v", role, err)
+			return err
+		}
+
 		// Retry logic
 		const maxRetries = 5
 		const retryDelay = 1 * time.Second
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			err = c.urUC.AssignRolesToUser(ctx, []domain.UserRole{
 				{
-					UserID:   userID,
-					RoleName: role,
+					UserID: userID,
+					RoleID: res.ID,
 				},
 			})
 			if err == nil {

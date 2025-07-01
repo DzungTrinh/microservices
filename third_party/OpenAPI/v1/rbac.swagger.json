@@ -10,8 +10,9 @@
       "name": "RBACService"
     }
   ],
+  "host": "localhost:8080",
   "schemes": [
-    "https"
+    "http"
   ],
   "consumes": [
     "application/json"
@@ -44,7 +45,7 @@
           }
         },
         "tags": [
-          "RBAC"
+          "Permissions"
         ],
         "security": [
           {
@@ -93,7 +94,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Permissions"
         ],
         "security": [
           {
@@ -139,7 +140,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Permissions"
         ],
         "security": [
           {
@@ -186,7 +187,64 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Role-permissions"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/role-permissions/{roleId}/{permissionId}": {
+      "delete": {
+        "summary": "Remove permission from role",
+        "description": "Removes a permission from a role in rbac_db.role_permissions. Requires admin role.",
+        "operationId": "RBACService_RemovePermissionFromRole",
+        "responses": {
+          "200": {
+            "description": "Permission removed successfully",
+            "schema": {
+              "$ref": "#/definitions/v1RemovePermissionFromRoleResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid role or permission ID)",
+            "schema": {}
+          },
+          "404": {
+            "description": "Role or permission not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "roleId",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "permissionId",
+            "description": "UUID of the permission",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Role-permissions"
         ],
         "security": [
           {
@@ -219,7 +277,7 @@
           }
         },
         "tags": [
-          "RBAC"
+          "Roles"
         ],
         "security": [
           {
@@ -268,7 +326,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Roles"
         ],
         "security": [
           {
@@ -314,7 +372,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Roles"
         ],
         "security": [
           {
@@ -370,7 +428,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Roles"
         ],
         "security": [
           {
@@ -416,7 +474,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Roles"
         ],
         "security": [
           {
@@ -462,7 +520,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "Role-permissions"
         ],
         "security": [
           {
@@ -509,7 +567,64 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "User-permissions"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/user-permissions/{userId}/{permissionId}": {
+      "delete": {
+        "summary": "Remove permission from user",
+        "description": "Removes a permission from a user in rbac_db.user_permissions. Requires admin role.",
+        "operationId": "RBACService_RemovePermissionFromUser",
+        "responses": {
+          "200": {
+            "description": "Permission removed successfully",
+            "schema": {
+              "$ref": "#/definitions/v1RemovePermissionFromUserResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid user or permission ID)",
+            "schema": {}
+          },
+          "404": {
+            "description": "User or permission not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "UUID of the user",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "permissionId",
+            "description": "UUID of the permission",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "User-permissions"
         ],
         "security": [
           {
@@ -556,7 +671,64 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "User-roles"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/user-roles/{userId}/{roleId}": {
+      "delete": {
+        "summary": "Remove role from user",
+        "description": "Removes a role from a user in rbac_db.user_roles. Requires admin role.",
+        "operationId": "RBACService_RemoveRoleFromUser",
+        "responses": {
+          "200": {
+            "description": "Role removed successfully",
+            "schema": {
+              "$ref": "#/definitions/v1RemoveRoleFromUserResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., invalid user or role ID)",
+            "schema": {}
+          },
+          "404": {
+            "description": "User or role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "UUID of the user",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "roleId",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "User-roles"
         ],
         "security": [
           {
@@ -602,7 +774,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "User-permissions"
         ],
         "security": [
           {
@@ -648,7 +820,7 @@
           }
         ],
         "tags": [
-          "RBAC"
+          "User-roles"
         ],
         "security": [
           {
@@ -1041,6 +1213,45 @@
         "deletedAt": {
           "type": "string",
           "title": "Deletion timestamp (ISO8601, optional)"
+        }
+      }
+    },
+    "v1RemovePermissionFromRoleResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if permission was removed"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1RemovePermissionFromUserResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if permission was removed"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
+        }
+      }
+    },
+    "v1RemoveRoleFromUserResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "True if role was removed"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },

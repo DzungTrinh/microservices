@@ -15,6 +15,13 @@ func reverseProxy(targetHost string) gin.HandlerFunc {
 	target, _ := url.Parse(targetHost)
 	proxy := httputil.NewSingleHostReverseProxy(target)
 
+	//remove duplicate CORS headers
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		resp.Header.Del("Access-Control-Allow-Origin")
+		resp.Header.Del("Access-Control-Allow-Credentials")
+		return nil
+	}
+
 	proxy.Director = func(req *http.Request) {
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
@@ -22,7 +29,17 @@ func reverseProxy(targetHost string) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		proxy.ServeHTTP(c.Writer, c.Request)
+		cb := getBreaker(targetHost)
+		_, err := cb.Execute(func() (interface{}, error) {
+			proxy.ServeHTTP(c.Writer, c.Request)
+			return nil, nil
+		})
+
+		if err != nil {
+			logger.GetInstance().Errorf("Circuit breaker triggered for %s: %v", targetHost, err)
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Service unavailable"})
+			c.Abort()
+		}
 	}
 }
 
@@ -76,6 +93,9 @@ func main() {
 		rbacGroup.GET("/permissions", middlewares.RequirePermission(constants.PermissionManagePermissions), reverseProxy(rbacServiceURL))
 		rbacGroup.GET("/users/:id/permissions", middlewares.RequirePermission(constants.PermissionManageUsers), reverseProxy(rbacServiceURL))
 		rbacGroup.GET("/users/:id/roles", middlewares.RequirePermission(constants.PermissionManageUsers), reverseProxy(rbacServiceURL))
+		rbacGroup.DELETE("/role-permissions/:id/:id2", middlewares.RequirePermission(constants.PermissionManageRoles), reverseProxy(rbacServiceURL))
+		rbacGroup.DELETE("/user-roles/:id/:id2", middlewares.RequirePermission(constants.PermissionManageUsers), reverseProxy(rbacServiceURL))
+		rbacGroup.DELETE("/user-permissions/:id/:id2", middlewares.RequirePermission(constants.PermissionManageUsers), reverseProxy(rbacServiceURL))
 	}
 
 	if err := router.Run(":" + cfg.Port); err != nil {

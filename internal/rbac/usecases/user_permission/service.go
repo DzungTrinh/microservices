@@ -2,6 +2,7 @@ package user_permission
 
 import (
 	"context"
+	"errors"
 	"microservices/user-management/internal/rbac/domain"
 	"microservices/user-management/internal/rbac/domain/repo"
 	"microservices/user-management/pkg/logger"
@@ -35,4 +36,18 @@ func (s *userPermissionService) ListPermissionsForUser(ctx context.Context, user
 	}
 	logger.GetInstance().Infof("Listed %d permissions for user %s", len(perms), userID)
 	return perms, nil
+}
+
+func (s *userPermissionService) RemovePermissionFromUser(ctx context.Context, userPerm domain.UserPermission) (*domain.UserPermission, error) {
+	if userPerm.UserID == "" || userPerm.PermissionID == "" {
+		return nil, errors.New("user_id and permission_id are required")
+	}
+
+	err := s.repo.SoftDeleteUserPermission(ctx, userPerm)
+	if err != nil {
+		logger.GetInstance().Errorf("RemovePermissionFromUser failed: %v", err)
+		return nil, err
+	}
+
+	return &userPerm, nil
 }

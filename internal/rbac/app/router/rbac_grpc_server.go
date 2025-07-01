@@ -95,3 +95,15 @@ func (s *RBACGrpcServer) ListPermissionsForUser(ctx context.Context, req *rbacv1
 func (s *RBACGrpcServer) ListRolesForUser(ctx context.Context, req *rbacv1.ListRolesForUserRequest) (*rbacv1.ListRolesForUserResponse, error) {
 	return s.userRoleCtrl.ListRolesForUser(ctx, req)
 }
+
+func (s *RBACGrpcServer) RemovePermissionFromRole(ctx context.Context, req *rbacv1.RemovePermissionFromRoleRequest) (*rbacv1.RemovePermissionFromRoleResponse, error) {
+	return s.rolePermCtrl.RemovePermissionFromRole(ctx, req)
+}
+
+func (s *RBACGrpcServer) RemovePermissionFromUser(ctx context.Context, req *rbacv1.RemovePermissionFromUserRequest) (*rbacv1.RemovePermissionFromUserResponse, error) {
+	return s.userPermCtrl.RemovePermissionFromUser(ctx, req)
+}
+
+func (s *RBACGrpcServer) RemoveRoleFromUser(ctx context.Context, req *rbacv1.RemoveRoleFromUserRequest) (*rbacv1.RemoveRoleFromUserResponse, error) {
+	return s.userRoleCtrl.RemoveRoleFromUser(ctx, req)
+}

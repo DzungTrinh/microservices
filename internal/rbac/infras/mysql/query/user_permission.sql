@@ -33,3 +33,8 @@ WHERE ur.user_id = ?
   AND ur.deleted_at IS NULL
   AND rp.deleted_at IS NULL
   AND p.deleted_at IS NULL;
+
+-- name: SoftDeleteUserPermission :exec
+UPDATE user_permissions
+SET deleted_at = NOW()
+WHERE user_id = ? AND permission_id = ? AND deleted_at IS NULL;

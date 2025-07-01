@@ -491,6 +491,171 @@ func local_request_RBACService_ListRolesForUser_0(ctx context.Context, marshaler
 	return msg, metadata, err
 }
 
+func request_RBACService_RemovePermissionFromRole_0(ctx context.Context, marshaler runtime.Marshaler, client RBACServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemovePermissionFromRoleRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["role_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "role_id")
+	}
+	protoReq.RoleId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
+	}
+	val, ok = pathParams["permission_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "permission_id")
+	}
+	protoReq.PermissionId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "permission_id", err)
+	}
+	msg, err := client.RemovePermissionFromRole(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_RBACService_RemovePermissionFromRole_0(ctx context.Context, marshaler runtime.Marshaler, server RBACServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemovePermissionFromRoleRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["role_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "role_id")
+	}
+	protoReq.RoleId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
+	}
+	val, ok = pathParams["permission_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "permission_id")
+	}
+	protoReq.PermissionId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "permission_id", err)
+	}
+	msg, err := server.RemovePermissionFromRole(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_RBACService_RemoveRoleFromUser_0(ctx context.Context, marshaler runtime.Marshaler, client RBACServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemoveRoleFromUserRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+	val, ok = pathParams["role_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "role_id")
+	}
+	protoReq.RoleId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
+	}
+	msg, err := client.RemoveRoleFromUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_RBACService_RemoveRoleFromUser_0(ctx context.Context, marshaler runtime.Marshaler, server RBACServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemoveRoleFromUserRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+	val, ok = pathParams["role_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "role_id")
+	}
+	protoReq.RoleId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
+	}
+	msg, err := server.RemoveRoleFromUser(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_RBACService_RemovePermissionFromUser_0(ctx context.Context, marshaler runtime.Marshaler, client RBACServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemovePermissionFromUserRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+	val, ok = pathParams["permission_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "permission_id")
+	}
+	protoReq.PermissionId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "permission_id", err)
+	}
+	msg, err := client.RemovePermissionFromUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_RBACService_RemovePermissionFromUser_0(ctx context.Context, marshaler runtime.Marshaler, server RBACServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq RemovePermissionFromUserRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+	val, ok = pathParams["permission_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "permission_id")
+	}
+	protoReq.PermissionId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "permission_id", err)
+	}
+	msg, err := server.RemovePermissionFromUser(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 // RegisterRBACServiceHandlerServer registers the http handlers for service RBACService to "mux".
 // UnaryRPC     :call RBACServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -777,6 +942,66 @@ func RegisterRBACServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_RBACService_ListRolesForUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemovePermissionFromRole_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/rbac.v1.RBACService/RemovePermissionFromRole", runtime.WithHTTPPathPattern("/api/v1/rbac/role-permissions/{role_id}/{permission_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_RBACService_RemovePermissionFromRole_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemovePermissionFromRole_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemoveRoleFromUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/rbac.v1.RBACService/RemoveRoleFromUser", runtime.WithHTTPPathPattern("/api/v1/rbac/user-roles/{user_id}/{role_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_RBACService_RemoveRoleFromUser_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemoveRoleFromUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemovePermissionFromUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/rbac.v1.RBACService/RemovePermissionFromUser", runtime.WithHTTPPathPattern("/api/v1/rbac/user-permissions/{user_id}/{permission_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_RBACService_RemovePermissionFromUser_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemovePermissionFromUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 
 	return nil
 }
@@ -1055,39 +1280,96 @@ func RegisterRBACServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_RBACService_ListRolesForUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemovePermissionFromRole_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/rbac.v1.RBACService/RemovePermissionFromRole", runtime.WithHTTPPathPattern("/api/v1/rbac/role-permissions/{role_id}/{permission_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_RBACService_RemovePermissionFromRole_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemovePermissionFromRole_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemoveRoleFromUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/rbac.v1.RBACService/RemoveRoleFromUser", runtime.WithHTTPPathPattern("/api/v1/rbac/user-roles/{user_id}/{role_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_RBACService_RemoveRoleFromUser_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemoveRoleFromUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_RBACService_RemovePermissionFromUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/rbac.v1.RBACService/RemovePermissionFromUser", runtime.WithHTTPPathPattern("/api/v1/rbac/user-permissions/{user_id}/{permission_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_RBACService_RemovePermissionFromUser_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_RBACService_RemovePermissionFromUser_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
 var (
-	pattern_RBACService_CreateRole_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "roles"}, ""))
-	pattern_RBACService_GetRoleByName_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "name"}, ""))
-	pattern_RBACService_ListRoles_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "roles"}, ""))
-	pattern_RBACService_UpdateRole_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "id"}, ""))
-	pattern_RBACService_DeleteRole_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "id"}, ""))
-	pattern_RBACService_AssignRolesToUser_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "user-roles"}, ""))
-	pattern_RBACService_CreatePermission_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "permissions"}, ""))
-	pattern_RBACService_DeletePermission_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "permissions", "id"}, ""))
-	pattern_RBACService_AssignPermissionsToRole_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "role-permissions"}, ""))
-	pattern_RBACService_AssignPermissionsToUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "user-permissions"}, ""))
-	pattern_RBACService_ListPermissionsForRole_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "roles", "role_id", "permissions"}, ""))
-	pattern_RBACService_ListPermissions_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "permissions"}, ""))
-	pattern_RBACService_ListPermissionsForUser_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "users", "user_id", "permissions"}, ""))
-	pattern_RBACService_ListRolesForUser_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "users", "user_id", "roles"}, ""))
+	pattern_RBACService_CreateRole_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "roles"}, ""))
+	pattern_RBACService_GetRoleByName_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "name"}, ""))
+	pattern_RBACService_ListRoles_0                = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "roles"}, ""))
+	pattern_RBACService_UpdateRole_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "id"}, ""))
+	pattern_RBACService_DeleteRole_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "roles", "id"}, ""))
+	pattern_RBACService_AssignRolesToUser_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "user-roles"}, ""))
+	pattern_RBACService_CreatePermission_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "permissions"}, ""))
+	pattern_RBACService_DeletePermission_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "rbac", "permissions", "id"}, ""))
+	pattern_RBACService_AssignPermissionsToRole_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "role-permissions"}, ""))
+	pattern_RBACService_AssignPermissionsToUser_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "user-permissions"}, ""))
+	pattern_RBACService_ListPermissionsForRole_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "roles", "role_id", "permissions"}, ""))
+	pattern_RBACService_ListPermissions_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "rbac", "permissions"}, ""))
+	pattern_RBACService_ListPermissionsForUser_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "users", "user_id", "permissions"}, ""))
+	pattern_RBACService_ListRolesForUser_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "rbac", "users", "user_id", "roles"}, ""))
+	pattern_RBACService_RemovePermissionFromRole_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "rbac", "role-permissions", "role_id", "permission_id"}, ""))
+	pattern_RBACService_RemoveRoleFromUser_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "rbac", "user-roles", "user_id", "role_id"}, ""))
+	pattern_RBACService_RemovePermissionFromUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "rbac", "user-permissions", "user_id", "permission_id"}, ""))
 )
 
 var (
-	forward_RBACService_CreateRole_0              = runtime.ForwardResponseMessage
-	forward_RBACService_GetRoleByName_0           = runtime.ForwardResponseMessage
-	forward_RBACService_ListRoles_0               = runtime.ForwardResponseMessage
-	forward_RBACService_UpdateRole_0              = runtime.ForwardResponseMessage
-	forward_RBACService_DeleteRole_0              = runtime.ForwardResponseMessage
-	forward_RBACService_AssignRolesToUser_0       = runtime.ForwardResponseMessage
-	forward_RBACService_CreatePermission_0        = runtime.ForwardResponseMessage
-	forward_RBACService_DeletePermission_0        = runtime.ForwardResponseMessage
-	forward_RBACService_AssignPermissionsToRole_0 = runtime.ForwardResponseMessage
-	forward_RBACService_AssignPermissionsToUser_0 = runtime.ForwardResponseMessage
-	forward_RBACService_ListPermissionsForRole_0  = runtime.ForwardResponseMessage
-	forward_RBACService_ListPermissions_0         = runtime.ForwardResponseMessage
-	forward_RBACService_ListPermissionsForUser_0  = runtime.ForwardResponseMessage
-	forward_RBACService_ListRolesForUser_0        = runtime.ForwardResponseMessage
+	forward_RBACService_CreateRole_0               = runtime.ForwardResponseMessage
+	forward_RBACService_GetRoleByName_0            = runtime.ForwardResponseMessage
+	forward_RBACService_ListRoles_0                = runtime.ForwardResponseMessage
+	forward_RBACService_UpdateRole_0               = runtime.ForwardResponseMessage
+	forward_RBACService_DeleteRole_0               = runtime.ForwardResponseMessage
+	forward_RBACService_AssignRolesToUser_0        = runtime.ForwardResponseMessage
+	forward_RBACService_CreatePermission_0         = runtime.ForwardResponseMessage
+	forward_RBACService_DeletePermission_0         = runtime.ForwardResponseMessage
+	forward_RBACService_AssignPermissionsToRole_0  = runtime.ForwardResponseMessage
+	forward_RBACService_AssignPermissionsToUser_0  = runtime.ForwardResponseMessage
+	forward_RBACService_ListPermissionsForRole_0   = runtime.ForwardResponseMessage
+	forward_RBACService_ListPermissions_0          = runtime.ForwardResponseMessage
+	forward_RBACService_ListPermissionsForUser_0   = runtime.ForwardResponseMessage
+	forward_RBACService_ListRolesForUser_0         = runtime.ForwardResponseMessage
+	forward_RBACService_RemovePermissionFromRole_0 = runtime.ForwardResponseMessage
+	forward_RBACService_RemoveRoleFromUser_0       = runtime.ForwardResponseMessage
+	forward_RBACService_RemovePermissionFromUser_0 = runtime.ForwardResponseMessage
 )

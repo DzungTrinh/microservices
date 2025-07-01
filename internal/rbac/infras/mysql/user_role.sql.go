@@ -63,3 +63,19 @@ func (q *Queries) ListRolesForUser(ctx context.Context, userID string) ([]Role, 
 	}
 	return items, nil
 }
+
+const softDeleteUserRole = `-- name: SoftDeleteUserRole :exec
+UPDATE user_roles
+SET deleted_at = NOW()
+WHERE user_id = ? AND role_id = ? AND deleted_at IS NULL
+`
+
+type SoftDeleteUserRoleParams struct {
+	UserID string `json:"user_id"`
+	RoleID string `json:"role_id"`
+}
+
+func (q *Queries) SoftDeleteUserRole(ctx context.Context, arg SoftDeleteUserRoleParams) error {
+	_, err := q.db.ExecContext(ctx, softDeleteUserRole, arg.UserID, arg.RoleID)
+	return err
+}

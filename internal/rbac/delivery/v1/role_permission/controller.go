@@ -66,3 +66,21 @@ func (c *RolePermissionController) ListPermissionsForRole(ctx context.Context, r
 	}
 	return &rbacv1.ListPermissionsForRoleResponse{Permissions: pbPerms, Success: true}, nil
 }
+
+func (c *RolePermissionController) RemovePermissionFromRole(ctx context.Context, req *rbacv1.RemovePermissionFromRoleRequest) (*rbacv1.RemovePermissionFromRoleResponse, error) {
+	_, err := c.uc.RemovePermissionFromRole(ctx, domain.RolePermission{
+		RoleID:       req.RoleId,
+		PermissionID: req.PermissionId,
+	})
+	if err != nil {
+		logger.GetInstance().Errorf("RemovePermissionFromRole failed: %v", err)
+		return &rbacv1.RemovePermissionFromRoleResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &rbacv1.RemovePermissionFromRoleResponse{
+		Success: true,
+	}, nil
+}

@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"microservices/user-management/internal/rbac/domain"
 	"microservices/user-management/internal/rbac/usecases/user_permission"
+	"microservices/user-management/pkg/constants"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"time"
@@ -42,14 +43,16 @@ func (c *UserPermissionController) AssignPermissionsToUser(ctx context.Context, 
 		}
 	}
 
-	var expiresAt *time.Time
+	var expiresAt time.Time
 	if req.ExpiresAt != "" {
 		t, err := time.Parse(time.RFC3339, req.ExpiresAt)
 		if err != nil {
 			logger.GetInstance().Errorf("Invalid expires_at format: %v", err)
 			return nil, status.Errorf(codes.InvalidArgument, "Invalid expires_at format")
 		}
-		expiresAt = &t
+		expiresAt = t
+	} else {
+		expiresAt = constants.FallbackFutureTime // no expiration
 	}
 	dtos := make([]domain.UserPermission, len(req.PermissionIds))
 	for i, permID := range req.PermissionIds {
@@ -57,7 +60,7 @@ func (c *UserPermissionController) AssignPermissionsToUser(ctx context.Context, 
 			UserID:       req.UserId,
 			PermissionID: permID,
 			GranterID:    req.GranterId,
-			ExpiresAt:    *expiresAt,
+			ExpiresAt:    expiresAt,
 		}
 	}
 	err = c.uc.AssignPermissionsToUser(ctx, dtos)
@@ -86,4 +89,22 @@ func (c *UserPermissionController) ListPermissionsForUser(ctx context.Context, r
 		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name, CreatedAt: p.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListPermissionsForUserResponse{Permissions: pbPerms, Success: true}, nil
+}
+
+func (c *UserPermissionController) RemovePermissionFromUser(ctx context.Context, req *rbacv1.RemovePermissionFromUserRequest) (*rbacv1.RemovePermissionFromUserResponse, error) {
+	_, err := c.uc.RemovePermissionFromUser(ctx, domain.UserPermission{
+		UserID:       req.UserId,
+		PermissionID: req.PermissionId,
+	})
+	if err != nil {
+		logger.GetInstance().Errorf("RemovePermissionFromUser failed: %v", err)
+		return &rbacv1.RemovePermissionFromUserResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &rbacv1.RemovePermissionFromUserResponse{
+		Success: true,
+	}, nil
 }

@@ -7,3 +7,8 @@ SELECT p.id, p.name, p.created_at, COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 
 FROM permissions p
          JOIN role_permissions rp ON p.id = rp.permission_id
 WHERE rp.role_id = ? AND rp.deleted_at IS NULL AND p.deleted_at IS NULL;
+
+-- name: SoftDeleteRolePermission :exec
+UPDATE role_permissions
+SET deleted_at = NOW()
+WHERE role_id = ? AND permission_id = ? AND deleted_at IS NULL;

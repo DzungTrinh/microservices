@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 const (
 	GrpcPort       = "GRPC_PORT"
 	HttpPort       = "HTTP_PORT"
@@ -59,3 +61,5 @@ const (
 	PermissionManageRoles       = "manage_roles"
 	PermissionManagePermissions = "manage_permissions"
 )
+
+var FallbackFutureTime = time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC)

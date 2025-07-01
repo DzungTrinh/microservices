@@ -8,4 +8,5 @@ import (
 type UserPermissionRepository interface {
 	AssignPermissionsToUser(ctx context.Context, userPerm domain.UserPermission) error
 	ListPermissionsForUser(ctx context.Context, userID string) ([]domain.Permission, error)
+	SoftDeleteUserPermission(ctx context.Context, userPerm domain.UserPermission) error
 }

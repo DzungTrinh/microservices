@@ -45,3 +45,10 @@ func (r *userRoleRepository) ListRolesForUser(ctx context.Context, userID string
 	}
 	return roles, nil
 }
+
+func (r *userRoleRepository) SoftDeleteUserRole(ctx context.Context, userRole domain.UserRole) error {
+	return r.Queries.SoftDeleteUserRole(ctx, mysql.SoftDeleteUserRoleParams{
+		UserID: userRole.UserID,
+		RoleID: userRole.RoleID,
+	})
+}

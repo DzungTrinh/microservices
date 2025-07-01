@@ -2,6 +2,7 @@ package user_role
 
 import (
 	"context"
+	"errors"
 	"microservices/user-management/internal/rbac/domain"
 	"microservices/user-management/internal/rbac/domain/repo"
 	"microservices/user-management/internal/rbac/usecases/role"
@@ -21,23 +22,6 @@ func NewUserRoleService(repo repo.UserRoleRepository, roleUC role.RoleUseCase) U
 }
 
 func (s *userRoleService) AssignRolesToUser(ctx context.Context, userRoles []domain.UserRole) error {
-
-	for i, userRole := range userRoles {
-		if s.roleUC == nil {
-			logger.GetInstance().Error("roleUC is nil in AssignRolesToUser")
-			panic("roleUC is nil in AssignRolesToUser")
-		}
-
-		// Fetch role ID by name
-		role, err := s.roleUC.GetRoleByName(ctx, userRole.RoleName)
-		if err != nil {
-			logger.GetInstance().Errorf("Failed to get role %s for user %s: %v", userRole.RoleID, userRole.UserID, err)
-			return err
-		}
-		// Update userRole with actual role ID
-		userRoles[i].RoleID = role.ID
-	}
-
 	for _, ur := range userRoles {
 		err := s.repo.AssignRolesToUser(ctx, ur)
 		if err != nil {
@@ -57,4 +41,18 @@ func (s *userRoleService) ListRolesForUser(ctx context.Context, userID string) (
 	}
 	logger.GetInstance().Infof("Listed %d roles for user %s", len(roles), userID)
 	return roles, nil
+}
+
+func (s *userRoleService) RemoveRoleFromUser(ctx context.Context, userRole domain.UserRole) (*domain.UserRole, error) {
+	if userRole.UserID == "" || userRole.RoleID == "" {
+		return nil, errors.New("user_id and role_id are required")
+	}
+
+	err := s.repo.SoftDeleteUserRole(ctx, userRole)
+	if err != nil {
+		logger.GetInstance().Errorf("RemoveRoleFromUser failed: %v", err)
+		return nil, err
+	}
+
+	return &userRole, nil
 }

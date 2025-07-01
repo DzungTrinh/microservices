@@ -8,4 +8,5 @@ import (
 type RolePermissionRepository interface {
 	AssignPermissionsToRole(ctx context.Context, rolePerm domain.RolePermission) error
 	ListPermissionsForRole(ctx context.Context, roleID string) ([]domain.Permission, error)
+	SoftDeleteRolePermission(ctx context.Context, rolePerm domain.RolePermission) error
 }

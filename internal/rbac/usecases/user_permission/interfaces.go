@@ -8,4 +8,5 @@ import (
 type UserPermissionUseCase interface {
 	AssignPermissionsToUser(ctx context.Context, userPerms []domain.UserPermission) error
 	ListPermissionsForUser(ctx context.Context, userID string) ([]domain.Permission, error)
+	RemovePermissionFromUser(ctx context.Context, userPerm domain.UserPermission) (*domain.UserPermission, error)
 }

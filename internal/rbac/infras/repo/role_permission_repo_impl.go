@@ -43,3 +43,10 @@ func (r *rolePermissionRepository) ListPermissionsForRole(ctx context.Context, r
 	}
 	return perms, nil
 }
+
+func (r *rolePermissionRepository) SoftDeleteRolePermission(ctx context.Context, rolePerm domain.RolePermission) error {
+	return r.Queries.SoftDeleteRolePermission(ctx, mysql.SoftDeleteRolePermissionParams{
+		RoleID:       rolePerm.RoleID,
+		PermissionID: rolePerm.PermissionID,
+	})
+}

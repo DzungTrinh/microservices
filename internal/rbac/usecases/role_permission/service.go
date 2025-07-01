@@ -2,6 +2,7 @@ package role_permission
 
 import (
 	"context"
+	"errors"
 	"microservices/user-management/internal/rbac/domain"
 	"microservices/user-management/internal/rbac/domain/repo"
 	"microservices/user-management/pkg/logger"
@@ -35,4 +36,18 @@ func (s *rolePermissionService) ListPermissionsForRole(ctx context.Context, role
 	}
 	logger.GetInstance().Infof("Listed %d permissions for role %s", len(perms), roleID)
 	return perms, nil
+}
+
+func (s *rolePermissionService) RemovePermissionFromRole(ctx context.Context, rolePerm domain.RolePermission) (*domain.RolePermission, error) {
+	if rolePerm.RoleID == "" || rolePerm.PermissionID == "" {
+		return nil, errors.New("role_id and permission_id are required")
+	}
+
+	err := s.repo.SoftDeleteRolePermission(ctx, rolePerm)
+	if err != nil {
+		logger.GetInstance().Errorf("RemovePermissionFromRole failed: %v", err)
+		return nil, err
+	}
+
+	return &rolePerm, nil
 }

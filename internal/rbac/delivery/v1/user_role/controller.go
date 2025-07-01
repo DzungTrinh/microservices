@@ -66,3 +66,21 @@ func (c *UserRoleController) ListRolesForUser(ctx context.Context, req *rbacv1.L
 	}
 	return &rbacv1.ListRolesForUserResponse{Roles: pbRoles, Success: true}, nil
 }
+
+func (c *UserRoleController) RemoveRoleFromUser(ctx context.Context, req *rbacv1.RemoveRoleFromUserRequest) (*rbacv1.RemoveRoleFromUserResponse, error) {
+	_, err := c.uc.RemoveRoleFromUser(ctx, domain.UserRole{
+		UserID: req.UserId,
+		RoleID: req.RoleId,
+	})
+	if err != nil {
+		logger.GetInstance().Errorf("RemoveRoleFromUser failed: %v", err)
+		return &rbacv1.RemoveRoleFromUserResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &rbacv1.RemoveRoleFromUserResponse{
+		Success: true,
+	}, nil
+}

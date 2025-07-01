@@ -60,3 +60,10 @@ func (r *userPermissionRepository) ListPermissionsForUser(ctx context.Context, u
 	}
 	return permissions, nil
 }
+
+func (r *userPermissionRepository) SoftDeleteUserPermission(ctx context.Context, userPerm domain.UserPermission) error {
+	return r.Queries.SoftDeleteUserPermission(ctx, mysql.SoftDeleteUserPermissionParams{
+		UserID:       userPerm.UserID,
+		PermissionID: userPerm.PermissionID,
+	})
+}

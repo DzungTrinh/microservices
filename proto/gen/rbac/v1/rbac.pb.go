@@ -1651,6 +1651,318 @@ func (x *ListRolesForUserResponse) GetError() string {
 	return ""
 }
 
+type RemovePermissionFromRoleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoleId        string                 `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`                   // UUID of the role
+	PermissionId  string                 `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"` // UUID of the permission
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePermissionFromRoleRequest) Reset() {
+	*x = RemovePermissionFromRoleRequest{}
+	mi := &file_v1_rbac_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePermissionFromRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePermissionFromRoleRequest) ProtoMessage() {}
+
+func (x *RemovePermissionFromRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePermissionFromRoleRequest.ProtoReflect.Descriptor instead.
+func (*RemovePermissionFromRoleRequest) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *RemovePermissionFromRoleRequest) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+func (x *RemovePermissionFromRoleRequest) GetPermissionId() string {
+	if x != nil {
+		return x.PermissionId
+	}
+	return ""
+}
+
+type RemovePermissionFromRoleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // True if permission was removed
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`      // Error message if failed
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePermissionFromRoleResponse) Reset() {
+	*x = RemovePermissionFromRoleResponse{}
+	mi := &file_v1_rbac_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePermissionFromRoleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePermissionFromRoleResponse) ProtoMessage() {}
+
+func (x *RemovePermissionFromRoleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePermissionFromRoleResponse.ProtoReflect.Descriptor instead.
+func (*RemovePermissionFromRoleResponse) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *RemovePermissionFromRoleResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RemovePermissionFromRoleResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type RemoveRoleFromUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // UUID of the user
+	RoleId        string                 `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"` // UUID of the role
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveRoleFromUserRequest) Reset() {
+	*x = RemoveRoleFromUserRequest{}
+	mi := &file_v1_rbac_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveRoleFromUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveRoleFromUserRequest) ProtoMessage() {}
+
+func (x *RemoveRoleFromUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveRoleFromUserRequest.ProtoReflect.Descriptor instead.
+func (*RemoveRoleFromUserRequest) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *RemoveRoleFromUserRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RemoveRoleFromUserRequest) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+type RemoveRoleFromUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // True if role was removed
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`      // Error message if failed
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveRoleFromUserResponse) Reset() {
+	*x = RemoveRoleFromUserResponse{}
+	mi := &file_v1_rbac_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveRoleFromUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveRoleFromUserResponse) ProtoMessage() {}
+
+func (x *RemoveRoleFromUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveRoleFromUserResponse.ProtoReflect.Descriptor instead.
+func (*RemoveRoleFromUserResponse) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *RemoveRoleFromUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RemoveRoleFromUserResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type RemovePermissionFromUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                   // UUID of the user
+	PermissionId  string                 `protobuf:"bytes,2,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"` // UUID of the permission
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePermissionFromUserRequest) Reset() {
+	*x = RemovePermissionFromUserRequest{}
+	mi := &file_v1_rbac_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePermissionFromUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePermissionFromUserRequest) ProtoMessage() {}
+
+func (x *RemovePermissionFromUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePermissionFromUserRequest.ProtoReflect.Descriptor instead.
+func (*RemovePermissionFromUserRequest) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *RemovePermissionFromUserRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RemovePermissionFromUserRequest) GetPermissionId() string {
+	if x != nil {
+		return x.PermissionId
+	}
+	return ""
+}
+
+type RemovePermissionFromUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // True if permission was removed
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`      // Error message if failed
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePermissionFromUserResponse) Reset() {
+	*x = RemovePermissionFromUserResponse{}
+	mi := &file_v1_rbac_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePermissionFromUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePermissionFromUserResponse) ProtoMessage() {}
+
+func (x *RemovePermissionFromUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rbac_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePermissionFromUserResponse.ProtoReflect.Descriptor instead.
+func (*RemovePermissionFromUserResponse) Descriptor() ([]byte, []int) {
+	return file_v1_rbac_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *RemovePermissionFromUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RemovePermissionFromUserResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 var File_v1_rbac_proto protoreflect.FileDescriptor
 
 const file_v1_rbac_proto_rawDesc = "" +
@@ -1766,11 +2078,29 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x18ListRolesForUserResponse\x12#\n" +
 	"\x05roles\x18\x01 \x03(\v2\r.rbac.v1.RoleR\x05roles\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error2\xe7)\n" +
-	"\vRBACService\x12\xee\x02\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\"_\n" +
+	"\x1fRemovePermissionFromRoleRequest\x12\x17\n" +
+	"\arole_id\x18\x01 \x01(\tR\x06roleId\x12#\n" +
+	"\rpermission_id\x18\x02 \x01(\tR\fpermissionId\"R\n" +
+	" RemovePermissionFromRoleResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"M\n" +
+	"\x19RemoveRoleFromUserRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\arole_id\x18\x02 \x01(\tR\x06roleId\"L\n" +
+	"\x1aRemoveRoleFromUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"_\n" +
+	"\x1fRemovePermissionFromUserRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
+	"\rpermission_id\x18\x02 \x01(\tR\fpermissionId\"R\n" +
+	" RemovePermissionFromUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xef5\n" +
+	"\vRBACService\x12\xef\x02\n" +
 	"\n" +
-	"CreateRole\x12\x1a.rbac.v1.CreateRoleRequest\x1a\x1b.rbac.v1.CreateRoleResponse\"\xa6\x02\x92A\x85\x02\n" +
-	"\x04RBAC\x12\vCreate role\x1aCCreates a new role in the rbac_db.roles table. Requires admin role.J\"\n" +
+	"CreateRole\x12\x1a.rbac.v1.CreateRoleRequest\x1a\x1b.rbac.v1.CreateRoleResponse\"\xa7\x02\x92A\x86\x02\n" +
+	"\x05Roles\x12\vCreate role\x1aCCreates a new role in the rbac_db.roles table. Requires admin role.J\"\n" +
 	"\x03200\x12\x1b\n" +
 	"\x19Role created successfullyJ2\n" +
 	"\x03400\x12+\n" +
@@ -1781,9 +2111,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xd1\x02\n" +
-	"\rGetRoleByName\x12\x1d.rbac.v1.GetRoleByNameRequest\x1a\x1e.rbac.v1.GetRoleByNameResponse\"\x80\x02\x92A\xdb\x01\n" +
-	"\x04RBAC\x12\x10Get role by Name\x1aPRetrieves details of a role from rbac_db.roles by its name. Requires admin role.J$\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/rbac/roles\x12\xd2\x02\n" +
+	"\rGetRoleByName\x12\x1d.rbac.v1.GetRoleByNameRequest\x1a\x1e.rbac.v1.GetRoleByNameResponse\"\x81\x02\x92A\xdc\x01\n" +
+	"\x05Roles\x12\x10Get role by Name\x1aPRetrieves details of a role from rbac_db.roles by its name. Requires admin role.J$\n" +
 	"\x03200\x12\x1d\n" +
 	"\x1bRole retrieved successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +
@@ -1792,9 +2122,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/rbac/roles/{name}\x12\x8b\x02\n" +
-	"\tListRoles\x12\x0e.rbac.v1.Empty\x1a\x1a.rbac.v1.ListRolesResponse\"\xd1\x01\x92A\xb3\x01\n" +
-	"\x04RBAC\x12\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/rbac/roles/{name}\x12\x8c\x02\n" +
+	"\tListRoles\x12\x0e.rbac.v1.Empty\x1a\x1a.rbac.v1.ListRolesResponse\"\xd2\x01\x92A\xb4\x01\n" +
+	"\x05Roles\x12\n" +
 	"List roles\x1aFRetrieves a list of all roles from rbac_db.roles. Requires admin role.J%\n" +
 	"\x03200\x12\x1e\n" +
 	"\x1cRoles retrieved successfullyJ\x1e\n" +
@@ -1802,10 +2132,10 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/rbac/roles\x12\xf8\x02\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/rbac/roles\x12\xf9\x02\n" +
 	"\n" +
-	"UpdateRole\x12\x1a.rbac.v1.UpdateRoleRequest\x1a\x1b.rbac.v1.UpdateRoleResponse\"\xb0\x02\x92A\x8a\x02\n" +
-	"\x04RBAC\x12\vUpdate role\x1aTUpdates the name or built-in status of a role in rbac_db.roles. Requires admin role.J\"\n" +
+	"UpdateRole\x12\x1a.rbac.v1.UpdateRoleRequest\x1a\x1b.rbac.v1.UpdateRoleResponse\"\xb1\x02\x92A\x8b\x02\n" +
+	"\x05Roles\x12\vUpdate role\x1aTUpdates the name or built-in status of a role in rbac_db.roles. Requires admin role.J\"\n" +
 	"\x03200\x12\x1b\n" +
 	"\x19Role updated successfullyJ0\n" +
 	"\x03400\x12)\n" +
@@ -1816,10 +2146,10 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/api/v1/rbac/roles/{id}\x12\xbf\x02\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/api/v1/rbac/roles/{id}\x12\xc0\x02\n" +
 	"\n" +
-	"DeleteRole\x12\x1a.rbac.v1.DeleteRoleRequest\x1a\x1b.rbac.v1.DeleteRoleResponse\"\xf7\x01\x92A\xd4\x01\n" +
-	"\x04RBAC\x12\vDelete role\x1aPSoft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.J\"\n" +
+	"DeleteRole\x12\x1a.rbac.v1.DeleteRoleRequest\x1a\x1b.rbac.v1.DeleteRoleResponse\"\xf8\x01\x92A\xd5\x01\n" +
+	"\x05Roles\x12\vDelete role\x1aPSoft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.J\"\n" +
 	"\x03200\x12\x1b\n" +
 	"\x19Role deleted successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +
@@ -1828,9 +2158,10 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19*\x17/api/v1/rbac/roles/{id}\x12\xce\x03\n" +
-	"\x11AssignRolesToUser\x12!.rbac.v1.AssignRolesToUserRequest\x1a\".rbac.v1.AssignRolesToUserResponse\"\xf1\x02\x92A\xcb\x02\n" +
-	"\x04RBAC\x12\x14Assign roles to user\x1a\x99\x01Assigns multiple roles to a user, updating rbac_db.user_roles. Used during registration or role management. Requires admin role for non-self assignments.J$\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19*\x17/api/v1/rbac/roles/{id}\x12\xd4\x03\n" +
+	"\x11AssignRolesToUser\x12!.rbac.v1.AssignRolesToUserRequest\x1a\".rbac.v1.AssignRolesToUserResponse\"\xf7\x02\x92A\xd1\x02\n" +
+	"\n" +
+	"User-roles\x12\x14Assign roles to user\x1a\x99\x01Assigns multiple roles to a user, updating rbac_db.user_roles. Used during registration or role management. Requires admin role for non-self assignments.J$\n" +
 	"\x03200\x12\x1d\n" +
 	"\x1bRoles assigned successfullyJ9\n" +
 	"\x03400\x122\n" +
@@ -1839,9 +2170,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/rbac/user-roles\x12\xa0\x03\n" +
-	"\x10CreatePermission\x12 .rbac.v1.CreatePermissionRequest\x1a!.rbac.v1.CreatePermissionResponse\"\xc6\x02\x92A\x9f\x02\n" +
-	"\x04RBAC\x12\x11Create permission\x1aECreates a new permission in rbac_db.permissions. Requires admin role.J(\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/rbac/user-roles\x12\xa7\x03\n" +
+	"\x10CreatePermission\x12 .rbac.v1.CreatePermissionRequest\x1a!.rbac.v1.CreatePermissionResponse\"\xcd\x02\x92A\xa6\x02\n" +
+	"\vPermissions\x12\x11Create permission\x1aECreates a new permission in rbac_db.permissions. Requires admin role.J(\n" +
 	"\x03200\x12!\n" +
 	"\x1fPermission created successfullyJ8\n" +
 	"\x03400\x121\n" +
@@ -1852,9 +2183,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/rbac/permissions\x12\xf7\x02\n" +
-	"\x10DeletePermission\x12 .rbac.v1.DeletePermissionRequest\x1a!.rbac.v1.DeletePermissionResponse\"\x9d\x02\x92A\xf4\x01\n" +
-	"\x04RBAC\x12\x11Delete permission\x1a^Soft-deletes a permission from rbac_db.permissions by setting deleted_at. Requires admin role.J(\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/rbac/permissions\x12\xfe\x02\n" +
+	"\x10DeletePermission\x12 .rbac.v1.DeletePermissionRequest\x1a!.rbac.v1.DeletePermissionResponse\"\xa4\x02\x92A\xfb\x01\n" +
+	"\vPermissions\x12\x11Delete permission\x1a^Soft-deletes a permission from rbac_db.permissions by setting deleted_at. Requires admin role.J(\n" +
 	"\x03200\x12!\n" +
 	"\x1fPermission deleted successfullyJ\x1d\n" +
 	"\x03404\x12\x16\n" +
@@ -1863,9 +2194,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/rbac/permissions/{id}\x12\xbd\x03\n" +
-	"\x17AssignPermissionsToRole\x12'.rbac.v1.AssignPermissionsToRoleRequest\x1a(.rbac.v1.AssignPermissionsToRoleResponse\"\xce\x02\x92A\xa2\x02\n" +
-	"\x04RBAC\x12\x1aAssign permissions to role\x1a_Assigns multiple permissions to a role, updating rbac_db.role_permissions. Requires admin role.J*\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/rbac/permissions/{id}\x12\xc9\x03\n" +
+	"\x17AssignPermissionsToRole\x12'.rbac.v1.AssignPermissionsToRoleRequest\x1a(.rbac.v1.AssignPermissionsToRoleResponse\"\xda\x02\x92A\xae\x02\n" +
+	"\x10Role-permissions\x12\x1aAssign permissions to role\x1a_Assigns multiple permissions to a role, updating rbac_db.role_permissions. Requires admin role.J*\n" +
 	"\x03200\x12#\n" +
 	"!Permissions assigned successfullyJ?\n" +
 	"\x03400\x128\n" +
@@ -1874,9 +2205,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/rbac/role-permissions\x12\xbd\x03\n" +
-	"\x17AssignPermissionsToUser\x12'.rbac.v1.AssignPermissionsToUserRequest\x1a(.rbac.v1.AssignPermissionsToUserResponse\"\xce\x02\x92A\xa2\x02\n" +
-	"\x04RBAC\x12\x1aAssign permissions to user\x1a_Assigns permissions directly to a user, updating rbac_db.user_permissions. Requires admin role.J*\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/rbac/role-permissions\x12\xc9\x03\n" +
+	"\x17AssignPermissionsToUser\x12'.rbac.v1.AssignPermissionsToUserRequest\x1a(.rbac.v1.AssignPermissionsToUserResponse\"\xda\x02\x92A\xae\x02\n" +
+	"\x10User-permissions\x12\x1aAssign permissions to user\x1a_Assigns permissions directly to a user, updating rbac_db.user_permissions. Requires admin role.J*\n" +
 	"\x03200\x12#\n" +
 	"!Permissions assigned successfullyJ?\n" +
 	"\x03400\x128\n" +
@@ -1885,9 +2216,9 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/rbac/user-permissions\x12\x9b\x03\n" +
-	"\x16ListPermissionsForRole\x12&.rbac.v1.ListPermissionsForRoleRequest\x1a'.rbac.v1.ListPermissionsForRoleResponse\"\xaf\x02\x92A\xfb\x01\n" +
-	"\x04RBAC\x12\x19List permissions for role\x1a`Retrieves all permissions assigned to a role from rbac_db.role_permissions. Requires admin role.J+\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/rbac/user-permissions\x12\xa7\x03\n" +
+	"\x16ListPermissionsForRole\x12&.rbac.v1.ListPermissionsForRoleRequest\x1a'.rbac.v1.ListPermissionsForRoleResponse\"\xbb\x02\x92A\x87\x02\n" +
+	"\x10Role-permissions\x12\x19List permissions for role\x1a`Retrieves all permissions assigned to a role from rbac_db.role_permissions. Requires admin role.J+\n" +
 	"\x03200\x12$\n" +
 	"\"Permissions retrieved successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +
@@ -1896,18 +2227,18 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/api/v1/rbac/roles/{role_id}/permissions\x12\xaf\x02\n" +
-	"\x0fListPermissions\x12\x0e.rbac.v1.Empty\x1a .rbac.v1.ListPermissionsResponse\"\xe9\x01\x92A\xc5\x01\n" +
-	"\x04RBAC\x12\x14List all permissions\x1aHRetrieves all permissions from rbac_db.permissions. Requires admin role.J+\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/api/v1/rbac/roles/{role_id}/permissions\x12\xb6\x02\n" +
+	"\x0fListPermissions\x12\x0e.rbac.v1.Empty\x1a .rbac.v1.ListPermissionsResponse\"\xf0\x01\x92A\xcc\x01\n" +
+	"\vPermissions\x12\x14List all permissions\x1aHRetrieves all permissions from rbac_db.permissions. Requires admin role.J+\n" +
 	"\x03200\x12$\n" +
 	"\"Permissions retrieved successfullyJ\x1e\n" +
 	"\x03500\x12\x17\n" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/rbac/permissions\x12\x9b\x03\n" +
-	"\x16ListPermissionsForUser\x12&.rbac.v1.ListPermissionsForUserRequest\x1a'.rbac.v1.ListPermissionsForUserResponse\"\xaf\x02\x92A\xfb\x01\n" +
-	"\x04RBAC\x12\x19List permissions for user\x1a`Retrieves all permissions assigned to a user from rbac_db.user_permissions. Requires admin role.J+\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/rbac/permissions\x12\xa7\x03\n" +
+	"\x16ListPermissionsForUser\x12&.rbac.v1.ListPermissionsForUserRequest\x1a'.rbac.v1.ListPermissionsForUserResponse\"\xbb\x02\x92A\x87\x02\n" +
+	"\x10User-permissions\x12\x19List permissions for user\x1a`Retrieves all permissions assigned to a user from rbac_db.user_permissions. Requires admin role.J+\n" +
 	"\x03200\x12$\n" +
 	"\"Permissions retrieved successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +
@@ -1916,9 +2247,10 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/api/v1/rbac/users/{user_id}/permissions\x12\xeb\x02\n" +
-	"\x10ListRolesForUser\x12 .rbac.v1.ListRolesForUserRequest\x1a!.rbac.v1.ListRolesForUserResponse\"\x91\x02\x92A\xe3\x01\n" +
-	"\x04RBAC\x12\x13List roles for user\x1aTRetrieves all roles assigned to a user from rbac_db.user_roles. Requires admin role.J%\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/api/v1/rbac/users/{user_id}/permissions\x12\xf1\x02\n" +
+	"\x10ListRolesForUser\x12 .rbac.v1.ListRolesForUserRequest\x1a!.rbac.v1.ListRolesForUserResponse\"\x97\x02\x92A\xe9\x01\n" +
+	"\n" +
+	"User-roles\x12\x13List roles for user\x1aTRetrieves all roles assigned to a user from rbac_db.user_roles. Requires admin role.J%\n" +
 	"\x03200\x12\x1e\n" +
 	"\x1cRoles retrieved successfullyJ\x17\n" +
 	"\x03404\x12\x10\n" +
@@ -1927,8 +2259,48 @@ const file_v1_rbac_proto_rawDesc = "" +
 	"\x15Internal server errorb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02$\x12\"/api/v1/rbac/users/{user_id}/rolesB\xef\x01\x92A\xdb\x01\x12@\n" +
-	"\fRBAC Service\x12+Service for managing roles and permissions.2\x031.0*\x01\x022\x10application/json:\x10application/jsonZp\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02$\x12\"/api/v1/rbac/users/{user_id}/roles\x12\xfb\x03\n" +
+	"\x18RemovePermissionFromRole\x12(.rbac.v1.RemovePermissionFromRoleRequest\x1a).rbac.v1.RemovePermissionFromRoleResponse\"\x89\x03\x92A\xc6\x02\n" +
+	"\x10Role-permissions\x12\x1bRemove permission from role\x1aRRemoves a permission from a role in rbac_db.role_permissions. Requires admin role.J(\n" +
+	"\x03200\x12!\n" +
+	"\x1fPermission removed successfullyJ>\n" +
+	"\x03400\x127\n" +
+	"5Invalid request (e.g., invalid role or permission ID)J%\n" +
+	"\x03404\x12\x1e\n" +
+	"\x1cRole or permission not foundJ\x1e\n" +
+	"\x03500\x12\x17\n" +
+	"\x15Internal server errorb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x029*7/api/v1/rbac/role-permissions/{role_id}/{permission_id}\x12\xb3\x03\n" +
+	"\x12RemoveRoleFromUser\x12\".rbac.v1.RemoveRoleFromUserRequest\x1a#.rbac.v1.RemoveRoleFromUserResponse\"\xd3\x02\x92A\x9c\x02\n" +
+	"\n" +
+	"User-roles\x12\x15Remove role from user\x1aFRemoves a role from a user in rbac_db.user_roles. Requires admin role.J\"\n" +
+	"\x03200\x12\x1b\n" +
+	"\x19Role removed successfullyJ8\n" +
+	"\x03400\x121\n" +
+	"/Invalid request (e.g., invalid user or role ID)J\x1f\n" +
+	"\x03404\x12\x18\n" +
+	"\x16User or role not foundJ\x1e\n" +
+	"\x03500\x12\x17\n" +
+	"\x15Internal server errorb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02-*+/api/v1/rbac/user-roles/{user_id}/{role_id}\x12\xfb\x03\n" +
+	"\x18RemovePermissionFromUser\x12(.rbac.v1.RemovePermissionFromUserRequest\x1a).rbac.v1.RemovePermissionFromUserResponse\"\x89\x03\x92A\xc6\x02\n" +
+	"\x10User-permissions\x12\x1bRemove permission from user\x1aRRemoves a permission from a user in rbac_db.user_permissions. Requires admin role.J(\n" +
+	"\x03200\x12!\n" +
+	"\x1fPermission removed successfullyJ>\n" +
+	"\x03400\x127\n" +
+	"5Invalid request (e.g., invalid user or permission ID)J%\n" +
+	"\x03404\x12\x1e\n" +
+	"\x1cUser or permission not foundJ\x1e\n" +
+	"\x03500\x12\x17\n" +
+	"\x15Internal server errorb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x029*7/api/v1/rbac/user-permissions/{user_id}/{permission_id}B\xff\x01\x92A\xeb\x01\x12@\n" +
+	"\fRBAC Service\x12+Service for managing roles and permissions.2\x031.0\x1a\x0elocalhost:8080*\x01\x012\x10application/json:\x10application/jsonZp\n" +
 	"n\n" +
 	"\n" +
 	"BearerAuth\x12`\b\x02\x12KJWT token using the Bearer scheme. Example: 'Authorization: Bearer {token}'\x1a\rAuthorization \x02Z\x0erbac/v1;rbacv1b\x06proto3"
@@ -1945,37 +2317,43 @@ func file_v1_rbac_proto_rawDescGZIP() []byte {
 	return file_v1_rbac_proto_rawDescData
 }
 
-var file_v1_rbac_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_v1_rbac_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_v1_rbac_proto_goTypes = []any{
-	(*Empty)(nil),                           // 0: rbac.v1.Empty
-	(*Role)(nil),                            // 1: rbac.v1.Role
-	(*Permission)(nil),                      // 2: rbac.v1.Permission
-	(*CreateRoleRequest)(nil),               // 3: rbac.v1.CreateRoleRequest
-	(*CreateRoleResponse)(nil),              // 4: rbac.v1.CreateRoleResponse
-	(*GetRoleByNameRequest)(nil),            // 5: rbac.v1.GetRoleByNameRequest
-	(*GetRoleByNameResponse)(nil),           // 6: rbac.v1.GetRoleByNameResponse
-	(*ListRolesResponse)(nil),               // 7: rbac.v1.ListRolesResponse
-	(*UpdateRoleRequest)(nil),               // 8: rbac.v1.UpdateRoleRequest
-	(*UpdateRoleResponse)(nil),              // 9: rbac.v1.UpdateRoleResponse
-	(*DeleteRoleRequest)(nil),               // 10: rbac.v1.DeleteRoleRequest
-	(*DeleteRoleResponse)(nil),              // 11: rbac.v1.DeleteRoleResponse
-	(*AssignRolesToUserRequest)(nil),        // 12: rbac.v1.AssignRolesToUserRequest
-	(*AssignRolesToUserResponse)(nil),       // 13: rbac.v1.AssignRolesToUserResponse
-	(*CreatePermissionRequest)(nil),         // 14: rbac.v1.CreatePermissionRequest
-	(*CreatePermissionResponse)(nil),        // 15: rbac.v1.CreatePermissionResponse
-	(*DeletePermissionRequest)(nil),         // 16: rbac.v1.DeletePermissionRequest
-	(*DeletePermissionResponse)(nil),        // 17: rbac.v1.DeletePermissionResponse
-	(*AssignPermissionsToRoleRequest)(nil),  // 18: rbac.v1.AssignPermissionsToRoleRequest
-	(*AssignPermissionsToRoleResponse)(nil), // 19: rbac.v1.AssignPermissionsToRoleResponse
-	(*AssignPermissionsToUserRequest)(nil),  // 20: rbac.v1.AssignPermissionsToUserRequest
-	(*AssignPermissionsToUserResponse)(nil), // 21: rbac.v1.AssignPermissionsToUserResponse
-	(*ListPermissionsForRoleRequest)(nil),   // 22: rbac.v1.ListPermissionsForRoleRequest
-	(*ListPermissionsForRoleResponse)(nil),  // 23: rbac.v1.ListPermissionsForRoleResponse
-	(*ListPermissionsResponse)(nil),         // 24: rbac.v1.ListPermissionsResponse
-	(*ListPermissionsForUserRequest)(nil),   // 25: rbac.v1.ListPermissionsForUserRequest
-	(*ListPermissionsForUserResponse)(nil),  // 26: rbac.v1.ListPermissionsForUserResponse
-	(*ListRolesForUserRequest)(nil),         // 27: rbac.v1.ListRolesForUserRequest
-	(*ListRolesForUserResponse)(nil),        // 28: rbac.v1.ListRolesForUserResponse
+	(*Empty)(nil),                            // 0: rbac.v1.Empty
+	(*Role)(nil),                             // 1: rbac.v1.Role
+	(*Permission)(nil),                       // 2: rbac.v1.Permission
+	(*CreateRoleRequest)(nil),                // 3: rbac.v1.CreateRoleRequest
+	(*CreateRoleResponse)(nil),               // 4: rbac.v1.CreateRoleResponse
+	(*GetRoleByNameRequest)(nil),             // 5: rbac.v1.GetRoleByNameRequest
+	(*GetRoleByNameResponse)(nil),            // 6: rbac.v1.GetRoleByNameResponse
+	(*ListRolesResponse)(nil),                // 7: rbac.v1.ListRolesResponse
+	(*UpdateRoleRequest)(nil),                // 8: rbac.v1.UpdateRoleRequest
+	(*UpdateRoleResponse)(nil),               // 9: rbac.v1.UpdateRoleResponse
+	(*DeleteRoleRequest)(nil),                // 10: rbac.v1.DeleteRoleRequest
+	(*DeleteRoleResponse)(nil),               // 11: rbac.v1.DeleteRoleResponse
+	(*AssignRolesToUserRequest)(nil),         // 12: rbac.v1.AssignRolesToUserRequest
+	(*AssignRolesToUserResponse)(nil),        // 13: rbac.v1.AssignRolesToUserResponse
+	(*CreatePermissionRequest)(nil),          // 14: rbac.v1.CreatePermissionRequest
+	(*CreatePermissionResponse)(nil),         // 15: rbac.v1.CreatePermissionResponse
+	(*DeletePermissionRequest)(nil),          // 16: rbac.v1.DeletePermissionRequest
+	(*DeletePermissionResponse)(nil),         // 17: rbac.v1.DeletePermissionResponse
+	(*AssignPermissionsToRoleRequest)(nil),   // 18: rbac.v1.AssignPermissionsToRoleRequest
+	(*AssignPermissionsToRoleResponse)(nil),  // 19: rbac.v1.AssignPermissionsToRoleResponse
+	(*AssignPermissionsToUserRequest)(nil),   // 20: rbac.v1.AssignPermissionsToUserRequest
+	(*AssignPermissionsToUserResponse)(nil),  // 21: rbac.v1.AssignPermissionsToUserResponse
+	(*ListPermissionsForRoleRequest)(nil),    // 22: rbac.v1.ListPermissionsForRoleRequest
+	(*ListPermissionsForRoleResponse)(nil),   // 23: rbac.v1.ListPermissionsForRoleResponse
+	(*ListPermissionsResponse)(nil),          // 24: rbac.v1.ListPermissionsResponse
+	(*ListPermissionsForUserRequest)(nil),    // 25: rbac.v1.ListPermissionsForUserRequest
+	(*ListPermissionsForUserResponse)(nil),   // 26: rbac.v1.ListPermissionsForUserResponse
+	(*ListRolesForUserRequest)(nil),          // 27: rbac.v1.ListRolesForUserRequest
+	(*ListRolesForUserResponse)(nil),         // 28: rbac.v1.ListRolesForUserResponse
+	(*RemovePermissionFromRoleRequest)(nil),  // 29: rbac.v1.RemovePermissionFromRoleRequest
+	(*RemovePermissionFromRoleResponse)(nil), // 30: rbac.v1.RemovePermissionFromRoleResponse
+	(*RemoveRoleFromUserRequest)(nil),        // 31: rbac.v1.RemoveRoleFromUserRequest
+	(*RemoveRoleFromUserResponse)(nil),       // 32: rbac.v1.RemoveRoleFromUserResponse
+	(*RemovePermissionFromUserRequest)(nil),  // 33: rbac.v1.RemovePermissionFromUserRequest
+	(*RemovePermissionFromUserResponse)(nil), // 34: rbac.v1.RemovePermissionFromUserResponse
 }
 var file_v1_rbac_proto_depIdxs = []int32{
 	1,  // 0: rbac.v1.ListRolesResponse.roles:type_name -> rbac.v1.Role
@@ -1997,22 +2375,28 @@ var file_v1_rbac_proto_depIdxs = []int32{
 	0,  // 16: rbac.v1.RBACService.ListPermissions:input_type -> rbac.v1.Empty
 	25, // 17: rbac.v1.RBACService.ListPermissionsForUser:input_type -> rbac.v1.ListPermissionsForUserRequest
 	27, // 18: rbac.v1.RBACService.ListRolesForUser:input_type -> rbac.v1.ListRolesForUserRequest
-	4,  // 19: rbac.v1.RBACService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
-	6,  // 20: rbac.v1.RBACService.GetRoleByName:output_type -> rbac.v1.GetRoleByNameResponse
-	7,  // 21: rbac.v1.RBACService.ListRoles:output_type -> rbac.v1.ListRolesResponse
-	9,  // 22: rbac.v1.RBACService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
-	11, // 23: rbac.v1.RBACService.DeleteRole:output_type -> rbac.v1.DeleteRoleResponse
-	13, // 24: rbac.v1.RBACService.AssignRolesToUser:output_type -> rbac.v1.AssignRolesToUserResponse
-	15, // 25: rbac.v1.RBACService.CreatePermission:output_type -> rbac.v1.CreatePermissionResponse
-	17, // 26: rbac.v1.RBACService.DeletePermission:output_type -> rbac.v1.DeletePermissionResponse
-	19, // 27: rbac.v1.RBACService.AssignPermissionsToRole:output_type -> rbac.v1.AssignPermissionsToRoleResponse
-	21, // 28: rbac.v1.RBACService.AssignPermissionsToUser:output_type -> rbac.v1.AssignPermissionsToUserResponse
-	23, // 29: rbac.v1.RBACService.ListPermissionsForRole:output_type -> rbac.v1.ListPermissionsForRoleResponse
-	24, // 30: rbac.v1.RBACService.ListPermissions:output_type -> rbac.v1.ListPermissionsResponse
-	26, // 31: rbac.v1.RBACService.ListPermissionsForUser:output_type -> rbac.v1.ListPermissionsForUserResponse
-	28, // 32: rbac.v1.RBACService.ListRolesForUser:output_type -> rbac.v1.ListRolesForUserResponse
-	19, // [19:33] is the sub-list for method output_type
-	5,  // [5:19] is the sub-list for method input_type
+	29, // 19: rbac.v1.RBACService.RemovePermissionFromRole:input_type -> rbac.v1.RemovePermissionFromRoleRequest
+	31, // 20: rbac.v1.RBACService.RemoveRoleFromUser:input_type -> rbac.v1.RemoveRoleFromUserRequest
+	33, // 21: rbac.v1.RBACService.RemovePermissionFromUser:input_type -> rbac.v1.RemovePermissionFromUserRequest
+	4,  // 22: rbac.v1.RBACService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
+	6,  // 23: rbac.v1.RBACService.GetRoleByName:output_type -> rbac.v1.GetRoleByNameResponse
+	7,  // 24: rbac.v1.RBACService.ListRoles:output_type -> rbac.v1.ListRolesResponse
+	9,  // 25: rbac.v1.RBACService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
+	11, // 26: rbac.v1.RBACService.DeleteRole:output_type -> rbac.v1.DeleteRoleResponse
+	13, // 27: rbac.v1.RBACService.AssignRolesToUser:output_type -> rbac.v1.AssignRolesToUserResponse
+	15, // 28: rbac.v1.RBACService.CreatePermission:output_type -> rbac.v1.CreatePermissionResponse
+	17, // 29: rbac.v1.RBACService.DeletePermission:output_type -> rbac.v1.DeletePermissionResponse
+	19, // 30: rbac.v1.RBACService.AssignPermissionsToRole:output_type -> rbac.v1.AssignPermissionsToRoleResponse
+	21, // 31: rbac.v1.RBACService.AssignPermissionsToUser:output_type -> rbac.v1.AssignPermissionsToUserResponse
+	23, // 32: rbac.v1.RBACService.ListPermissionsForRole:output_type -> rbac.v1.ListPermissionsForRoleResponse
+	24, // 33: rbac.v1.RBACService.ListPermissions:output_type -> rbac.v1.ListPermissionsResponse
+	26, // 34: rbac.v1.RBACService.ListPermissionsForUser:output_type -> rbac.v1.ListPermissionsForUserResponse
+	28, // 35: rbac.v1.RBACService.ListRolesForUser:output_type -> rbac.v1.ListRolesForUserResponse
+	30, // 36: rbac.v1.RBACService.RemovePermissionFromRole:output_type -> rbac.v1.RemovePermissionFromRoleResponse
+	32, // 37: rbac.v1.RBACService.RemoveRoleFromUser:output_type -> rbac.v1.RemoveRoleFromUserResponse
+	34, // 38: rbac.v1.RBACService.RemovePermissionFromUser:output_type -> rbac.v1.RemovePermissionFromUserResponse
+	22, // [22:39] is the sub-list for method output_type
+	5,  // [5:22] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -2029,7 +2413,7 @@ func file_v1_rbac_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_rbac_proto_rawDesc), len(file_v1_rbac_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

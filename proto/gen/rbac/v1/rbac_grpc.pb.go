@@ -19,20 +19,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RBACService_CreateRole_FullMethodName              = "/rbac.v1.RBACService/CreateRole"
-	RBACService_GetRoleByName_FullMethodName           = "/rbac.v1.RBACService/GetRoleByName"
-	RBACService_ListRoles_FullMethodName               = "/rbac.v1.RBACService/ListRoles"
-	RBACService_UpdateRole_FullMethodName              = "/rbac.v1.RBACService/UpdateRole"
-	RBACService_DeleteRole_FullMethodName              = "/rbac.v1.RBACService/DeleteRole"
-	RBACService_AssignRolesToUser_FullMethodName       = "/rbac.v1.RBACService/AssignRolesToUser"
-	RBACService_CreatePermission_FullMethodName        = "/rbac.v1.RBACService/CreatePermission"
-	RBACService_DeletePermission_FullMethodName        = "/rbac.v1.RBACService/DeletePermission"
-	RBACService_AssignPermissionsToRole_FullMethodName = "/rbac.v1.RBACService/AssignPermissionsToRole"
-	RBACService_AssignPermissionsToUser_FullMethodName = "/rbac.v1.RBACService/AssignPermissionsToUser"
-	RBACService_ListPermissionsForRole_FullMethodName  = "/rbac.v1.RBACService/ListPermissionsForRole"
-	RBACService_ListPermissions_FullMethodName         = "/rbac.v1.RBACService/ListPermissions"
-	RBACService_ListPermissionsForUser_FullMethodName  = "/rbac.v1.RBACService/ListPermissionsForUser"
-	RBACService_ListRolesForUser_FullMethodName        = "/rbac.v1.RBACService/ListRolesForUser"
+	RBACService_CreateRole_FullMethodName               = "/rbac.v1.RBACService/CreateRole"
+	RBACService_GetRoleByName_FullMethodName            = "/rbac.v1.RBACService/GetRoleByName"
+	RBACService_ListRoles_FullMethodName                = "/rbac.v1.RBACService/ListRoles"
+	RBACService_UpdateRole_FullMethodName               = "/rbac.v1.RBACService/UpdateRole"
+	RBACService_DeleteRole_FullMethodName               = "/rbac.v1.RBACService/DeleteRole"
+	RBACService_AssignRolesToUser_FullMethodName        = "/rbac.v1.RBACService/AssignRolesToUser"
+	RBACService_CreatePermission_FullMethodName         = "/rbac.v1.RBACService/CreatePermission"
+	RBACService_DeletePermission_FullMethodName         = "/rbac.v1.RBACService/DeletePermission"
+	RBACService_AssignPermissionsToRole_FullMethodName  = "/rbac.v1.RBACService/AssignPermissionsToRole"
+	RBACService_AssignPermissionsToUser_FullMethodName  = "/rbac.v1.RBACService/AssignPermissionsToUser"
+	RBACService_ListPermissionsForRole_FullMethodName   = "/rbac.v1.RBACService/ListPermissionsForRole"
+	RBACService_ListPermissions_FullMethodName          = "/rbac.v1.RBACService/ListPermissions"
+	RBACService_ListPermissionsForUser_FullMethodName   = "/rbac.v1.RBACService/ListPermissionsForUser"
+	RBACService_ListRolesForUser_FullMethodName         = "/rbac.v1.RBACService/ListRolesForUser"
+	RBACService_RemovePermissionFromRole_FullMethodName = "/rbac.v1.RBACService/RemovePermissionFromRole"
+	RBACService_RemoveRoleFromUser_FullMethodName       = "/rbac.v1.RBACService/RemoveRoleFromUser"
+	RBACService_RemovePermissionFromUser_FullMethodName = "/rbac.v1.RBACService/RemovePermissionFromUser"
 )
 
 // RBACServiceClient is the client API for RBACService service.
@@ -69,6 +72,12 @@ type RBACServiceClient interface {
 	ListPermissionsForUser(ctx context.Context, in *ListPermissionsForUserRequest, opts ...grpc.CallOption) (*ListPermissionsForUserResponse, error)
 	// ListRolesForUser retrieves all roles assigned to a user.
 	ListRolesForUser(ctx context.Context, in *ListRolesForUserRequest, opts ...grpc.CallOption) (*ListRolesForUserResponse, error)
+	// RemovePermissionFromRole removes a permission from a role.
+	RemovePermissionFromRole(ctx context.Context, in *RemovePermissionFromRoleRequest, opts ...grpc.CallOption) (*RemovePermissionFromRoleResponse, error)
+	// RemoveRoleFromUser removes a role from a user.
+	RemoveRoleFromUser(ctx context.Context, in *RemoveRoleFromUserRequest, opts ...grpc.CallOption) (*RemoveRoleFromUserResponse, error)
+	// RemovePermissionFromUser removes a permission from a user.
+	RemovePermissionFromUser(ctx context.Context, in *RemovePermissionFromUserRequest, opts ...grpc.CallOption) (*RemovePermissionFromUserResponse, error)
 }
 
 type rBACServiceClient struct {
@@ -219,6 +228,36 @@ func (c *rBACServiceClient) ListRolesForUser(ctx context.Context, in *ListRolesF
 	return out, nil
 }
 
+func (c *rBACServiceClient) RemovePermissionFromRole(ctx context.Context, in *RemovePermissionFromRoleRequest, opts ...grpc.CallOption) (*RemovePermissionFromRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemovePermissionFromRoleResponse)
+	err := c.cc.Invoke(ctx, RBACService_RemovePermissionFromRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rBACServiceClient) RemoveRoleFromUser(ctx context.Context, in *RemoveRoleFromUserRequest, opts ...grpc.CallOption) (*RemoveRoleFromUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveRoleFromUserResponse)
+	err := c.cc.Invoke(ctx, RBACService_RemoveRoleFromUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rBACServiceClient) RemovePermissionFromUser(ctx context.Context, in *RemovePermissionFromUserRequest, opts ...grpc.CallOption) (*RemovePermissionFromUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemovePermissionFromUserResponse)
+	err := c.cc.Invoke(ctx, RBACService_RemovePermissionFromUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RBACServiceServer is the server API for RBACService service.
 // All implementations should embed UnimplementedRBACServiceServer
 // for forward compatibility.
@@ -253,6 +292,12 @@ type RBACServiceServer interface {
 	ListPermissionsForUser(context.Context, *ListPermissionsForUserRequest) (*ListPermissionsForUserResponse, error)
 	// ListRolesForUser retrieves all roles assigned to a user.
 	ListRolesForUser(context.Context, *ListRolesForUserRequest) (*ListRolesForUserResponse, error)
+	// RemovePermissionFromRole removes a permission from a role.
+	RemovePermissionFromRole(context.Context, *RemovePermissionFromRoleRequest) (*RemovePermissionFromRoleResponse, error)
+	// RemoveRoleFromUser removes a role from a user.
+	RemoveRoleFromUser(context.Context, *RemoveRoleFromUserRequest) (*RemoveRoleFromUserResponse, error)
+	// RemovePermissionFromUser removes a permission from a user.
+	RemovePermissionFromUser(context.Context, *RemovePermissionFromUserRequest) (*RemovePermissionFromUserResponse, error)
 }
 
 // UnimplementedRBACServiceServer should be embedded to have
@@ -303,6 +348,15 @@ func (UnimplementedRBACServiceServer) ListPermissionsForUser(context.Context, *L
 }
 func (UnimplementedRBACServiceServer) ListRolesForUser(context.Context, *ListRolesForUserRequest) (*ListRolesForUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRolesForUser not implemented")
+}
+func (UnimplementedRBACServiceServer) RemovePermissionFromRole(context.Context, *RemovePermissionFromRoleRequest) (*RemovePermissionFromRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemovePermissionFromRole not implemented")
+}
+func (UnimplementedRBACServiceServer) RemoveRoleFromUser(context.Context, *RemoveRoleFromUserRequest) (*RemoveRoleFromUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveRoleFromUser not implemented")
+}
+func (UnimplementedRBACServiceServer) RemovePermissionFromUser(context.Context, *RemovePermissionFromUserRequest) (*RemovePermissionFromUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemovePermissionFromUser not implemented")
 }
 func (UnimplementedRBACServiceServer) testEmbeddedByValue() {}
 
@@ -576,6 +630,60 @@ func _RBACService_ListRolesForUser_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RBACService_RemovePermissionFromRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemovePermissionFromRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RBACServiceServer).RemovePermissionFromRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RBACService_RemovePermissionFromRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RBACServiceServer).RemovePermissionFromRole(ctx, req.(*RemovePermissionFromRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RBACService_RemoveRoleFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRoleFromUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RBACServiceServer).RemoveRoleFromUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RBACService_RemoveRoleFromUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RBACServiceServer).RemoveRoleFromUser(ctx, req.(*RemoveRoleFromUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RBACService_RemovePermissionFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemovePermissionFromUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RBACServiceServer).RemovePermissionFromUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RBACService_RemovePermissionFromUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RBACServiceServer).RemovePermissionFromUser(ctx, req.(*RemovePermissionFromUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RBACService_ServiceDesc is the grpc.ServiceDesc for RBACService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -638,6 +746,18 @@ var RBACService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRolesForUser",
 			Handler:    _RBACService_ListRolesForUser_Handler,
+		},
+		{
+			MethodName: "RemovePermissionFromRole",
+			Handler:    _RBACService_RemovePermissionFromRole_Handler,
+		},
+		{
+			MethodName: "RemoveRoleFromUser",
+			Handler:    _RBACService_RemoveRoleFromUser_Handler,
+		},
+		{
+			MethodName: "RemovePermissionFromUser",
+			Handler:    _RBACService_RemovePermissionFromUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

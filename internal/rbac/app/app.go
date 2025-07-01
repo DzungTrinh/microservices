@@ -3,9 +3,14 @@ package app
 import (
 	"context"
 	"fmt"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"log"
 	"microservices/user-management/cmd/rbac/config"
+	"microservices/user-management/internal/rbac/app/seed"
 	"microservices/user-management/internal/rbac/infras/rabbitmq"
-	"microservices/user-management/internal/rbac/infras/seed"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
 	"net"
@@ -34,7 +39,19 @@ func NewApp(cfg config.Config) *App {
 		l.Errorf("Failed to seed roles: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_recovery.UnaryServerInterceptor(
+					grpc_recovery.WithRecoveryHandler(func(p any) error {
+						log.Printf("panic occurred: %v", p)
+						return status.Errorf(codes.Internal, "internal server error")
+					}),
+				),
+			),
+		),
+	)
+
 	rbacv1.RegisterRBACServiceServer(grpcServer, deps.RBACGrpcHandler)
 
 	go func() {
@@ -49,7 +66,7 @@ func NewApp(cfg config.Config) *App {
 	}()
 
 	// Initialize RabbitMQ consumer
-	consumer, err := rabbitmq.NewConsumer(deps.UserRoleUC)
+	consumer, err := rabbitmq.NewConsumer(deps.UserRoleUC, deps.RoleUC)
 	if err != nil {
 		l.Fatalf("Failed to initialize RabbitMQ consumer: %v", err)
 	}

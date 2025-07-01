@@ -103,3 +103,19 @@ func (q *Queries) ListPermissionsForUser(ctx context.Context, arg ListPermission
 	}
 	return items, nil
 }
+
+const softDeleteUserPermission = `-- name: SoftDeleteUserPermission :exec
+UPDATE user_permissions
+SET deleted_at = NOW()
+WHERE user_id = ? AND permission_id = ? AND deleted_at IS NULL
+`
+
+type SoftDeleteUserPermissionParams struct {
+	UserID       string `json:"user_id"`
+	PermissionID string `json:"permission_id"`
+}
+
+func (q *Queries) SoftDeleteUserPermission(ctx context.Context, arg SoftDeleteUserPermissionParams) error {
+	_, err := q.db.ExecContext(ctx, softDeleteUserPermission, arg.UserID, arg.PermissionID)
+	return err
+}

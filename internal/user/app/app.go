@@ -4,10 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
+	"log"
 	"microservices/user-management/internal/pkg/middlewares"
+	"microservices/user-management/internal/user/app/seed"
 	"microservices/user-management/internal/user/cron"
 	"microservices/user-management/pkg/logger"
 	userv1 "microservices/user-management/proto/gen/user/v1"
@@ -17,8 +23,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"microservices/user-management/cmd/user/config"
-
-	"microservices/user-management/internal/user/infras/seed"
 )
 
 type App struct {
@@ -40,7 +44,18 @@ func NewApp(cfg config.Config) *App {
 		}
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_recovery.UnaryServerInterceptor(
+					grpc_recovery.WithRecoveryHandler(func(p any) error {
+						log.Printf("panic occurred: %v", p)
+						return status.Errorf(codes.Internal, "internal server error")
+					}),
+				),
+			),
+		),
+	)
 	userv1.RegisterUserServiceServer(grpcServer, deps.UserGrpcHandler)
 
 	go func() {
