@@ -5,35 +5,88 @@
 package mysql
 
 import (
+	"database/sql"
+	"encoding/json"
 	"time"
 )
 
-type RefreshToken struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Token     string    `json:"token"`
-	UserAgent string    `json:"user_agent"`
-	IpAddress string    `json:"ip_address"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiresAt time.Time `json:"expires_at"`
-	Revoked   bool      `json:"revoked"`
+type Credential struct {
+	ID          string     `json:"id"`
+	UserID      string     `json:"user_id"`
+	Provider    string     `json:"provider"`
+	SecretHash  string     `json:"secret_hash"`
+	ProviderUid string     `json:"provider_uid"`
+	CreatedAt   time.Time  `json:"created_at"`
+	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
-type Role struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type DeviceSession struct {
+	ID        string     `json:"id"`
+	UserID    string     `json:"user_id"`
+	UserAgent string     `json:"user_agent"`
+	IpAddress string     `json:"ip_address"`
+	CreatedAt time.Time  `json:"created_at"`
+	LastSeen  time.Time  `json:"last_seen"`
+	ExpiresAt *time.Time `json:"expires_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+type MfaFactor struct {
+	ID        string         `json:"id"`
+	UserID    string         `json:"user_id"`
+	Type      string         `json:"type"`
+	Secret    sql.NullString `json:"secret"`
+	Verified  bool           `json:"verified"`
+	CreatedAt time.Time      `json:"created_at"`
+	DeletedAt *time.Time     `json:"deleted_at"`
+}
+
+type OutboxEvent struct {
+	ID            int64           `json:"id"`
+	AggregateType string          `json:"aggregate_type"`
+	AggregateID   string          `json:"aggregate_id"`
+	Type          string          `json:"type"`
+	Payload       json.RawMessage `json:"payload"`
+	Status        string          `json:"status"`
+	CreatedAt     time.Time       `json:"created_at"`
+	ProcessedAt   *time.Time      `json:"processed_at"`
+}
+
+type RefreshToken struct {
+	ID        string     `json:"id"`
+	UserID    string     `json:"user_id"`
+	Token     string     `json:"token"`
+	UserAgent string     `json:"user_agent"`
+	IpAddress string     `json:"ip_address"`
+	CreatedAt time.Time  `json:"created_at"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	Revoked   bool       `json:"revoked"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 type User struct {
-	ID        string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
+	ID            string     `json:"id"`
+	Email         string     `json:"email"`
+	Username      string     `json:"username"`
+	EmailVerified bool       `json:"email_verified"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	DeletedAt     *time.Time `json:"deleted_at"`
 }
 
-type UserRole struct {
-	UserID string `json:"user_id"`
-	RoleID string `json:"role_id"`
+type UserProfile struct {
+	UserID      string          `json:"user_id"`
+	Profile     json.RawMessage `json:"profile"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+	DeletedAt   *time.Time      `json:"deleted_at"`
+	DisplayName string          `json:"display_name"`
+}
+
+type VerificationToken struct {
+	Token     string     `json:"token"`
+	UserID    string     `json:"user_id"`
+	Channel   string     `json:"channel"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }

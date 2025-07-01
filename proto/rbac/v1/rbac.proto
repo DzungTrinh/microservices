@@ -75,14 +75,14 @@ service RBACService {
     };
   }
 
-  // GetRoleByID retrieves a role by its ID.
-  rpc GetRoleByID(GetRoleByIDRequest) returns (GetRoleByIDResponse) {
+  // GetRoleByName retrieves a role by its ID.
+  rpc GetRoleByName(GetRoleByNameRequest) returns (GetRoleByNameResponse) {
     option (google.api.http) = {
-      get: "/api/v1/rbac/roles/{id}"
+      get: "/api/v1/rbac/roles/{name}"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Get role by ID";
-      description: "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.";
+      summary: "Get role by Name";
+      description: "Retrieves details of a role from rbac_db.roles by its name. Requires admin role.";
       tags: ["RBAC"];
       security: [
         {
@@ -574,8 +574,22 @@ service RBACService {
     };
   }
 }
-
 message Empty {}
+
+message Role {
+  string id = 1; // UUID of the role
+  string name = 2; // Role name
+  bool built_in = 3; // Whether the role is built-in
+  string created_at = 4; // Creation timestamp (ISO8601)
+  string deleted_at = 5; // Deletion timestamp (ISO8601, optional)
+}
+
+message Permission {
+  string id = 1; // UUID of the permission
+  string name = 2; // Permission name
+  string created_at = 3; // Creation timestamp (ISO8601)
+  string deleted_at = 4; // Deletion timestamp (ISO8601, optional)
+}
 
 message CreateRoleRequest {
   string name = 1; // Role name (e.g., "admin", "user")
@@ -589,16 +603,18 @@ message CreateRoleResponse {
   string error = 4; // Error message if failed
 }
 
-message GetRoleByIDRequest {
-  string id = 1; // UUID of the role
+message GetRoleByNameRequest {
+  string name = 1; // UUID of the role
 }
 
-message GetRoleByIDResponse {
+message GetRoleByNameResponse {
   string role_id = 1; // UUID of the role
   string name = 2; // Role name
   bool built_in = 3; // Whether the role is built-in
   bool success = 4; // True if the role was retrieved
   string error = 5; // Error message if failed
+  string created_at = 6; // Creation timestamp (ISO8601)
+  string deleted_at = 7; // Deletion timestamp (ISO8601, optional)
 }
 
 message ListRolesResponse {
@@ -691,36 +707,28 @@ message ListPermissionsForRoleResponse {
   string error = 3; // Error message if failed
 }
 
-message Role {
-  string id = 1; // UUID of the role
-  string name = 2; // Role name
-  bool built_in = 3; // Whether the role is built-in
-}
-
-message Permission {
-  string id = 1; // UUID of the permission
-  string name = 2; // Permission name
-}
-
 message ListPermissionsResponse {
-  repeated Permission permissions = 1;
-  bool success = 2;
+  repeated Permission permissions = 1; // List of permissions
+  bool success = 2; // True if permissions were retrieved
+  string error = 3; // Error message if failed
 }
 
 message ListPermissionsForUserRequest {
-  string user_id = 1;
+  string user_id = 1; // UUID of the user
 }
 
 message ListPermissionsForUserResponse {
-  repeated Permission permissions = 1;
-  bool success = 2;
+  repeated Permission permissions = 1; // List of permissions
+  bool success = 2; // True if permissions were retrieved
+  string error = 3; // Error message if failed
 }
 
 message ListRolesForUserRequest {
-  string user_id = 1;
+  string user_id = 1; // UUID of the user
 }
 
 message ListRolesForUserResponse {
-  repeated Role roles = 1;
-  bool success = 2;
+  repeated Role roles = 1; // List of roles
+  bool success = 2; // True if roles were retrieved
+  string error = 3; // Error message if failed
 }

@@ -21,7 +21,7 @@ func NewPermissionRepository(db *sql.DB) repo.PermissionRepository {
 }
 
 func (r *permissionRepository) CreatePermission(ctx context.Context, perm domain.Permission) error {
-	_, err := r.Queries.CreatePermission(ctx, mysql.CreatePermissionParams{
+	err := r.Queries.CreatePermission(ctx, mysql.CreatePermissionParams{
 		ID:   perm.ID,
 		Name: perm.Name,
 	})

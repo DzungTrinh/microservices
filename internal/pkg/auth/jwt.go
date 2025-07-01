@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"context"
 	"fmt"
+	"google.golang.org/grpc/metadata"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,9 +13,10 @@ import (
 
 // AccessClaims for access tokens
 type AccessClaims struct {
-	ID        string   `json:"id"`
-	Roles     []string `json:"roles"`
-	TokenType string   `json:"token_type"`
+	ID          string   `json:"id"`
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
+	TokenType   string   `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
@@ -30,8 +34,8 @@ type TokenPair struct {
 }
 
 // GenerateTokenPair creates both access and refresh tokens
-func GenerateTokenPair(id string, roles []string, accessTTL, refreshTTL time.Duration) (TokenPair, error) {
-	accessToken, err := GenerateAccessToken(id, roles, accessTTL)
+func GenerateTokenPair(id string, roles []string, permissions []string, accessTTL, refreshTTL time.Duration) (TokenPair, error) {
+	accessToken, err := GenerateAccessToken(id, roles, permissions, accessTTL)
 	if err != nil {
 		return TokenPair{}, err
 	}
@@ -48,11 +52,12 @@ func GenerateTokenPair(id string, roles []string, accessTTL, refreshTTL time.Dur
 }
 
 // GenerateAccessToken creates an access token
-func GenerateAccessToken(id string, roles []string, ttl time.Duration) (string, error) {
+func GenerateAccessToken(id string, roles []string, permissions []string, ttl time.Duration) (string, error) {
 	claims := &AccessClaims{
-		ID:        id,
-		Roles:     roles,
-		TokenType: "access",
+		ID:          id,
+		Permissions: permissions,
+		Roles:       roles,
+		TokenType:   "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -124,4 +129,35 @@ func VerifyToken(tokenStr, tokenType string) (interface{}, error) {
 	}
 
 	return claims, nil
+}
+
+func ExtractClaimsFromContext(ctx context.Context) (*AccessClaims, error) {
+	// First, try getting from context
+	if claims, ok := ctx.Value("claims").(*AccessClaims); ok {
+		return claims, nil
+	}
+
+	// Fallback: extract from metadata
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("missing metadata")
+	}
+
+	authHeader := md.Get("authorization")
+	if len(authHeader) == 0 {
+		return nil, fmt.Errorf("missing authorization header")
+	}
+
+	token := strings.TrimPrefix(authHeader[0], "Bearer ")
+	claims, err := VerifyToken(token, "access")
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+
+	accessClaims, ok := claims.(*AccessClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid claims type")
+	}
+
+	return accessClaims, nil
 }

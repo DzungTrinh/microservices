@@ -11,8 +11,8 @@ import (
 )
 
 const createRefreshToken = `-- name: CreateRefreshToken :exec
-INSERT INTO refresh_tokens (id, user_id, token, user_agent, ip_address, expires_at, revoked)
-VALUES (?, ?, ?, ?, ?, ?, 0)
+INSERT INTO refresh_tokens (id, user_id, token, user_agent, ip_address, created_at, expires_at, revoked)
+VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)
 `
 
 type CreateRefreshTokenParams struct {
@@ -22,6 +22,7 @@ type CreateRefreshTokenParams struct {
 	UserAgent string    `json:"user_agent"`
 	IpAddress string    `json:"ip_address"`
 	ExpiresAt time.Time `json:"expires_at"`
+	Revoked   bool      `json:"revoked"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error {
@@ -32,6 +33,7 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 		arg.UserAgent,
 		arg.IpAddress,
 		arg.ExpiresAt,
+		arg.Revoked,
 	)
 	return err
 }
@@ -47,9 +49,9 @@ func (q *Queries) DeleteExpiredRefreshTokens(ctx context.Context) error {
 }
 
 const getRefreshToken = `-- name: GetRefreshToken :one
-SELECT id, user_id, token, user_agent, ip_address, created_at, expires_at, revoked
+SELECT id, user_id, token, user_agent, ip_address, created_at, expires_at, revoked, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM refresh_tokens
-WHERE token = ? AND expires_at > NOW() AND revoked = 0
+WHERE token = ? AND deleted_at IS NULL
 `
 
 func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshToken, error) {
@@ -64,14 +66,15 @@ func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshTok
 		&i.CreatedAt,
 		&i.ExpiresAt,
 		&i.Revoked,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const revokeRefreshToken = `-- name: RevokeRefreshToken :exec
 UPDATE refresh_tokens
-SET revoked = 1
-WHERE token = ?
+SET revoked = 1, deleted_at = NOW()
+WHERE token = ? AND deleted_at IS NULL
 `
 
 func (q *Queries) RevokeRefreshToken(ctx context.Context, token string) error {

@@ -1,20 +1,20 @@
--- name: CreateRole :execresult
+-- name: CreateRole :exec
 INSERT INTO roles (id, name, built_in, created_at)
-    VALUES (?, ?, ?, NOW());
+VALUES (?, ?, ?, NOW());
 
--- name: GetRoleByID :one
-SELECT id, name, built_in, created_at
+-- name: GetRoleByName :one
+SELECT id, name, built_in, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM roles
-WHERE id = ? AND deleted_at IS NULL;
+WHERE name = ? AND deleted_at IS NULL;
 
 -- name: ListRoles :many
-SELECT id, name, built_in, created_at, deleted_at
+SELECT id, name, built_in, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM roles
 WHERE deleted_at IS NULL;
 
 -- name: UpdateRole :exec
 UPDATE roles
-SET name = ?, built_in = ?, updated_at = NOW()
+SET name = ?, built_in = ?
 WHERE id = ? AND deleted_at IS NULL;
 
 -- name: DeleteRole :exec

@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/permission"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
+	"time"
 )
 
 type PermissionController struct {
@@ -30,7 +31,7 @@ func (c *PermissionController) CreatePermission(ctx context.Context, req *rbacv1
 	dto := domain.Permission{
 		Name: req.Name,
 	}
-	err = c.uc.CreatePermission(ctx, &dto)
+	_, err = c.uc.CreatePermission(ctx, &dto)
 	if err != nil {
 		logger.GetInstance().Errorf("CreatePermission failed: %v", err)
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -62,7 +63,7 @@ func (c *PermissionController) ListPermissions(ctx context.Context, _ *rbacv1.Em
 	}
 	pbPerms := make([]*rbacv1.Permission, len(resp))
 	for i, p := range resp {
-		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name}
+		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name, CreatedAt: p.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListPermissionsResponse{Permissions: pbPerms, Success: true}, nil
 }

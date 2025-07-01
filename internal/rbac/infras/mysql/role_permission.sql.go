@@ -7,48 +7,45 @@ package mysql
 
 import (
 	"context"
-	"time"
 )
 
 const assignPermissionsToRole = `-- name: AssignPermissionsToRole :exec
-INSERT INTO role_permissions (role_id, perm_id)
-VALUES (?, ?)
-ON DUPLICATE KEY UPDATE role_id = role_id
+INSERT INTO role_permissions (role_id, permission_id, created_at)
+SELECT ?, ?, NOW()
 `
 
 type AssignPermissionsToRoleParams struct {
-	RoleID string `json:"role_id"`
-	PermID string `json:"perm_id"`
+	RoleID       string `json:"role_id"`
+	PermissionID string `json:"permission_id"`
 }
 
 func (q *Queries) AssignPermissionsToRole(ctx context.Context, arg AssignPermissionsToRoleParams) error {
-	_, err := q.db.ExecContext(ctx, assignPermissionsToRole, arg.RoleID, arg.PermID)
+	_, err := q.db.ExecContext(ctx, assignPermissionsToRole, arg.RoleID, arg.PermissionID)
 	return err
 }
 
 const listPermissionsForRole = `-- name: ListPermissionsForRole :many
-SELECT p.id, p.name, p.created_at
+SELECT p.id, p.name, p.created_at, COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM permissions p
-         JOIN role_permissions rp ON p.id = rp.perm_id
-WHERE rp.role_id = ? AND p.deleted_at IS NULL
+         JOIN role_permissions rp ON p.id = rp.permission_id
+WHERE rp.role_id = ? AND rp.deleted_at IS NULL AND p.deleted_at IS NULL
 `
 
-type ListPermissionsForRoleRow struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (q *Queries) ListPermissionsForRole(ctx context.Context, roleID string) ([]ListPermissionsForRoleRow, error) {
+func (q *Queries) ListPermissionsForRole(ctx context.Context, roleID string) ([]Permission, error) {
 	rows, err := q.db.QueryContext(ctx, listPermissionsForRole, roleID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListPermissionsForRoleRow
+	var items []Permission
 	for rows.Next() {
-		var i ListPermissionsForRoleRow
-		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedAt); err != nil {
+		var i Permission
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

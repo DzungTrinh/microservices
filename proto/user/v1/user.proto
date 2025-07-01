@@ -29,138 +29,158 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service UserService {
-  rpc Register(RegisterRequest) returns (AuthTokens) {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
     option (google.api.http) = {
-      post: "/api/v1/register"
+      post: "/api/v1/user/register"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Register user"
-      description: "Creates a new user with provided credentials."
-      tags: ["Auth"]
+      summary: "Register a user";
+      description: "Creates a new user in user_db.users, stores credentials, and assigns default role via rbac-svc.";
+      tags: ["Auth"];
+      responses: {
+        key: "200";
+        value: { description: "User registered successfully"; }
+      };
+      responses: {
+        key: "400";
+        value: { description: "Invalid request"; }
+      };
+      responses: {
+        key: "500";
+        value: { description: "Internal server error"; }
+      };
     };
   }
-  rpc Login(LoginRequest) returns (AuthTokens) {
+  rpc Login(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/api/v1/login"
+      post: "/api/v1/user/login"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Login user"
-      description: "Authenticates a user and returns access and refresh tokens."
-      tags: ["Auth"]
+      summary: "Login a user";
+      description: "Authenticates a user and issues access and refresh tokens.";
+      tags: ["Auth"];
+      responses: {
+        key: "200";
+        value: { description: "User logged in successfully"; }
+      };
+      responses: {
+        key: "401";
+        value: { description: "Invalid credentials"; }
+      };
+      responses: {
+        key: "500";
+        value: { description: "Internal server error"; }
+      };
     };
   }
-  rpc Refresh(RefreshRequest) returns (AccessToken) {
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = {
-      post: "/api/v1/refresh"
+      post: "/api/v1/user/refresh"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Refresh token"
-      description: "Verify refresh token then get new access token and refresh token."
-      tags: ["Auth"]
+      summary: "Refresh token";
+      description: "Validates a refresh token and issues new access and refresh tokens.";
+      tags: ["Auth"];
+      responses: {
+        key: "200";
+        value: { description: "Tokens refreshed successfully"; }
+      };
+      responses: {
+        key: "401";
+        value: { description: "Invalid or expired refresh token"; }
+      };
+      responses: {
+        key: "500";
+        value: { description: "Internal server error"; }
+      };
     };
   }
-  rpc GetAllUsers(Empty) returns (UserList) {
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {
     option (google.api.http) = {
-      get: "/api/v1/users"
+      get: "/api/v1/user/users"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "List all users"
-      description: "Retrieves a list of all registered users. Requires admin role."
-      tags: ["Users"]
-      security: [
-        {
-          security_requirement: {
-            key: "BearerAuth",
-            value: {}
-          }
-        }
-      ]
-    };
-  }
-  rpc GetUserByID(GetUserByIDRequest) returns (User) {
-    option (google.api.http) = {
-      get: "/api/v1/users/{id}"
-    };
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Get user by ID"
-      description: "Retrieves details of a specific user by their ID. Requires authentication."
-      tags: ["Users"]
-      security: [
-        {
-          security_requirement: {
-            key: "BearerAuth",
-            value: {}
-          }
-        }
-      ]
-    };
-  }
-  rpc GetCurrentUser(Empty) returns (User) {
-    option (google.api.http) = {
-      get: "/api/v1/users/me"
-    };
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Get current user"
-      description: "Retrieves details of the authenticated user. Requires authentication."
-      tags: ["Users"]
-      security: [
-        {
-          security_requirement: {
-            key: "BearerAuth",
-            value: {}
-          }
-        }
-      ]
-    };
-  }
-  rpc UpdateUserRoles(UpdateUserRolesRequest) returns (User) {
-    option (google.api.http) = {
-      put: "/api/v1/users/{id}/roles"
-      body: "*"
-    };
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Update user roles"
-      description: "Updates the roles of a specific user. Requires admin role."
-      tags: ["Users"]
-      security: [
-        {
-          security_requirement: {
-            key: "BearerAuth",
-            value: {}
-          }
-        }
-      ]
+      summary: "Get all users";
+      description: "Retrieves a list of all users with their roles and permissions. Requires admin role or manage_users permission.";
+      tags: ["Users"];
+      responses: {
+        key: "200";
+        value: { description: "List of users retrieved successfully"; }
+      };
+      responses: {
+        key: "401";
+        value: { description: "Unauthorized - invalid or missing token"; }
+      };
+      responses: {
+        key: "403";
+        value: { description: "Forbidden - admin role or manage_users permission required"; }
+      };
+      responses: {
+        key: "500";
+        value: { description: "Internal server error"; }
+      };
     };
   }
 }
 
-message Empty {}
-message RegisterRequest {string email = 1; string username = 2; string password = 3;}
-message LoginRequest    {string email = 1; string password = 2;}
-message RefreshRequest  {string refresh_token = 1;}
-
-message AuthTokens  {string access_token = 1; string refresh_token = 2; bool mfa_required = 3;}
-message AccessToken {string access_token = 1;}
-
-message User {
-  string id = 1;
-  string username = 2;
-  string email = 3;
-  repeated string roles = 4;
+message RegisterRequest {
+  string email = 1; // Email address
+  string username = 2; // Username
+  string password = 3; // Password
 }
 
-message UserList {
+message RegisterResponse {
+  string user_id = 1; // UUID of the created user
+  string email = 2; // Email address
+  string username = 3; // Username
+  string access_token = 4; // JWT access token
+  string refresh_token = 5; // Refresh token
+  bool success = 6; // True if registration succeeded
+  string error = 7; // Error message if failed
+}
+
+message LoginRequest {
+  string email = 1; // Email address
+  string password = 2; // Password
+}
+
+message LoginResponse {
+  string user_id = 1; // UUID of the user
+  string email = 2; // Email address
+  string username = 3; // Username
+  string access_token = 4; // JWT access token
+  string refresh_token = 5; // Refresh token
+  bool success = 6; // True if login succeeded
+  string error = 7; // Error message if failed
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1; // Refresh token
+}
+
+message RefreshTokenResponse {
+  string access_token = 1; // New JWT access token
+  string refresh_token = 2; // New refresh token
+  bool success = 3; // True if token refresh succeeded
+  string error = 4; // Error message if failed
+}
+
+message GetAllUsersRequest {}
+
+message GetAllUsersResponse {
   repeated User users = 1;
 }
 
-message GetUserByIDRequest {
+message User {
   string id = 1;
-}
-
-message UpdateUserRolesRequest {
-  string id = 1;
-  repeated string roles = 2;
+  string email = 2;
+  string username = 3;
+  bool email_verified = 4;
+  repeated string roles = 5;
+  repeated string permissions = 6;
+  string created_at = 7;
+  string updated_at = 8;
 }

@@ -16,6 +16,9 @@ type Config struct {
 	AdminPassword string        `env:"ADMIN_PASSWORD" env-required:"true"`
 	GRPCPort      string        `env:"GRPC_PORT" env-required:"true"`
 	Logger        logger.Config `env:"LOGGER"`
+	RabbitmqUrl   string        `env:"RABBITMQ_URL" env-required:"true"`
+	RabbitmqQueue string        `env:"RABBITMQ_QUEUE" env-required:"true"`
+	RBACGRPCAddr  string        `env:"RBAC_GRPC_ADDR" env-required:"true"`
 }
 
 func Load() error {

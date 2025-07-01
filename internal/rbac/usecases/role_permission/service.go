@@ -19,7 +19,7 @@ func (s *rolePermissionService) AssignPermissionsToRole(ctx context.Context, rol
 	for _, rp := range rolePerms {
 		err := s.repo.AssignPermissionsToRole(ctx, rp)
 		if err != nil {
-			logger.GetInstance().Errorf("Failed to assign permission %s to role %s: %v", rp.PermID, rp.RoleID, err)
+			logger.GetInstance().Errorf("Failed to assign permission %s to role %s: %v", rp.PermissionID, rp.RoleID, err)
 			return err
 		}
 	}

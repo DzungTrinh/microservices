@@ -16,15 +16,15 @@ func NewPermissionService(repo repo.PermissionRepository) PermissionUseCase {
 	return &permissionService{repo: repo}
 }
 
-func (s *permissionService) CreatePermission(ctx context.Context, perm *domain.Permission) error {
+func (s *permissionService) CreatePermission(ctx context.Context, perm *domain.Permission) (string, error) {
 	perm.ID = uuid.New().String()
 	err := s.repo.CreatePermission(ctx, *perm)
 	if err != nil {
 		logger.GetInstance().Errorf("Failed to create permission %s: %v", perm.Name, err)
-		return err
+		return "", err
 	}
 	logger.GetInstance().Infof("Permission created: %s", perm.ID)
-	return nil
+	return perm.ID, nil
 }
 
 func (s *permissionService) DeletePermission(ctx context.Context, id string) error {

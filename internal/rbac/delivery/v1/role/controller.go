@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/role"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
+	"time"
 )
 
 type RoleController struct {
@@ -43,24 +44,19 @@ func (c *RoleController) CreateRole(ctx context.Context, req *rbacv1.CreateRoleR
 	}, nil
 }
 
-func (c *RoleController) GetRoleByID(ctx context.Context, req *rbacv1.GetRoleByIDRequest) (*rbacv1.GetRoleByIDResponse, error) {
-	// Validate UUID
-	_, err := uuid.Parse(req.Id)
+func (c *RoleController) GetRoleByName(ctx context.Context, req *rbacv1.GetRoleByNameRequest) (*rbacv1.GetRoleByNameResponse, error) {
+	resp, err := c.uc.GetRoleByName(ctx, req.Name)
 	if err != nil {
-		logger.GetInstance().Errorf("Invalid Role ID format: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid Role ID format")
-	}
-
-	resp, err := c.uc.GetRoleByID(ctx, req.Id)
-	if err != nil {
-		logger.GetInstance().Errorf("GetRoleByID failed: %v", err)
+		logger.GetInstance().Errorf("GetRoleByName failed: %v", err)
 		return nil, status.Errorf(codes.NotFound, err.Error())
 	}
-	return &rbacv1.GetRoleByIDResponse{
-		RoleId:  resp.ID,
-		Name:    resp.Name,
-		BuiltIn: resp.BuiltIn,
-		Success: true,
+	return &rbacv1.GetRoleByNameResponse{
+		RoleId:    resp.ID,
+		Name:      resp.Name,
+		BuiltIn:   resp.BuiltIn,
+		CreatedAt: resp.CreatedAt.Format(time.RFC3339),
+		DeletedAt: "",
+		Success:   true,
 	}, nil
 }
 
@@ -72,7 +68,7 @@ func (c *RoleController) ListRoles(ctx context.Context, _ *rbacv1.Empty) (*rbacv
 	}
 	rbacv1Roles := make([]*rbacv1.Role, len(resp))
 	for i, r := range resp {
-		rbacv1Roles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn}
+		rbacv1Roles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn, CreatedAt: r.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListRolesResponse{Roles: rbacv1Roles, Success: true}, nil
 }

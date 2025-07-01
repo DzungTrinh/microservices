@@ -2,14 +2,13 @@ package cron
 
 import (
 	"context"
+	"microservices/user-management/internal/user/usecases/refresh_token"
 	"microservices/user-management/pkg/logger"
 	"time"
-
-	"microservices/user-management/internal/user/usecases/users"
 )
 
 // StartTokenCleanup runs a periodic task to clean expired tokens
-func StartTokenCleanup(ctx context.Context, usecase users.UserUseCase) {
+func StartTokenCleanup(ctx context.Context, usecase refresh_token.RefreshTokenUseCase) {
 	ticker := time.NewTicker(24 * time.Hour)
 	go func() {
 		defer ticker.Stop()

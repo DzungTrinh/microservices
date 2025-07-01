@@ -9,11 +9,20 @@ sql:
         out: "internal/user/infras/mysql"
         emit_json_tags: true
         overrides:
-          # Nullable VARCHAR → string
           - db_type: "varchar"
             nullable: true
             go_type:
               type: string
+          - db_type: "char"
+            nullable: true
+            go_type:
+              type: string
+          - db_type: "datetime"
+            nullable: true
+            go_type:
+              pointer: true
+              import: "time"
+              type: "Time"
 
   - engine: "mysql"
     queries: "internal/rbac/infras/mysql/query/*.sql"
@@ -24,7 +33,6 @@ sql:
         out: "internal/rbac/infras/mysql"
         emit_json_tags: true
         overrides:
-          # Nullable VARCHAR → string
           - db_type: "char"
             nullable: true
             go_type:

@@ -19,7 +19,7 @@ func (s *userPermissionService) AssignPermissionsToUser(ctx context.Context, use
 	for _, up := range userPerms {
 		err := s.repo.AssignPermissionsToUser(ctx, up)
 		if err != nil {
-			logger.GetInstance().Errorf("Failed to assign permission %s to user %s: %v", up.PermID, up.UserID, err)
+			logger.GetInstance().Errorf("Failed to assign permission %s to user %s: %v", up.PermissionID, up.UserID, err)
 			return err
 		}
 	}

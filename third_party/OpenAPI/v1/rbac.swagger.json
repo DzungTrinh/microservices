@@ -278,50 +278,6 @@
       }
     },
     "/api/v1/rbac/roles/{id}": {
-      "get": {
-        "summary": "Get role by ID",
-        "description": "Retrieves details of a role from rbac_db.roles by its ID. Requires admin role.",
-        "operationId": "RBACService_GetRoleByID",
-        "responses": {
-          "200": {
-            "description": "Role retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/v1GetRoleByIDResponse"
-            }
-          },
-          "404": {
-            "description": "Role not found",
-            "schema": {}
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {}
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "UUID of the role",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "RBAC"
-        ],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      },
       "delete": {
         "summary": "Delete role",
         "description": "Soft-deletes a role in rbac_db.roles by setting deleted_at. Requires admin role.",
@@ -411,6 +367,52 @@
             "schema": {
               "$ref": "#/definitions/RBACServiceUpdateRoleBody"
             }
+          }
+        ],
+        "tags": [
+          "RBAC"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rbac/roles/{name}": {
+      "get": {
+        "summary": "Get role by Name",
+        "description": "Retrieves details of a role from rbac_db.roles by its name. Requires admin role.",
+        "operationId": "RBACService_GetRoleByName",
+        "responses": {
+          "200": {
+            "description": "Role retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1GetRoleByNameResponse"
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "UUID of the role",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -593,6 +595,7 @@
         "parameters": [
           {
             "name": "userId",
+            "description": "UUID of the user",
             "in": "path",
             "required": true,
             "type": "string"
@@ -638,6 +641,7 @@
         "parameters": [
           {
             "name": "userId",
+            "description": "UUID of the user",
             "in": "path",
             "required": true,
             "type": "string"
@@ -881,7 +885,7 @@
         }
       }
     },
-    "v1GetRoleByIDResponse": {
+    "v1GetRoleByNameResponse": {
       "type": "object",
       "properties": {
         "roleId": {
@@ -903,6 +907,14 @@
         "error": {
           "type": "string",
           "title": "Error message if failed"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },
@@ -935,10 +947,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Permission"
-          }
+          },
+          "title": "List of permissions"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if permissions were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -950,10 +968,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Permission"
-          }
+          },
+          "title": "List of permissions"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if permissions were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -965,10 +989,16 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Role"
-          }
+          },
+          "title": "List of roles"
         },
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "True if roles were retrieved"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if failed"
         }
       }
     },
@@ -1003,6 +1033,14 @@
         "name": {
           "type": "string",
           "title": "Permission name"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },
@@ -1020,6 +1058,14 @@
         "builtIn": {
           "type": "boolean",
           "title": "Whether the role is built-in"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Creation timestamp (ISO8601)"
+        },
+        "deletedAt": {
+          "type": "string",
+          "title": "Deletion timestamp (ISO8601, optional)"
         }
       }
     },

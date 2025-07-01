@@ -11,26 +11,34 @@ import (
 )
 
 const assignPermissionsToUser = `-- name: AssignPermissionsToUser :exec
-INSERT INTO user_permissions (user_id, perm_id, granter_id, expires_at, created_at)
-VALUES (?, ?, ?, ?, NOW())
-ON DUPLICATE KEY UPDATE granter_id = ?, expires_at = ?
+INSERT INTO user_permissions (user_id, permission_id, granter_id, expires_at, created_at)
+SELECT ?, ?, ?, ?, NOW()
+FROM permissions
+WHERE permissions.id = ?
+  AND permissions.deleted_at IS NULL ON DUPLICATE KEY
+UPDATE
+    granter_id = ?,
+    expires_at = ?,
+    deleted_at = NULL
 `
 
 type AssignPermissionsToUserParams struct {
-	UserID      string    `json:"user_id"`
-	PermID      string    `json:"perm_id"`
-	GranterID   string    `json:"granter_id"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	GranterID_2 string    `json:"granter_id_2"`
-	ExpiresAt_2 time.Time `json:"expires_at_2"`
+	UserID       string    `json:"user_id"`
+	PermissionID string    `json:"permission_id"`
+	GranterID    string    `json:"granter_id"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	ID           string    `json:"id"`
+	GranterID_2  string    `json:"granter_id_2"`
+	ExpiresAt_2  time.Time `json:"expires_at_2"`
 }
 
 func (q *Queries) AssignPermissionsToUser(ctx context.Context, arg AssignPermissionsToUserParams) error {
 	_, err := q.db.ExecContext(ctx, assignPermissionsToUser,
 		arg.UserID,
-		arg.PermID,
+		arg.PermissionID,
 		arg.GranterID,
 		arg.ExpiresAt,
+		arg.ID,
 		arg.GranterID_2,
 		arg.ExpiresAt_2,
 	)
@@ -38,35 +46,50 @@ func (q *Queries) AssignPermissionsToUser(ctx context.Context, arg AssignPermiss
 }
 
 const listPermissionsForUser = `-- name: ListPermissionsForUser :many
-SELECT p.id, p.name, up.created_at, up.expires_at, up.granter_id
+SELECT DISTINCT p.id,
+                p.name,
+                p.created_at,
+                COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM permissions p
          JOIN user_permissions up ON p.id = up.permission_id
 WHERE up.user_id = ?
+  AND up.deleted_at IS NULL
+  AND p.deleted_at IS NULL
+
+UNION
+
+SELECT DISTINCT p.id,
+                p.name,
+                p.created_at,
+                COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
+FROM permissions p
+         JOIN role_permissions rp ON p.id = rp.permission_id
+         JOIN user_roles ur ON rp.role_id = ur.role_id
+WHERE ur.user_id = ?
+  AND ur.deleted_at IS NULL
+  AND rp.deleted_at IS NULL
+  AND p.deleted_at IS NULL
 `
 
-type ListPermissionsForUserRow struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiresAt time.Time `json:"expires_at"`
-	GranterID string    `json:"granter_id"`
+type ListPermissionsForUserParams struct {
+	UserID   string `json:"user_id"`
+	UserID_2 string `json:"user_id_2"`
 }
 
-func (q *Queries) ListPermissionsForUser(ctx context.Context, userID string) ([]ListPermissionsForUserRow, error) {
-	rows, err := q.db.QueryContext(ctx, listPermissionsForUser, userID)
+func (q *Queries) ListPermissionsForUser(ctx context.Context, arg ListPermissionsForUserParams) ([]Permission, error) {
+	rows, err := q.db.QueryContext(ctx, listPermissionsForUser, arg.UserID, arg.UserID_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListPermissionsForUserRow
+	var items []Permission
 	for rows.Next() {
-		var i ListPermissionsForUserRow
+		var i Permission
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.CreatedAt,
-			&i.ExpiresAt,
-			&i.GranterID,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}

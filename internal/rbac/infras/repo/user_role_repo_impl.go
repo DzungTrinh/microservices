@@ -24,6 +24,7 @@ func (r *userRoleRepository) AssignRolesToUser(ctx context.Context, userRole dom
 	return r.Queries.AssignRolesToUser(ctx, mysql.AssignRolesToUserParams{
 		UserID: userRole.UserID,
 		RoleID: userRole.RoleID,
+		ID:     userRole.RoleID,
 	})
 }
 
@@ -39,6 +40,7 @@ func (r *userRoleRepository) ListRolesForUser(ctx context.Context, userID string
 			Name:      r.Name,
 			BuiltIn:   r.BuiltIn,
 			CreatedAt: r.CreatedAt,
+			DeletedAt: r.DeletedAt,
 		}
 	}
 	return roles, nil

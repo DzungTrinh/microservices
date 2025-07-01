@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/role_permission"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
+	"time"
 )
 
 type RolePermissionController struct {
@@ -36,7 +37,7 @@ func (c *RolePermissionController) AssignPermissionsToRole(ctx context.Context, 
 
 	dtos := make([]domain.RolePermission, len(req.PermissionIds))
 	for i, permID := range req.PermissionIds {
-		dtos[i] = domain.RolePermission{RoleID: req.RoleId, PermID: permID}
+		dtos[i] = domain.RolePermission{RoleID: req.RoleId, PermissionID: permID}
 	}
 	err = c.uc.AssignPermissionsToRole(ctx, dtos)
 	if err != nil {
@@ -61,7 +62,7 @@ func (c *RolePermissionController) ListPermissionsForRole(ctx context.Context, r
 	}
 	pbPerms := make([]*rbacv1.Permission, len(resp))
 	for i, p := range resp {
-		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name}
+		pbPerms[i] = &rbacv1.Permission{Id: p.ID, Name: p.Name, CreatedAt: p.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListPermissionsForRoleResponse{Permissions: pbPerms, Success: true}, nil
 }

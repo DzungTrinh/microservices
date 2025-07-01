@@ -7,13 +7,11 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
-	"time"
 )
 
-const createRole = `-- name: CreateRole :execresult
+const createRole = `-- name: CreateRole :exec
 INSERT INTO roles (id, name, built_in, created_at)
-    VALUES (?, ?, ?, NOW())
+VALUES (?, ?, ?, NOW())
 `
 
 type CreateRoleParams struct {
@@ -22,8 +20,9 @@ type CreateRoleParams struct {
 	BuiltIn bool   `json:"built_in"`
 }
 
-func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createRole, arg.ID, arg.Name, arg.BuiltIn)
+func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) error {
+	_, err := q.db.ExecContext(ctx, createRole, arg.ID, arg.Name, arg.BuiltIn)
+	return err
 }
 
 const deleteRole = `-- name: DeleteRole :exec
@@ -37,33 +36,27 @@ func (q *Queries) DeleteRole(ctx context.Context, id string) error {
 	return err
 }
 
-const getRoleByID = `-- name: GetRoleByID :one
-SELECT id, name, built_in, created_at
+const getRoleByName = `-- name: GetRoleByName :one
+SELECT id, name, built_in, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM roles
-WHERE id = ? AND deleted_at IS NULL
+WHERE name = ? AND deleted_at IS NULL
 `
 
-type GetRoleByIDRow struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	BuiltIn   bool      `json:"built_in"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (q *Queries) GetRoleByID(ctx context.Context, id string) (GetRoleByIDRow, error) {
-	row := q.db.QueryRowContext(ctx, getRoleByID, id)
-	var i GetRoleByIDRow
+func (q *Queries) GetRoleByName(ctx context.Context, name string) (Role, error) {
+	row := q.db.QueryRowContext(ctx, getRoleByName, name)
+	var i Role
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.BuiltIn,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listRoles = `-- name: ListRoles :many
-SELECT id, name, built_in, created_at, deleted_at
+SELECT id, name, built_in, created_at, COALESCE(deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM roles
 WHERE deleted_at IS NULL
 `
@@ -99,7 +92,7 @@ func (q *Queries) ListRoles(ctx context.Context) ([]Role, error) {
 
 const updateRole = `-- name: UpdateRole :exec
 UPDATE roles
-SET name = ?, built_in = ?, updated_at = NOW()
+SET name = ?, built_in = ?
 WHERE id = ? AND deleted_at IS NULL
 `
 

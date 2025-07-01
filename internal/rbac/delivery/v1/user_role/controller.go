@@ -9,6 +9,7 @@ import (
 	"microservices/user-management/internal/rbac/usecases/user_role"
 	"microservices/user-management/pkg/logger"
 	rbacv1 "microservices/user-management/proto/gen/rbac/v1"
+	"time"
 )
 
 type UserRoleController struct {
@@ -61,7 +62,7 @@ func (c *UserRoleController) ListRolesForUser(ctx context.Context, req *rbacv1.L
 	}
 	pbRoles := make([]*rbacv1.Role, len(resp))
 	for i, r := range resp {
-		pbRoles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn}
+		pbRoles[i] = &rbacv1.Role{Id: r.ID, Name: r.Name, BuiltIn: r.BuiltIn, CreatedAt: r.CreatedAt.Format(time.RFC3339), DeletedAt: ""}
 	}
 	return &rbacv1.ListRolesForUserResponse{Roles: pbRoles, Success: true}, nil
 }

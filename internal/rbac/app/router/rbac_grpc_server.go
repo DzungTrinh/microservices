@@ -44,8 +44,8 @@ func (s *RBACGrpcServer) CreateRole(ctx context.Context, req *rbacv1.CreateRoleR
 	return s.roleCtrl.CreateRole(ctx, req)
 }
 
-func (s *RBACGrpcServer) GetRoleByID(ctx context.Context, req *rbacv1.GetRoleByIDRequest) (*rbacv1.GetRoleByIDResponse, error) {
-	return s.roleCtrl.GetRoleByID(ctx, req)
+func (s *RBACGrpcServer) GetRoleByID(ctx context.Context, req *rbacv1.GetRoleByNameRequest) (*rbacv1.GetRoleByNameResponse, error) {
+	return s.roleCtrl.GetRoleByName(ctx, req)
 }
 
 func (s *RBACGrpcServer) ListRoles(ctx context.Context, req *rbacv1.Empty) (*rbacv1.ListRolesResponse, error) {
