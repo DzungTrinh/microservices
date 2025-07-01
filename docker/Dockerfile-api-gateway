@@ -19,5 +19,7 @@ EXPOSE 8080
 
 COPY --from=builder /bin/app /app
 COPY --from=builder /app/cmd/api-gateway/.env /.env
+COPY --from=builder /app/third_party/OpenAPI/v1/user.swagger.json /third_party/OpenAPI/v1/user.swagger.json
+COPY --from=builder /app/third_party/OpenAPI/v1/rbac.swagger.json /third_party/OpenAPI/v1/rbac.swagger.json
 
 CMD ["/app"]

@@ -53,12 +53,12 @@ func InitializeDependencies(cfg config.Config) *Dependencies {
 
 	authUseCase := authUC.NewAuthUseCase(userRepo, credRepo, rtRepo, outboxRepo, txManager, rbacClient)
 	refreshTokenUC := rtUC.NewRefreshTokenUseCase(rtRepo, userRepo, rbacClient)
-	userUseCase := user.NewUserUseCase(userRepo, credRepo, outboxRepo, txManager)
+	userUseCase := user.NewUserUseCase(userRepo, credRepo, outboxRepo, txManager, rbacClient)
 
 	authCtrl := auth.NewAuthController(authUseCase)
 	refreshTokenCtrl := refresh_token.NewRefreshTokenController(refreshTokenUC)
 
-	userGrpcHandler := router.NewUserGrpcServer(authUseCase, refreshTokenUC)
+	userGrpcHandler := router.NewUserGrpcServer(authUseCase, refreshTokenUC, userUseCase)
 
 	publisher, err := rabbitmq.NewPublisher(outboxRepo)
 	if err != nil {

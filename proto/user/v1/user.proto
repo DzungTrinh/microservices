@@ -98,6 +98,32 @@ service UserService {
       };
     };
   }
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/user/users"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get all users";
+      description: "Retrieves a list of all users with their roles and permissions. Requires admin role or manage_users permission.";
+      tags: ["Users"];
+      responses: {
+        key: "200";
+        value: { description: "List of users retrieved successfully"; }
+      };
+      responses: {
+        key: "401";
+        value: { description: "Unauthorized - invalid or missing token"; }
+      };
+      responses: {
+        key: "403";
+        value: { description: "Forbidden - admin role or manage_users permission required"; }
+      };
+      responses: {
+        key: "500";
+        value: { description: "Internal server error"; }
+      };
+    };
+  }
 }
 
 message RegisterRequest {
@@ -140,4 +166,21 @@ message RefreshTokenResponse {
   string refresh_token = 2; // New refresh token
   bool success = 3; // True if token refresh succeeded
   string error = 4; // Error message if failed
+}
+
+message GetAllUsersRequest {}
+
+message GetAllUsersResponse {
+  repeated User users = 1;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string username = 3;
+  bool email_verified = 4;
+  repeated string roles = 5;
+  repeated string permissions = 6;
+  string created_at = 7;
+  string updated_at = 8;
 }

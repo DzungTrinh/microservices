@@ -80,27 +80,30 @@ func (h *UserGrpcServer) RefreshToken(ctx context.Context, r *userv1.RefreshToke
 	}, nil
 }
 
-func (h *UserGrpcServer) GetAllUsers(ctx context.Context, _ *userv1.Empty) (*userv1.UserList, error) {
-	users, err := h.userUC.GetAllUsers(ctx)
+func (s *UserGrpcServer) GetAllUsers(ctx context.Context, _ *userv1.GetAllUsersRequest) (*userv1.GetAllUsersResponse, error) {
+	users, err := s.userUC.GetAllUsers(ctx)
 	if err != nil {
 		logger.GetInstance().Errorf("GetAllUsers failed: %v", err)
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	userList := &userv1.UserList{Users: make([]*userv1.User, len(users))}
+	resp := &userv1.GetAllUsersResponse{
+		Users: make([]*userv1.User, len(users)),
+	}
 	for i, user := range users {
-		roles := make([]string, len(user.Roles))
-		for j, role := range user.Roles {
-			roles[j] = string(role)
-		}
-		userList.Users[i] = &userv1.User{
-			Id:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Roles:    roles,
+		resp.Users[i] = &userv1.User{
+			Id:            user.ID,
+			Email:         user.Email,
+			Username:      user.Username,
+			EmailVerified: user.EmailVerified,
+			Roles:         user.Roles,
+			Permissions:   user.Permissions,
+			CreatedAt:     user.CreatedAt,
+			UpdatedAt:     user.UpdatedAt,
 		}
 	}
-	return userList, nil
+
+	return resp, nil
 }
 
 //

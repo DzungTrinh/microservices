@@ -73,7 +73,7 @@ func NewApp(cfg config.Config) *App {
 
 	// Serve Swagger JSON
 	r.GET("/swagger.json", func(c *gin.Context) {
-		c.File("./third_party/OpenAPI/identity.swagger.json")
+		c.File("./third_party/OpenAPI/v1/user.swagger.json")
 	})
 
 	// Mount gRPC-Gateway handlers

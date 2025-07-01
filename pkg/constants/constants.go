@@ -51,3 +51,11 @@ const (
 	RoleUser  = "user"
 	RoleAdmin = "admin"
 )
+
+const (
+	PermissionReadProfile       = "read_profile"
+	PermissionWriteProfile      = "write_profile"
+	PermissionManageUsers       = "manage_users"
+	PermissionManageRoles       = "manage_roles"
+	PermissionManagePermissions = "manage_permissions"
+)

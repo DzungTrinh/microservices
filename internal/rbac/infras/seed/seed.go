@@ -18,12 +18,21 @@ func SeedRoles(ctx context.Context, roleUC role.RoleUseCase, rpUC role_permissio
 		permissions []string
 	}{
 		{
-			name:        constants.RoleAdmin,
-			permissions: []string{"read_profile", "write_profile", "manage_users", "manage_roles", "manage_permissions"},
+			name: constants.RoleAdmin,
+			permissions: []string{
+				constants.PermissionReadProfile,
+				constants.PermissionWriteProfile,
+				constants.PermissionManageUsers,
+				constants.PermissionManageRoles,
+				constants.PermissionManagePermissions,
+			},
 		},
 		{
-			name:        constants.RoleUser,
-			permissions: []string{"read_profile", "write_profile"},
+			name: constants.RoleUser,
+			permissions: []string{
+				constants.PermissionReadProfile,
+				constants.PermissionWriteProfile,
+			},
 		},
 	}
 
@@ -32,11 +41,11 @@ func SeedRoles(ctx context.Context, roleUC role.RoleUseCase, rpUC role_permissio
 
 	// Seed permissions
 	permissions := []string{
-		"read_profile",
-		"write_profile",
-		"manage_users",
-		"manage_roles",
-		"manage_permissions",
+		constants.PermissionReadProfile,
+		constants.PermissionWriteProfile,
+		constants.PermissionManageUsers,
+		constants.PermissionManageRoles,
+		constants.PermissionManagePermissions,
 	}
 
 	for _, permName := range permissions {

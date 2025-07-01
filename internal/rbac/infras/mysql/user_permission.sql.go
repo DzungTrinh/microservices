@@ -14,11 +14,12 @@ const assignPermissionsToUser = `-- name: AssignPermissionsToUser :exec
 INSERT INTO user_permissions (user_id, permission_id, granter_id, expires_at, created_at)
 SELECT ?, ?, ?, ?, NOW()
 FROM permissions
-WHERE permissions.id = ? AND permissions.deleted_at IS NULL
-ON DUPLICATE KEY UPDATE
-                     granter_id = ?,
-                     expires_at = ?,
-                     deleted_at = NULL
+WHERE permissions.id = ?
+  AND permissions.deleted_at IS NULL ON DUPLICATE KEY
+UPDATE
+    granter_id = ?,
+    expires_at = ?,
+    deleted_at = NULL
 `
 
 type AssignPermissionsToUserParams struct {
@@ -45,14 +46,38 @@ func (q *Queries) AssignPermissionsToUser(ctx context.Context, arg AssignPermiss
 }
 
 const listPermissionsForUser = `-- name: ListPermissionsForUser :many
-SELECT p.id, p.name, p.created_at, COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
+SELECT DISTINCT p.id,
+                p.name,
+                p.created_at,
+                COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
 FROM permissions p
          JOIN user_permissions up ON p.id = up.permission_id
-WHERE up.user_id = ? AND up.deleted_at IS NULL AND p.deleted_at IS NULL
+WHERE up.user_id = ?
+  AND up.deleted_at IS NULL
+  AND p.deleted_at IS NULL
+
+UNION
+
+SELECT DISTINCT p.id,
+                p.name,
+                p.created_at,
+                COALESCE(p.deleted_at, TIMESTAMP '0001-01-01 00:00:00') AS deleted_at
+FROM permissions p
+         JOIN role_permissions rp ON p.id = rp.permission_id
+         JOIN user_roles ur ON rp.role_id = ur.role_id
+WHERE ur.user_id = ?
+  AND ur.deleted_at IS NULL
+  AND rp.deleted_at IS NULL
+  AND p.deleted_at IS NULL
 `
 
-func (q *Queries) ListPermissionsForUser(ctx context.Context, userID string) ([]Permission, error) {
-	rows, err := q.db.QueryContext(ctx, listPermissionsForUser, userID)
+type ListPermissionsForUserParams struct {
+	UserID   string `json:"user_id"`
+	UserID_2 string `json:"user_id_2"`
+}
+
+func (q *Queries) ListPermissionsForUser(ctx context.Context, arg ListPermissionsForUserParams) ([]Permission, error) {
+	rows, err := q.db.QueryContext(ctx, listPermissionsForUser, arg.UserID, arg.UserID_2)
 	if err != nil {
 		return nil, err
 	}

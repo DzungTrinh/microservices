@@ -431,6 +431,186 @@ func (x *RefreshTokenResponse) GetError() string {
 	return ""
 }
 
+type GetAllUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllUsersRequest) Reset() {
+	*x = GetAllUsersRequest{}
+	mi := &file_v1_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUsersRequest) ProtoMessage() {}
+
+func (x *GetAllUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUsersRequest.ProtoReflect.Descriptor instead.
+func (*GetAllUsersRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_proto_rawDescGZIP(), []int{6}
+}
+
+type GetAllUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllUsersResponse) Reset() {
+	*x = GetAllUsersResponse{}
+	mi := &file_v1_user_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUsersResponse) ProtoMessage() {}
+
+func (x *GetAllUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUsersResponse.ProtoReflect.Descriptor instead.
+func (*GetAllUsersResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetAllUsersResponse) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+type User struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	EmailVerified bool                   `protobuf:"varint,4,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
+	Roles         []string               `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
+	Permissions   []string               `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_v1_user_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_v1_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *User) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *User) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *User) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *User) GetEmailVerified() bool {
+	if x != nil {
+		return x.EmailVerified
+	}
+	return false
+}
+
+func (x *User) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+func (x *User) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
+func (x *User) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *User) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 var File_v1_user_proto protoreflect.FileDescriptor
 
 const file_v1_user_proto_rawDesc = "" +
@@ -465,7 +645,22 @@ const file_v1_user_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x18\n" +
 	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x04 \x01(\tR\x05error2\xa1\a\n" +
+	"\x05error\x18\x04 \x01(\tR\x05error\"\x14\n" +
+	"\x12GetAllUsersRequest\":\n" +
+	"\x13GetAllUsersResponse\x12#\n" +
+	"\x05users\x18\x01 \x03(\v2\r.user.v1.UserR\x05users\"\xe5\x01\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
+	"\busername\x18\x03 \x01(\tR\busername\x12%\n" +
+	"\x0eemail_verified\x18\x04 \x01(\bR\remailVerified\x12\x14\n" +
+	"\x05roles\x18\x05 \x03(\tR\x05roles\x12 \n" +
+	"\vpermissions\x18\x06 \x03(\tR\vpermissions\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt2\xda\n" +
+	"\n" +
 	"\vUserService\x12\xbf\x02\n" +
 	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\"\xfd\x01\x92A\xd9\x01\n" +
 	"\x04Auth\x12\x0fRegister a user\x1a_Creates a new user in user_db.users, stores credentials, and assigns default role via rbac-svc.J%\n" +
@@ -490,7 +685,17 @@ const file_v1_user_proto_rawDesc = "" +
 	"\x03401\x12\"\n" +
 	" Invalid or expired refresh tokenJ\x1e\n" +
 	"\x03500\x12\x17\n" +
-	"\x15Internal server error\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/user/refreshB\x8a\x02\x92A\xf6\x01\x12[\n" +
+	"\x15Internal server error\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/user/refresh\x12\xb6\x03\n" +
+	"\vGetAllUsers\x12\x1b.user.v1.GetAllUsersRequest\x1a\x1c.user.v1.GetAllUsersResponse\"\xeb\x02\x92A\xcd\x02\n" +
+	"\x05Users\x12\rGet all users\x1aoRetrieves a list of all users with their roles and permissions. Requires admin role or manage_users permission.J-\n" +
+	"\x03200\x12&\n" +
+	"$List of users retrieved successfullyJ0\n" +
+	"\x03401\x12)\n" +
+	"'Unauthorized - invalid or missing tokenJC\n" +
+	"\x03403\x12<\n" +
+	":Forbidden - admin role or manage_users permission requiredJ\x1e\n" +
+	"\x03500\x12\x17\n" +
+	"\x15Internal server error\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/user/usersB\x8a\x02\x92A\xf6\x01\x12[\n" +
 	"\x13User Management API\x12?API for user registration, authentication, and user management.2\x031.0*\x01\x022\x10application/json:\x10application/jsonZp\n" +
 	"n\n" +
 	"\n" +
@@ -508,7 +713,7 @@ func file_v1_user_proto_rawDescGZIP() []byte {
 	return file_v1_user_proto_rawDescData
 }
 
-var file_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_v1_user_proto_goTypes = []any{
 	(*RegisterRequest)(nil),      // 0: user.v1.RegisterRequest
 	(*RegisterResponse)(nil),     // 1: user.v1.RegisterResponse
@@ -516,19 +721,25 @@ var file_v1_user_proto_goTypes = []any{
 	(*LoginResponse)(nil),        // 3: user.v1.LoginResponse
 	(*RefreshTokenRequest)(nil),  // 4: user.v1.RefreshTokenRequest
 	(*RefreshTokenResponse)(nil), // 5: user.v1.RefreshTokenResponse
+	(*GetAllUsersRequest)(nil),   // 6: user.v1.GetAllUsersRequest
+	(*GetAllUsersResponse)(nil),  // 7: user.v1.GetAllUsersResponse
+	(*User)(nil),                 // 8: user.v1.User
 }
 var file_v1_user_proto_depIdxs = []int32{
-	0, // 0: user.v1.UserService.Register:input_type -> user.v1.RegisterRequest
-	2, // 1: user.v1.UserService.Login:input_type -> user.v1.LoginRequest
-	4, // 2: user.v1.UserService.RefreshToken:input_type -> user.v1.RefreshTokenRequest
-	1, // 3: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
-	3, // 4: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
-	5, // 5: user.v1.UserService.RefreshToken:output_type -> user.v1.RefreshTokenResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	8, // 0: user.v1.GetAllUsersResponse.users:type_name -> user.v1.User
+	0, // 1: user.v1.UserService.Register:input_type -> user.v1.RegisterRequest
+	2, // 2: user.v1.UserService.Login:input_type -> user.v1.LoginRequest
+	4, // 3: user.v1.UserService.RefreshToken:input_type -> user.v1.RefreshTokenRequest
+	6, // 4: user.v1.UserService.GetAllUsers:input_type -> user.v1.GetAllUsersRequest
+	1, // 5: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
+	3, // 6: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
+	5, // 7: user.v1.UserService.RefreshToken:output_type -> user.v1.RefreshTokenResponse
+	7, // 8: user.v1.UserService.GetAllUsers:output_type -> user.v1.GetAllUsersResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_v1_user_proto_init() }
@@ -542,7 +753,7 @@ func file_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_user_proto_rawDesc), len(file_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

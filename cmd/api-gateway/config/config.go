@@ -10,9 +10,8 @@ import (
 type Config struct {
 	Port         string        `env:"PORT" env-required:"true"`
 	UserHttpPort string        `env:"USER_HTTP_PORT" env-required:"true"`
-	UserGrpcPort string        `env:"USER_GRPC_PORT" env-required:"true"`
 	RbacHttpPort string        `env:"RBAC_HTTP_PORT" env-required:"true"`
-	RbacGrpcPort string        `env:"RBAC_GRPC_PORT" env-required:"true"`
+	JwtSecret    string        `env:"JWT_SECRET" env-required:"true"`
 	Logger       logger.Config `env:"LOGGER"`
 }
 

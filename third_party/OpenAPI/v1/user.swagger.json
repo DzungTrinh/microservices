@@ -145,6 +145,42 @@
           "Auth"
         ]
       }
+    },
+    "/api/v1/user/users": {
+      "get": {
+        "summary": "Get all users",
+        "description": "Retrieves a list of all users with their roles and permissions. Requires admin role or manage_users permission.",
+        "operationId": "UserService_GetAllUsers",
+        "responses": {
+          "200": {
+            "description": "List of users retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/v1GetAllUsersResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token",
+            "schema": {}
+          },
+          "403": {
+            "description": "Forbidden - admin role or manage_users permission required",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
     }
   },
   "definitions": {
@@ -172,6 +208,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1GetAllUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1User"
           }
         }
       }
@@ -299,6 +347,41 @@
         "error": {
           "type": "string",
           "title": "Error message if failed"
+        }
+      }
+    },
+    "v1User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "emailVerified": {
+          "type": "boolean"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
         }
       }
     }

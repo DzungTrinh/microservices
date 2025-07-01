@@ -42,7 +42,10 @@ func (r *userPermissionRepository) AssignPermissionsToUser(ctx context.Context, 
 }
 
 func (r *userPermissionRepository) ListPermissionsForUser(ctx context.Context, userID string) ([]domain.Permission, error) {
-	results, err := r.Queries.ListPermissionsForUser(ctx, userID)
+	results, err := r.Queries.ListPermissionsForUser(ctx, mysql.ListPermissionsForUserParams{
+		UserID:   userID,
+		UserID_2: userID,
+	})
 	if err != nil {
 		return nil, err
 	}
